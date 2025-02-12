@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/streetsidesoftware/cspell/refs/heads/main/cspell.schema.json
+useGitignore: true
+version: "0.2"
+language: en
+ignorePaths:
+  - justfile
+  - flake.nix
+  - cspell.yaml
+  - "docs/book.toml"
+  - "docs/book"
+words:
+  - altibiz
+  - nixpkgs
+  - pkgs
+  - toplevel
+  - nushell
+  - mdbook
+  - plantuml
+  - taplo
+  - attrsets
+  - nixos
+  - justfile
+  - markdownlint
+  - attrset
