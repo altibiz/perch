@@ -7,6 +7,28 @@ let
       [ "." "." ]
       (nixpkgs.lib.removePrefix dir path);
 
+  extractAttr = module: attr: default:
+    let
+      attrset =
+        if builtins.isAttrs module
+        then module
+        else if builtins.isFunction module
+        then
+          let
+            args =
+              builtins.listToAttrs
+                (builtins.map
+                  (name: { inherit name; value = null; })
+                  (builtins.attrNames
+                    (builtins.functionArgs module)));
+          in
+          (module args)
+        else { };
+    in
+    if builtins.hasAttr attr attrset
+    then attrset.${attr}
+    else default;
+
   importNixWrapFlattenAttrs = wrap: dir:
     builtins.listToAttrs
       (builtins.map
@@ -184,7 +206,7 @@ in
       inputs
       dir;
 
-  mkNixosConfigurations = { inputs, dir, users ? [ ] }:
+  mkNixosConfigurations = { inputs, dir }:
     let
       specialArgs = inputs;
 
@@ -214,7 +236,7 @@ in
         ];
       };
 
-      mkNixosModules = module: host: [
+      mkNixosModules = module: host: users: [
         (mkShared host)
         (self.lib.module.mkNixosModule module.__import.value)
         {
@@ -251,41 +273,46 @@ in
         })
       ];
 
-      matrix = nixpkgs.lib.cartesianProduct {
-        system = flake-utils.lib.defaultSystems;
-        hostModule =
-          nixpkgs.lib.mapAttrsToList
-            (name: value: { host = name; module = value; })
-            (importNixWrapFlattenAttrs dir);
-      };
-
-      mkImportedNixosConfigurations = inputs: users: dir:
-        builtins.listToAttrs
-          (builtins.filter
-            (configuration: configuration != null)
-            (builtins.map
-              ({ system, hostModule }:
-                let
-                  host = hostModule.host;
-                  module = hostModule.module;
-                in
-                if module.__import.type != "regular"
-                  && module.__import.type != "default"
-                then null
-                else
-                  {
-                    name = "${host}-${system}";
-                    value = inputs.nixpkgs.lib.nixosSystem {
-                      inherit system specialArgs;
-                      modules = mkNixosModules module host;
-                    };
-                  })
-              matrix));
+      matrix =
+        let
+          hostModuleSystems =
+            nixpkgs.lib.mapAttrsToList
+              (name: value: {
+                module = value;
+                host = name;
+                systems =
+                  extractAttr
+                    value
+                    "systems"
+                    flake-utils.lib.defaultSystems;
+                users =
+                  extractAttr
+                    value
+                    "users"
+                    [ ];
+              })
+              (importNixWrapFlattenAttrs dir);
+        in
+        nixpkgs.lib.flatten
+          (builtins.map
+            ({ module, host, systems, users }:
+              builtins.map
+                (system: {
+                  inherit module host system users;
+                })
+                systems)
+            hostModuleSystems);
     in
-    mkImportedNixosConfigurations
-      inputs
-      dir
-      users;
+    builtins.listToAttrs
+      (builtins.map
+        ({ module, host, system, users }: {
+          name = "${host}-${system}";
+          value = inputs.nixpkgs.lib.nixosSystem {
+            inherit system specialArgs;
+            modules = mkNixosModules module host users;
+          };
+        })
+        matrix);
 
   mkFlake = { inputs, dir, users ? [ ] }:
     let
