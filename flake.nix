@@ -15,14 +15,17 @@
     , ...
     } @inputs:
     let
-      lib = nixpkgs.lib.mapAttrs'
-        (name: value: { inherit name; value = value inputs; })
-        (((import "${self}/src/import.nix") inputs).importDir "${self}/src");
+      libPart = {
+        lib =
+          nixpkgs.lib.mapAttrs'
+            (name: value: { inherit name; value = value inputs; })
+            (((import ./src/import.nix) inputs).importDir ./src);
+      };
+
+      flakePart = libPart.lib.flake.mkFlake {
+        inherit inputs;
+        dir = builtins.unsafeDiscardStringContext ./scripts/flake;
+      };
     in
-    (lib.flake.mkFlake {
-      inherit inputs;
-      dir = "${self}/scripts/flake";
-    }) // {
-      inherit lib;
-    };
+    libPart // flakePart;
 }

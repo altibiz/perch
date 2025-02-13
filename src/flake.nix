@@ -340,38 +340,55 @@ in
         })
         matrix);
 
-  mkFlake = { inputs, dir, __noLib ? false }:
+  mkFlake = { inputs, dir }:
     let
-      systemfulPart = flake-utils.lib.eachDefaultSystem (system:
-        let
-          shellsDir = "${dir}/shells";
-          formattersDir = "${dir}/formatters";
-          checksDir = "${dir}/checks";
-          packagesDir = "${dir}/packages";
-          appsDir = "${dir}/apps";
-        in
-        {
-          devShells = self.lib.flake.mkShells {
-            inherit inputs system;
-            dir = shellsDir;
-          };
-          formatter = self.lib.flake.mkFormatter {
-            inherit inputs system;
-            dir = formattersDir;
-          };
-          checks = self.lib.flake.mkChecks {
-            inherit inputs system;
-            dir = checksDir;
-          };
-          packages = self.lib.flake.mkPackages {
-            inherit inputs system;
-            dir = packagesDir;
-          };
-          apps = self.lib.flake.mkApps {
-            inherit inputs system;
-            dir = appsDir;
-          };
-        });
+      systemfulPart = flake-utils.lib.eachDefaultSystem
+        (system:
+          let
+            shellsDir = "${dir}/shells";
+            formattersDir = "${dir}/formatters";
+            checksDir = "${dir}/checks";
+            packagesDir = "${dir}/packages";
+            appsDir = "${dir}/apps";
+          in
+          (if !(builtins.pathExists shellsDir) then { } else {
+            devShells = self.lib.flake.mkShells {
+              inherit inputs system;
+              dir = shellsDir;
+            };
+          }) //
+          (if !(builtins.pathExists formattersDir) then { } else {
+            formatter =
+              self.lib.flake.mkFormatter
+                {
+                  inherit inputs system;
+                  dir = formattersDir;
+                };
+          }) //
+          (if !(builtins.pathExists checksDir) then { } else {
+            checks =
+              self.lib.flake.mkChecks
+                {
+                  inherit inputs system;
+                  dir = checksDir;
+                };
+          }) //
+          (if !(builtins.pathExists packagesDir) then { } else {
+            packages =
+              self.lib.flake.mkPackages
+                {
+                  inherit inputs system;
+                  dir = packagesDir;
+                };
+          }) //
+          (if !(builtins.pathExists appsDir) then { } else {
+            apps =
+              self.lib.flake.mkApps
+                {
+                  inherit inputs system;
+                  dir = appsDir;
+                };
+          }));
       systemlessPart =
         let
           libDir = "${dir}/lib";
@@ -379,11 +396,13 @@ in
           modulesDir = "${dir}/modules";
           configurationsDir = "${dir}/configurations";
         in
-        {
+        (if !(builtins.pathExists overlaysDir) then { } else {
           overlays = self.lib.flake.mkOverlays {
             inherit inputs;
             dir = overlaysDir;
           };
+        }) //
+        (if !(builtins.pathExists modulesDir) then { } else {
           nixosModules = self.lib.flake.mkNixosModules {
             inherit inputs;
             dir = modulesDir;
@@ -392,11 +411,12 @@ in
             inherit inputs;
             dir = modulesDir;
           };
+        }) // (if !(builtins.pathExists configurationsDir) then { } else {
           nixosConfigurations = self.lib.flake.mkNixosConfigurations {
             inherit inputs;
             dir = configurationsDir;
           };
-        } // (if __noLib then { } else {
+        }) // (if !(builtins.pathExists libDir) then { } else {
           lib = self.lib.flake.mkLib {
             inherit inputs;
             dir = libDir;
