@@ -34,84 +34,7 @@ let
           (builtins.hasAttr "__import")
           (self.lib.import.importDirMeta dir))));
 
-  mkImportedLib = inputs: dir:
-    importNixWrapFlattenAttrs
-      (module: module.__import.value inputs)
-      dir;
-
-  mkImportedApps = system: { nixpkgs
-                           , pkgs ? (import nixpkgs { inherit system; })
-                           }@inputs: dir:
-    importNixWrapFlattenAttrs
-      (module: {
-        type = "app";
-        program =
-          pkgs.lib.getExe
-            (pkgs.callPackage
-              module.__import.value
-              inputs);
-      })
-      dir;
-
-  mkImportedPackages = system: { nixpkgs
-                               , pkgs ? (import nixpkgs { inherit system; })
-                               }@inputs: dir:
-    importNixWrapFlattenAttrs
-      (module:
-        pkgs.callPackage
-          module.__import.value
-          inputs)
-      dir;
-
-  mkImportedShells =
-    system: { nixpkgs
-            , pkgs ? (import nixpkgs { inherit system; })
-            }@inputs: dir:
-    importNixWrapFlattenAttrs
-      (module:
-      pkgs.callPackage
-        module.__import.value
-        inputs)
-      dir;
-
-  mkImportedOverlays = inputs: dir:
-    importNixWrapFlattenAttrs
-      (module: module.__import.value inputs)
-      dir;
-
-  mkComposedOverlay = inputs: dir:
-    nixpkgs.lib.composeManyExtensions
-      (builtins.attrValues
-        (mkImportedOverlays inputs dir));
-
-  mkImportedChecks = system: { nixpkgs
-                             , pkgs ? (import nixpkgs { inherit system; })
-                             }@inputs: dir:
-    importNixWrapFlattenAttrs
-      (module:
-        pkgs.callPackage
-          module.__import.value
-          inputs)
-      dir;
-
-  mkImportedFormatter = system: { nixpkgs
-                                , pkgs ? (import nixpkgs { inherit system; })
-                                }@inputs: dir:
-    pkgs.writeShellApplication {
-      name = "formatter";
-      runtimeInputs = [ ];
-      text = builtins.concatStringsSep
-        "\n"
-        (importNixWrapFlattenList
-          (module:
-            pkgs.lib.getExe
-              (pkgs.callPackage
-                module.__import.value
-                inputs))
-          dir);
-    };
-
-  mkImportedModules = isHome: inputs: dir:
+  mkModules = isHome: inputs: dir:
     let
       imported =
         importNixWrapFlattenAttrs
@@ -134,131 +57,296 @@ let
         });
       };
     };
-
-  mkImportedHosts = { nixpkgs, home-manager ? null, ... }@inputs: users: dir:
-    buil
-      (module:
-        if module.__import.type != "regular"
-          && module.__import.type != "default"
-        then null
-        else
-          let
-            host = "${mkName dir module.__import.path}";
-
-            specialArgs = inputs;
-
-            shared = {
-              options = {
-                host = nixpkgs.lib.mkOption {
-                  type = nixpkgs.lib.types.str;
-                  default = host;
-                  description = "Imported host name.";
-                };
-              };
-            };
-          in
-          nixpkgs.lib.nixosSystem {
-            inherit system specialArgs;
-            modules = [
-              shared
-              (self.lib.module.mkNixosModule module.__import.value)
-              inputs.self.nixosModules.default
-              {
-                networking.hostName = host;
-                users.users = (builtins.listToAttrs
-                  builtins.map
-                  (user: {
-                    name = user;
-                    value = {
-                      isNormalUser = true;
-                      home = "/home/${user}";
-                      createHome = true;
-                    };
-                  })
-                  users);
-              }
-
-              (if home-manager == null then { } else {
-                imports = [
-                  home-manager.nixosModules.default
-                ];
-                home-manager.extraSpecialArgs = specialArgs;
-                home-manager.users =
-                  (builtins.listToAttrs
-                    (builtins.map
-                      (user: {
-                        name = user;
-                        value = {
-                          options = {
-                            user = nixpkgs.lib.mkOption {
-                              type = nixpkgs.lib.types.str;
-                              default = user;
-                              description = "Imported user name.";
-                            };
-                          };
-
-                          imports = [
-                            shared
-                            (self.lib.module.mkHomeManagerModule module.__import.value)
-                            inputs.self.lib.homeManagerModules.default
-                          ];
-                        };
-                      })
-                      users));
-              })
-            ];
-          })
-      (importNixWrapFlattenAttrs
-        dir);
 in
 {
+  mkShells = { system, inputs, dir, default ? "default" }:
+    let
+      mkImportedShells =
+        system: { nixpkgs
+                , pkgs ? (import nixpkgs { inherit system; })
+                }@inputs: dir:
+        importNixWrapFlattenAttrs
+          (module:
+          pkgs.callPackage
+            module.__import.value
+            inputs)
+          dir;
+
+      imported = mkImportedShells system inputs dir;
+    in
+    imported // { default = imported.${default}; };
+
+  mkChecks = { system, inputs, dir }:
+    let
+      mkImportedChecks = system: { nixpkgs
+                                 , pkgs ? (import nixpkgs { inherit system; })
+                                 }@inputs: dir:
+        importNixWrapFlattenAttrs
+          (module:
+            pkgs.callPackage
+              module.__import.value
+              inputs)
+          dir;
+    in
+    mkImportedChecks system inputs dir;
+
+  mkFormatter = { system, inputs, dir }:
+    let
+      mkImportedFormatter = system: { nixpkgs
+                                    , pkgs ? (import nixpkgs { inherit system; })
+                                    }@inputs: dir:
+        pkgs.writeShellApplication {
+          name = "formatter";
+          runtimeInputs = [ ];
+          text = builtins.concatStringsSep
+            "\n"
+            (importNixWrapFlattenList
+              (module:
+                pkgs.lib.getExe
+                  (pkgs.callPackage
+                    module.__import.value
+                    inputs))
+              dir);
+        };
+    in
+    mkImportedFormatter system inputs dir;
+
   mkApps = { system, inputs, dir, default ? "default" }:
     let
+      mkImportedApps = system: { nixpkgs
+                               , pkgs ? (import nixpkgs { inherit system; })
+                               }@inputs: dir:
+        importNixWrapFlattenAttrs
+          (module: {
+            type = "app";
+            program =
+              pkgs.lib.getExe
+                (pkgs.callPackage
+                  module.__import.value
+                  inputs);
+          })
+          dir;
+
       imported = mkImportedApps system inputs dir;
     in
     imported // { default = imported.${default}; };
 
   mkPackages = { system, inputs, dir, default ? "default" }:
     let
+      mkImportedPackages = system: { nixpkgs
+                                   , pkgs ? (import nixpkgs { inherit system; })
+                                   }@inputs: dir:
+        importNixWrapFlattenAttrs
+          (module:
+            pkgs.callPackage
+              module.__import.value
+              inputs)
+          dir;
+
       imported = mkImportedPackages system inputs dir;
     in
     imported // { default = imported.${default}; };
 
-  mkShells = { system, inputs, dir, default ? "default" }:
-    let
-      imported = mkImportedShells system inputs dir;
-    in
-    imported // { default = imported.${default}; };
-
-  mkChecks = { system, inputs, dir }:
-    mkImportedChecks system inputs dir;
-
-  mkFormatter = { system, inputs, dir }:
-    mkImportedFormatter system inputs dir;
-
   mkLib = { inputs, dir }:
+    let
+      mkImportedLib = inputs: dir:
+        importNixWrapFlattenAttrs
+          (module: module.__import.value inputs)
+          dir;
+    in
     mkImportedLib inputs dir;
 
   mkOverlays = { inputs, dir }:
+    let
+      mkImportedOverlays = inputs: dir:
+        importNixWrapFlattenAttrs
+          (module: module.__import.value inputs)
+          dir;
+
+      mkComposedOverlay = inputs: dir:
+        nixpkgs.lib.composeManyExtensions
+          (builtins.attrValues
+            (mkImportedOverlays inputs dir));
+    in
     (mkImportedOverlays inputs dir) // {
       default = mkComposedOverlay inputs dir;
     };
 
   mkNixosModules = { inputs, dir }:
-    mkImportedModules
+    mkModules
       false
       inputs
       dir;
 
   mkHomeManagerModules = { inputs, dir }:
-    mkImportedModules
+    mkModules
       true
       inputs
       dir;
 
-  mkHosts = { inputs, dir }:
-    mkImportedHosts
-      inputs
-      dir;
-}
+  mkNixosConfigurations = { inputs, dir, users ? [ ] }:
+    let
+      specialArgs = inputs;
 
+      mkShared = host: {
+        options = {
+          host = inputs.nixpkgs.lib.mkOption {
+            type = inputs.nixpkgs.lib.types.str;
+            default = host;
+            description = "Imported host name.";
+          };
+        };
+      };
+
+      mkHomeManagerModule = module: host: user: {
+        options = {
+          user = inputs.nixpkgs.lib.mkOption {
+            type = inputs.nixpkgs.lib.types.str;
+            default = user;
+            description = "Imported user name.";
+          };
+        };
+
+        imports = [
+          (mkShared host)
+          (self.lib.module.mkHomeManagerModule module.__import.value)
+          inputs.self.lib.homeManagerModules.default
+        ];
+      };
+
+      mkNixosModules = module: host: [
+        (mkShared host)
+        (self.lib.module.mkNixosModule module.__import.value)
+        {
+          networking.hostName = host;
+        }
+        (if ((builtins.length users) == 0) then { } else {
+          users.users =
+            builtins.listToAttrs
+              (builtins.map
+                (user: {
+                  name = user;
+                  value = {
+                    isNormalUser = true;
+                    home = "/home/${user}";
+                    createHome = true;
+                  };
+                })
+                users);
+        })
+        (if !(builtins.hasAttr "home-manager" inputs)
+          || ((builtins.length users) == 0) then { } else {
+          imports = [
+            inputs.home-manager.nixosModules.default
+          ];
+          home-manager.extraSpecialArgs = specialArgs;
+          home-manager.users =
+            builtins.listToAttrs
+              (builtins.map
+                (user: {
+                  name = user;
+                  value = mkHomeManagerModule module host user;
+                })
+                users);
+        })
+      ];
+
+      matrix = nixpkgs.lib.cartesianProduct {
+        system = flake-utils.lib.defaultSystems;
+        hostModule =
+          nixpkgs.lib.mapAttrsToList
+            (name: value: { host = name; module = value; })
+            (importNixWrapFlattenAttrs dir);
+      };
+
+      mkImportedNixosConfigurations = inputs: users: dir:
+        builtins.listToAttrs
+          (builtins.filter
+            (configuration: configuration != null)
+            (builtins.map
+              ({ system, hostModule }:
+                let
+                  host = hostModule.host;
+                  module = hostModule.module;
+                in
+                if module.__import.type != "regular"
+                  && module.__import.type != "default"
+                then null
+                else
+                  {
+                    name = "${host}-${system}";
+                    value = inputs.nixpkgs.lib.nixosSystem {
+                      inherit system specialArgs;
+                      modules = mkNixosModules module host;
+                    };
+                  })
+              matrix));
+    in
+    mkImportedNixosConfigurations
+      inputs
+      dir
+      users;
+
+  mkFlake = { inputs, dir, users ? [ ] }:
+    let
+      systemfulPart = flake-utils.lib.eachDefaultSystem (system:
+        let
+          shellsDir = "${dir}/shells";
+          formattersDir = "${dir}/formatters";
+          checksDir = "${dir}/checks";
+          packagesDir = "${dir}/packages";
+        in
+        {
+          devShells = self.lib.flake.mkShells {
+            inherit inputs system;
+            dir = shellsDir;
+          };
+          formatter = self.lib.flake.mkFormatter {
+            inherit inputs system;
+            dir = formattersDir;
+          };
+          checks = self.lib.flake.mkChecks {
+            inherit inputs system;
+            dir = checksDir;
+          };
+          packages = self.lib.flake.mkPackages {
+            inherit inputs system;
+            dir = packagesDir;
+          };
+          apps = self.lib.flake.mkApps {
+            inherit inputs system;
+            dir = packagesDir;
+          };
+        });
+      systemlessPart =
+        let
+          libDir = "${dir}/lib";
+          overlaysDir = "${dir}/overlays";
+          modulesDir = "${dir}/modules";
+          configurationsDir = "${dir}/configurations";
+        in
+        {
+          lib = self.lib.flake.mkLib {
+            inherit inputs;
+            dir = libDir;
+          };
+          overlays = self.lib.flake.mkOverlays {
+            inherit inputs;
+            dir = overlaysDir;
+          };
+          nixosModules = self.lib.flake.mkNixosModules {
+            inherit inputs;
+            dir = modulesDir;
+          };
+          homeManagerModules = self.lib.flake.mkHomeManagerModules {
+            inherit inputs;
+            dir = modulesDir;
+          };
+          nixosConfigurations = self.lib.flake.mkNixosConfigurations {
+            inherit inputs;
+            dir = configurationsDir;
+          };
+        };
+    in
+    systemfulPart // systemlessPart;
+}
