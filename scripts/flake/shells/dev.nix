@@ -1,4 +1,4 @@
-{ mkShell, pkgs, ... }:
+{ lib, mkShell, pkgs, ... }:
 
 mkShell {
   packages = with pkgs; [
@@ -27,10 +27,12 @@ mkShell {
     # misc
     nodePackages.prettier
     nodePackages.yaml-language-server
-    marksman
     taplo
 
     # tools
     fd
-  ];
+  ] ++ (lib.optionals pkgs.hostPlatform.is64bit [
+    # marksman
+    marksman
+  ]);
 }
