@@ -243,6 +243,11 @@ in
             description = "Imported host name.";
           };
         };
+
+        config = {
+          nix.settings.experimental-features =
+            [ "nix-command" "flakes" ];
+        };
       };
 
       mkHomeManagerModule = module: host: user: {
