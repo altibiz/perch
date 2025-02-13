@@ -4,34 +4,25 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
+    deploy-rs.url = "github:serokell/deploy-rs";
+    deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
+    deploy-rs.inputs.utils.follows = "flake-utils";
   };
 
   outputs =
     { self
-    , flake-utils
     , nixpkgs
     , ...
-    } @ rawInputs:
+    } @inputs:
     let
-      inputs = rawInputs;
-
-      libPart = {
-        lib = nixpkgs.lib.mapAttrs'
-          (name: value: { inherit name; value = value inputs; })
-          (((import "${self}/src/lib/import.nix") inputs).importDir "${self}/src/lib");
-      };
-
-      systemPart = flake-utils.lib.eachDefaultSystem (system:
-        let
-          flake = self.lib.import.importDirWrap
-            (import: import.__import.value inputs)
-            "${self}/scripts/flake";
-        in
-        {
-          devShells = flake.shell.mkShells system;
-          formatter = flake.formatter.mkFormatter system;
-          checks = flake.check.mkChecks system;
-        });
+      lib = nixpkgs.lib.mapAttrs'
+        (name: value: { inherit name; value = value inputs; })
+        (((import "${self}/src/lib/import.nix") inputs).importDir "${self}/src/lib");
     in
-    libPart // systemPart;
+    (lib.flake.mkFlake {
+      inherit inputs;
+      dir = "${self}/scripts/flake";
+    }) // {
+      inherit lib;
+    };
 }
