@@ -1,4 +1,4 @@
-{ writeShellApplication, just }:
+{ writeShellApplication, just, ... }:
 
 writeShellApplication {
   name = "just";

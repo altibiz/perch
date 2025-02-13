@@ -1,4 +1,4 @@
-{ writeShellApplication, nodePackages }:
+{ writeShellApplication, nodePackages, ... }:
 
 writeShellApplication {
   name = "cspell";

@@ -1,4 +1,4 @@
-{ writeShellApplication, nixpkgs-fmt }:
+{ writeShellApplication, nixpkgs-fmt, ... }:
 
 writeShellApplication {
   name = "nixpkgs-fmt";

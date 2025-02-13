@@ -1,4 +1,4 @@
-{ writeShellApplication, markdownlint-cli }:
+{ writeShellApplication, markdownlint-cli, ... }:
 
 writeShellApplication {
   name = "prettier";

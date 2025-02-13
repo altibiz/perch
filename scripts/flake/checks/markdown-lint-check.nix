@@ -1,4 +1,4 @@
-{ writeShellApplication, nodePackages, fd }:
+{ writeShellApplication, nodePackages, fd, ... }:
 
 writeShellApplication {
   name = "prettier";
