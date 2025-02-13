@@ -20,9 +20,6 @@ mkShell {
     # documentation
     simple-http-server
     mdbook
-    mdbook-plantuml
-    plantuml
-    openjdk
 
     # spelling
     nodePackages.cspell

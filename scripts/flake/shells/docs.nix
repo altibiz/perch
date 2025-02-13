@@ -8,8 +8,5 @@ mkShell {
 
     # documentation
     mdbook
-    mdbook-plantuml
-    plantuml
-    openjdk
   ];
 }
