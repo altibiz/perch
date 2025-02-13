@@ -81,11 +81,14 @@ let
     };
 in
 {
-  mkShells = { system, inputs, dir, default ? "default" }:
+  mkShells = { system, inputs, dir }:
     let
       mkImportedShells =
         system: { nixpkgs
-                , pkgs ? (import nixpkgs { inherit system; })
+                , pkgs ? (import nixpkgs {
+                    inherit system;
+                    config.overlays = [ inputs.self.overlays.default ];
+                  })
                 }@inputs: dir:
         importNixWrapFlattenAttrs
           (module:
@@ -96,12 +99,15 @@ in
 
       imported = mkImportedShells system inputs dir;
     in
-    imported // { default = imported.${default}; };
+    imported;
 
   mkChecks = { system, inputs, dir }:
     let
       mkImportedChecks = system: { nixpkgs
-                                 , pkgs ? (import nixpkgs { inherit system; })
+                                 , pkgs ? (import nixpkgs {
+                                     inherit system;
+                                     config.overlays = [ inputs.self.overlays.default ];
+                                   })
                                  }@inputs: dir:
         importNixWrapFlattenAttrs
           (module:
@@ -115,11 +121,13 @@ in
   mkFormatter = { system, inputs, dir }:
     let
       mkImportedFormatter = system: { nixpkgs
-                                    , pkgs ? (import nixpkgs { inherit system; })
+                                    , pkgs ? (import nixpkgs {
+                                        inherit system;
+                                        config.overlays = [ inputs.self.overlays.default ];
+                                      })
                                     }@inputs: dir:
         pkgs.writeShellApplication {
           name = "formatter";
-          runtimeInputs = [ ];
           text = builtins.concatStringsSep
             "\n"
             (importNixWrapFlattenList
@@ -133,10 +141,13 @@ in
     in
     mkImportedFormatter system inputs dir;
 
-  mkApps = { system, inputs, dir, default ? "default" }:
+  mkApps = { system, inputs, dir }:
     let
       mkImportedApps = system: { nixpkgs
-                               , pkgs ? (import nixpkgs { inherit system; })
+                               , pkgs ? (import nixpkgs {
+                                   inherit system;
+                                   config.overlays = [ inputs.self.overlays.default ];
+                                 })
                                }@inputs: dir:
         importNixWrapFlattenAttrs
           (module: {
@@ -151,12 +162,15 @@ in
 
       imported = mkImportedApps system inputs dir;
     in
-    imported // { default = imported.${default}; };
+    imported;
 
-  mkPackages = { system, inputs, dir, default ? "default" }:
+  mkPackages = { system, inputs, dir }:
     let
       mkImportedPackages = system: { nixpkgs
-                                   , pkgs ? (import nixpkgs { inherit system; })
+                                   , pkgs ? (import nixpkgs {
+                                       inherit system;
+                                       config.overlays = [ inputs.self.overlays.default ];
+                                     })
                                    }@inputs: dir:
         importNixWrapFlattenAttrs
           (module:
@@ -167,7 +181,7 @@ in
 
       imported = mkImportedPackages system inputs dir;
     in
-    imported // { default = imported.${default}; };
+    imported;
 
   mkLib = { inputs, dir }:
     let
@@ -232,13 +246,14 @@ in
         imports = [
           (mkShared host)
           (self.lib.module.mkHomeManagerModule module.__import.value)
-          inputs.self.lib.homeManagerModules.default
+          inputs.self.homeManagerModules.default
         ];
       };
 
       mkNixosModules = module: host: users: [
         (mkShared host)
         (self.lib.module.mkNixosModule module.__import.value)
+        inputs.self.nixosModules.default
         {
           networking.hostName = host;
         }
@@ -314,7 +329,7 @@ in
         })
         matrix);
 
-  mkFlake = { inputs, dir, users ? [ ] }:
+  mkFlake = { inputs, dir }:
     let
       systemfulPart = flake-utils.lib.eachDefaultSystem (system:
         let
@@ -322,6 +337,7 @@ in
           formattersDir = "${dir}/formatters";
           checksDir = "${dir}/checks";
           packagesDir = "${dir}/packages";
+          appsDir = "${dir}/apps";
         in
         {
           devShells = self.lib.flake.mkShells {
@@ -342,7 +358,7 @@ in
           };
           apps = self.lib.flake.mkApps {
             inherit inputs system;
-            dir = packagesDir;
+            dir = appsDir;
           };
         });
       systemlessPart =
