@@ -20,6 +20,5 @@ and adheres to [Semantic Versioning](https://semver.org/).
 - `nixosModule` + `homeManagerModule` combinator
 - import functions
 
-[1.1.0]:
-  https://github.com/altibiz/extensions-dependency-injection/compare/1.0.0...1.1.0
+[1.1.0]: https://github.com/altibiz/perch/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/altibiz/perch/releases/tag/1.0.0
