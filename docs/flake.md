@@ -14,35 +14,35 @@ From a top-down point of view the `flake` module exports the top-level function
 |---| shells
 |   |   shell1.nix
 |   |   shell2.nix
-|   |
+|
 |---| formatters
 |   |   formatter1.nix
 |   |   formatter2.nix
-|   |
+|
 |---| checks
 |   |   check1.nix
 |   |   check2.nix
-|   |
+|
 |---| packages
 |   |   package1.nix
 |   |   package2.nix
-|   |
+|
 |---| apps
 |   |   app1.nix
 |   |   app2.nix
-|   |
+|
 |---| lib
 |   |   lib1.nix
 |   |   lib2.nix
-|   |
+|
 |---| overlays
 |   |   overlay1.nix
 |   |   overlay2.nix
-|   |
+|
 |---| modules
 |   |   module1.nix
 |   |   module2.nix
-|   |
+|
 |---| configurations
     |   configuration1.nix
     |   configuration2.nix
@@ -53,12 +53,25 @@ and turns with the invocation
 into flake outputs as such:
 
 ```nix
-{ self, nixpkgs, home-manager ? null, ... }@inputs:
+{ self, nixpkgs, deploy-rs ? null, home-manager ? null, ... }@inputs:
 
 let
   pkgs = import nixpkgs {
     system = <current-system>;
     config.overlays = [ self.overlays.default ];
+  };
+
+  deployPkgs = import nixpkgs {
+    system = <current-system>;
+    overlays = [
+      deploy-rs.overlay
+      (self: super: {
+        deploy-rs = {
+          inherit (pkgs) deploy-rs;
+          lib = super.deploy-rs.lib;
+        };
+      })
+    ];
   };
 in
 {
@@ -222,6 +235,23 @@ in
         }
       ];
     };
+
+  deploy.nodes."configuration1-${<current-system>}" = {
+    hostname = "<hostname>";
+    sshUser = "<first-user>";
+    user = "root";
+    profile.system.path =
+      deployPkgs.deploy-rs.lib.activate.nixos
+        self.nixosConfigurations."configuration1-${<current-system>}";
+  };
+  deploy.nodes."configuration2-${<current-system>}" = {
+    hostname = "<hostname>";
+    sshUser = "<first-user>";
+    user = "root";
+    profile.system.path =
+      deployPkgs.deploy-rs.lib.activate.nixos
+        self.nixosConfigurations."configuration2-${<current-system>}";
+  };
 }
 ```
 
@@ -234,11 +264,11 @@ Explanations for pseudocode variables written in angle brackets (`<...>`):
   [`flake-utils`](https://github.com/numtide/flake-utils) documentation on what
   this does.
 - `<current-system>`:
-  - For anything other than `nixosConfigurations` this is the current system
-    from `<default-systems...>`
-  - For `nixosConfigurations` this is the current system from the top level
-    module `systems` attribute. The top level module (in the example above
-    `dir/configurations/configuration1.nix` and
+  - For anything other than `nixosConfigurations` and `deploy.nodes` this is the
+    current system from `<default-systems...>`
+  - For `nixosConfigurations` and `deploy.nodes` this is the current system from
+    the top level module `systems` attribute. The top level module (in the
+    example above `dir/configurations/configuration1.nix` and
     `dir/configurations/configuration1.nix`) can additionally have a top-level
     attribute called `systems` denoting for which systems the
     `nixosConfiguration` will be built. For function modules this attribute is
@@ -249,6 +279,19 @@ Explanations for pseudocode variables written in angle brackets (`<...>`):
   configuration is denoted via a top-level module attribute called `users`. This
   attribute is evaluated in the same manner as the top-level `systems`
   attribute.
+- `<hostname>`: This is a top-level module attribute called `hostname`. This
+  attribute is evaluated in the same manner as the top-level `systems`
+  attribute. It is required if your flake inputs contain `deploy-rs`.
+- `<first-users>`: This is the first user in the top-level attribute `users`. It
+  is required if your flake inputs contain `deploy-rs`.
+
+As indicated by the optionality of the `host-manager` and `deploy-rs` arguments,
+these integrations are optional. For more information on what these intgrations
+do please refer to the
+[`home-manager`](https://github.com/nix-community/home-manager) and
+[`deploy-rs`](https://github.com/serokell/deploy-rs) documentation pages. In
+short, `home-manager` "provides a basic system for managing a user environment"
+and `deploy-rs` is "a simple multi-profile Nix-flake deploy tool".
 
 Additionally, the module consists of functions being utilized by the
 `perch.lib.flake.mkFlake` function to evaluate all flake output types. These

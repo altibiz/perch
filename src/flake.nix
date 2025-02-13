@@ -1,4 +1,4 @@
-{ self, nixpkgs, flake-utils, deploy-rs, ... }:
+{ self, nixpkgs, flake-utils, ... }:
 
 let
   mkName = dir: path:
@@ -350,6 +350,7 @@ in
       mkImportedDeployNodes =
         { nixpkgs
         , pkgs ? null
+        , deploy-rs
         , ...
         }@inputs:
         builtins.mapAttrs
@@ -466,6 +467,8 @@ in
             inherit inputs;
             dir = modulesDir;
           };
+        }) // (if !((builtins.pathExists modulesDir)
+        && (builtins.hasAttr "home-manager" inputs)) then { } else {
           homeManagerModules = self.lib.flake.mkHomeManagerModules {
             inherit inputs;
             dir = modulesDir;
@@ -475,11 +478,11 @@ in
             inherit inputs;
             dir = configurationsDir;
           };
-        }) // {
+        }) // (if !(builtins.hasAttr "deploy-rs" inputs) then { } else {
           deploy.nodes = self.lib.flake.mkDeployNodes {
             inherit inputs;
           };
-        } // (if !(builtins.pathExists libDir) then { } else {
+        }) // (if !(builtins.pathExists libDir) then { } else {
           lib = self.lib.flake.mkLib {
             inherit inputs;
             dir = libDir;

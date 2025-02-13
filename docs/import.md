@@ -12,7 +12,7 @@ which imports a directory hierarchy like this:
 |---| leaf1
 |   |   leaf11.nix
 |   |   leaf12.nix
-|   |
+|
 |---| leaf2
 |   |   leaf21.nix
 |   |   leaf22.nix
@@ -20,7 +20,7 @@ which imports a directory hierarchy like this:
 |   |---| leaf23
 |       |   leaf231.nix
 |       |   leaf232.nix
-|       |
+|
 |---| leafDefault
     |   default.nix
 ```
