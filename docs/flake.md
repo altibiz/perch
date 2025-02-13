@@ -57,7 +57,7 @@ into flake outputs as such:
 
 let
   pkgs = import nixpkgs {
-    sytem = <current-system>;
+    system = <current-system>;
     config.overlays = [ self.overlays.default ];
   };
 in
@@ -71,7 +71,7 @@ in
       (import "dir/shells/shell2.nix")
       inputs;
 
-  formatter.<default-systems...> = pkgs.writhShellApplication {
+  formatter.<default-systems...> = pkgs.writeShellApplication {
     name = "formatter";
     text = ''
       ${pkgs.lib.getExe
@@ -170,7 +170,7 @@ in
       name = "configuration1-${<current-system>}";
       modules = [
         (perch.lib.module.mkNixosModule
-          (import "dir/configurationss/configuration1.nix"))
+          (import "dir/configurations/configuration1.nix"))
         self.nixosModules.default
         {
           networking.hostName = "configuration1";
@@ -187,7 +187,7 @@ in
           home-manager.extraSpecialArgs = specialArgs;
           home-manager.users.<current-user> = [
             (perch.lib.module.mkHomeManagerModule
-              (import "dir/configurationss/configuration1.nix"))
+              (import "dir/configurations/configuration1.nix"))
             self.homeManagerModules.default
           ];
         }
@@ -199,7 +199,7 @@ in
       name = "$configuration2-${<current-system>}";
       modules = [
         (perch.lib.module.mkNixosModule
-          (import "dir/configurationss/configuration2.nix"))
+          (import "dir/configurations/configuration2.nix"))
         self.nixosModules.default
         {
           networking.hostName = "configuration2";
@@ -216,7 +216,7 @@ in
           home-manager.extraSpecialArgs = specialArgs;
           home-manager.users.<current-user> = [
             (perch.lib.module.mkHomeManagerModule
-              (import "dir/configurationss/configuration2.nix"))
+              (import "dir/configurations/configuration2.nix"))
             self.homeManagerModules.default
           ];
         }
