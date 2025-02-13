@@ -329,7 +329,7 @@ in
         })
         matrix);
 
-  mkFlake = { inputs, dir }:
+  mkFlake = { inputs, dir, __noLib ? false }:
     let
       systemfulPart = flake-utils.lib.eachDefaultSystem (system:
         let
@@ -369,10 +369,6 @@ in
           configurationsDir = "${dir}/configurations";
         in
         {
-          lib = self.lib.flake.mkLib {
-            inherit inputs;
-            dir = libDir;
-          };
           overlays = self.lib.flake.mkOverlays {
             inherit inputs;
             dir = overlaysDir;
@@ -389,7 +385,12 @@ in
             inherit inputs;
             dir = configurationsDir;
           };
-        };
+        } // (if __noLib then { } else {
+          lib = self.lib.flake.mkLib {
+            inherit inputs;
+            dir = libDir;
+          };
+        });
     in
     systemfulPart // systemlessPart;
 }
