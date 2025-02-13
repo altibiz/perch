@@ -98,14 +98,16 @@ in
     '';
   };
 
-  checks.<default-systems...>.check1 =
-    pkgs.callPackage
-      (import "dir/checks/check1.nix")
-      inputs;
-  checks.<default-systems...>.check2 =
-    pkgs.callPackage
-      (import "dir/checks/check2.nix")
-      inputs;
+  checks = {
+    <default-systems...>.check1 =
+      pkgs.callPackage
+        (import "dir/checks/check1.nix")
+        inputs;
+    <default-systems...>.check2 =
+      pkgs.callPackage
+        (import "dir/checks/check2.nix")
+        inputs;
+  } // <deploy-checks>;
 
   packages.<default-systems...>.package1 =
     pkgs.callPackage
@@ -284,6 +286,8 @@ Explanations for pseudocode variables written in angle brackets (`<...>`):
   attribute. It is required if your flake inputs contain `deploy-rs`.
 - `<first-users>`: This is the first user in the top-level attribute `users`. It
   is required if your flake inputs contain `deploy-rs`.
+- `<deploy-checks>`: These are added as a checks provided by the `deploy-rs`
+  input.
 
 As indicated by the optionality of the `host-manager` and `deploy-rs` arguments,
 these integrations are optional. For more information on what these intgrations
@@ -308,6 +312,8 @@ functions are:
   above and produces
   the`{lib,overlays,nixosModules,homeManagerModules,nixosConfigurations}`
   outputs as described in the example above.
+- `mkDeployNodes`: takes an attrset of type `{ inputs }` and produces the
+  `deploy.nodes` output as described in the example above.
 
 When passing in the `dir` attribute just make sure to pass it in string form.
 For example instead of passing in a path `./flake` pass it in like so

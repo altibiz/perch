@@ -115,14 +115,18 @@ in
                                      inherit system;
                                      config.overlays = [ inputs.self.overlays.default ];
                                    })
+                                 , deploy-rs ? null
                                  , ...
                                  }@inputs: dir:
-        importNixWrapFlattenAttrs
+        (importNixWrapFlattenAttrs
           (module:
             pkgs.callPackage
               module.__import.value
               inputs)
-          dir;
+          dir) // (
+          if deploy-rs == null then { } else
+          deploy-rs.lib.${system}.deployChecks inputs.self.deploy
+        );
     in
     mkImportedChecks system inputs dir;
 
