@@ -2,10 +2,16 @@
 
 let
   mkName = dir: path:
-    builtins.replaceStrings
-      [ "/" "\\" ]
-      [ "." "." ]
-      (nixpkgs.lib.removePrefix dir path);
+    nixpkgs.lib.removePrefix
+      "."
+      (builtins.replaceStrings
+        [ "/" "\\" ]
+        [ "." "." ]
+        (nixpkgs.lib.removePrefix
+          dir
+          (nixpkgs.lib.removeSuffix
+            ".nix"
+            path)));
 
   extractAttr = module: attr: default:
     let
@@ -89,6 +95,7 @@ in
                     inherit system;
                     config.overlays = [ inputs.self.overlays.default ];
                   })
+                , ...
                 }@inputs: dir:
         importNixWrapFlattenAttrs
           (module:
@@ -108,6 +115,7 @@ in
                                      inherit system;
                                      config.overlays = [ inputs.self.overlays.default ];
                                    })
+                                 , ...
                                  }@inputs: dir:
         importNixWrapFlattenAttrs
           (module:
@@ -125,6 +133,7 @@ in
                                         inherit system;
                                         config.overlays = [ inputs.self.overlays.default ];
                                       })
+                                    , ...
                                     }@inputs: dir:
         pkgs.writeShellApplication {
           name = "formatter";
@@ -148,6 +157,7 @@ in
                                    inherit system;
                                    config.overlays = [ inputs.self.overlays.default ];
                                  })
+                               , ...
                                }@inputs: dir:
         importNixWrapFlattenAttrs
           (module: {
@@ -171,6 +181,7 @@ in
                                        inherit system;
                                        config.overlays = [ inputs.self.overlays.default ];
                                      })
+                                   , ...
                                    }@inputs: dir:
         importNixWrapFlattenAttrs
           (module:

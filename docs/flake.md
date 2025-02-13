@@ -265,3 +265,11 @@ functions are:
   above and produces
   the`{lib,overlays,nixosModules,homeManagerModules,nixosConfigurations}`
   outputs as described in the example above.
+
+When passing in the `dir` attribute just make sure to pass it in string form.
+For example instead of passing in a path `./flake` pass it in like so
+`${self}/flake`. This is to prevent errors relating to [strings with contexts
+not being allowed to refer to store paths].
+
+[strings with contexts not being allowed to refer to store paths]:
+  https://discourse.nixos.org/t/not-allowed-to-refer-to-a-store-path-error/5226/3

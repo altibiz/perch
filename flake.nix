@@ -17,11 +17,11 @@
     let
       lib = nixpkgs.lib.mapAttrs'
         (name: value: { inherit name; value = value inputs; })
-        (((import ./src/lib/import.nix) inputs).importDir ./src/lib);
+        (((import "${self}/src/import.nix") inputs).importDir "${self}/src");
     in
     (lib.flake.mkFlake {
       inherit inputs;
-      dir = ./scripts/flake;
+      dir = "${self}/scripts/flake";
     }) // {
       inherit lib;
     };
