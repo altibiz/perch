@@ -2,7 +2,7 @@
   description = "Perch";
 
   inputs = {
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-utils.url = "github:numtide/flake-utils/v1.0.0";
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
   };
 
