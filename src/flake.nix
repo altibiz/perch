@@ -1,4 +1,4 @@
-{ self, nixpkgs, flake-utils, ... }:
+{ self, nixpkgs, flake-utils, deploy-rs, ... }:
 
 let
   mkName = dir: path:
@@ -345,6 +345,60 @@ in
         })
         matrix);
 
+  mkDeployNodes = { inputs }:
+    let
+      mkImportedDeployNodes =
+        { nixpkgs
+        , pkgs ? null
+        , ...
+        }@inputs:
+        builtins.mapAttrs
+          (name: value:
+          let
+            nonNullPkgs = if pkgs != null then pkgs else
+            (import nixpkgs {
+              system = value.pkgs.system;
+              config.overlays = [ inputs.self.overlays.default ];
+            });
+            deployPkgs = import nixpkgs {
+              system = value.pkgs.system;
+              overlays = [
+                deploy-rs.overlay
+                (self: super: {
+                  deploy-rs = {
+                    inherit (nonNullPkgs) deploy-rs;
+                    lib = super.deploy-rs.lib;
+                  };
+                })
+              ];
+            };
+
+            hostname =
+              extractAttr
+                value
+                "hostname"
+                (builtins.abort "hostname required");
+            users =
+              extractAttr
+                value
+                "users"
+                (builtins.abort "at least one user required");
+          in
+          {
+            inherit hostname;
+            sshUser = builtins.head users;
+            user = "root";
+            profile.system.path =
+              deployPkgs.deploy-rs.lib.activate.nixos
+                self.nixosConfigurations.${name};
+          })
+          inputs.self.nixosConfigurations;
+
+      imported = mkImportedDeployNodes inputs;
+    in
+    imported;
+
+
   mkFlake = { inputs, dir }:
     let
       systemfulPart = flake-utils.lib.eachDefaultSystem
@@ -421,7 +475,11 @@ in
             inherit inputs;
             dir = configurationsDir;
           };
-        }) // (if !(builtins.pathExists libDir) then { } else {
+        }) // {
+          deploy.nodes = self.lib.flake.mkDeployNodes {
+            inherit inputs;
+          };
+        } // (if !(builtins.pathExists libDir) then { } else {
           lib = self.lib.flake.mkLib {
             inherit inputs;
             dir = libDir;
