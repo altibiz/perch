@@ -5,6 +5,6 @@ organize, extend, and refine your configurations.
 
 <!-- markdownlint-disable MD013 -->
 
-{{ #include ../../README.md:6:28 }}
+{{ #include ../README.md:6:28 }}
 
 <!-- markdownlint-enable MD013 -->
