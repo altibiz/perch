@@ -413,7 +413,7 @@ in
 
   mkFlake = { inputs, dir }:
     let
-      finalDir = builtins.unsafeDiscardStringContext dir;
+      finalDir = dir;
 
       systemfulPart = flake-utils.lib.eachDefaultSystem
         (system:
