@@ -1,7 +1,7 @@
-{ ... }:
+{ nixpkgs, ... }:
 
 let
-  mkDotObject = specialArgs: perchModule:
+  mkPerchObject = specialArgs: perchModule:
     if builtins.isFunction perchModule
     then (perchModule specialArgs)
     else perchModule;
@@ -11,12 +11,18 @@ let
       if (builtins.isPath maybeImport) || (builtins.isString maybeImport)
       then
         let
-          module = (mkModule (import maybeImport) specialArgs);
+          path = maybeImport;
+          module = (mkModule path specialArgs);
         in
         if builtins.isAttrs module
-        then module // { _file = maybeImport; }
+        then module // { _file = path; }
         else module
-      else mkModule maybeImport specialArgs)
+      else
+        let
+          imported = maybeImport;
+          module = mkModule imported specialArgs;
+        in
+        mkModule module specialArgs)
     (if builtins.hasAttr "imports" perchObject
     then perchObject.imports
     else [ ]);
@@ -28,49 +34,73 @@ let
     then perchObject.options
     else { };
 
-  mkConfig = { lib, ... }: path: perchObject:
+  # TODO: when not containing config, use top level with stripped attrs
+  mkConfig = specialArgs: perchObject:
     if builtins.hasAttr "disabled" perchObject
     then { }
     else if builtins.hasAttr "config" perchObject
+    then perchObject.config
+    else { };
+
+  mkModule = path: perchObject:
+    if builtins.hasAttr "disabled" perchObject
+    then { }
+    else if builtins.hasAttr "modules" perchObject
     then
       let
-        configObject = perchObject.config;
+        moduleObject = perchObject.modules;
       in
-      if lib.hasAttrByPath path configObject
-      then lib.getAttrFromPath path configObject
+      if nixpkgs.lib.hasAttrByPath path moduleObject
+      then nixpkgs.lib.getAttrFromPath path moduleObject
       else { }
     else
-      if lib.hasAttrByPath path perchObject
-      then lib.getAttrFromPath path perchObject
+      if nixpkgs.lib.hasAttrByPath path perchObject
+      then nixpkgs.lib.getAttrFromPath path perchObject
       else { };
 
   # NOTE: if pkgs here not demanded other modules don't get access...
-  mkNixosModule = mkNixosModule: perchModule: { pkgs, ... } @specialArgs:
+  mkNixosModule = mkNixosModule: maybeImported: { pkgs, ... } @specialArgs:
     let
-      perchObject = mkDotObject specialArgs perchModule;
+      perchModule =
+        if (builtins.isPath maybeImported)
+          || (builtins.isString maybeImported)
+        then import maybeImported
+        else maybeImported;
+      perchObject = mkPerchObject specialArgs perchModule;
       imports = mkImports mkNixosModule specialArgs perchObject;
       options = mkOptions specialArgs perchObject;
-      config = mkConfig specialArgs [ "system" ] perchObject;
-      sharedConfig = mkConfig specialArgs [ "shared" ] perchObject;
+      config = mkConfig specialArgs perchObject;
+      module = mkModule [ "system" ] perchObject;
     in
     {
-      imports = imports ++ [ sharedConfig ];
-      inherit options config;
-    };
+      imports = imports ++ [ module ];
+      inherit config options;
+    } // (if (builtins.isPath maybeImported)
+    || (builtins.isString maybeImported) then {
+      _file = maybeImported;
+    } else { });
 
   # NOTE: if pkgs here not demanded other modules don't get access...
-  mkHomeManagerModule = mkHomeManagerModule: perchModule: { pkgs, ... } @specialArgs:
+  mkHomeManagerModule = mkHomeManagerModule: maybeImported: { pkgs, ... } @specialArgs:
     let
-      perchObject = mkDotObject specialArgs perchModule;
+      perchModule =
+        if (builtins.isPath maybeImported)
+          || (builtins.isString maybeImported)
+        then import maybeImported
+        else maybeImported;
+      perchObject = mkPerchObject specialArgs perchModule;
       imports = mkImports mkHomeManagerModule specialArgs perchObject;
       options = mkOptions specialArgs perchObject;
-      config = mkConfig specialArgs [ "home" ] perchObject;
-      sharedConfig = mkConfig specialArgs [ "shared" ] perchObject;
+      config = mkConfig specialArgs perchObject;
+      module = mkModule [ "home" ] perchObject;
     in
     {
-      imports = imports ++ [ sharedConfig ];
+      imports = imports ++ [ module ];
       inherit options config;
-    };
+    } // (if (builtins.isPath maybeImported)
+    || (builtins.isString maybeImported) then {
+      _file = maybeImported;
+    } else { });
 in
 {
   mkNixosModule = mkNixosModule mkNixosModule;
