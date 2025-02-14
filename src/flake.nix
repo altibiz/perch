@@ -2,16 +2,18 @@
 
 let
   mkName = dir: path:
-    nixpkgs.lib.removePrefix
-      "."
-      (builtins.replaceStrings
-        [ "/" "\\" ]
-        [ "." "." ]
-        (nixpkgs.lib.removePrefix
-          dir
-          (nixpkgs.lib.removeSuffix
-            ".nix"
-            path)));
+    nixpkgs.removeSuffix
+      ".default"
+      (nixpkgs.lib.removePrefix
+        "."
+        (builtins.replaceStrings
+          [ "/" "\\" ]
+          [ "." "." ]
+          (nixpkgs.lib.removePrefix
+            dir
+            (nixpkgs.lib.removeSuffix
+              ".nix"
+              path))));
 
   extractAttr = module: attr: default:
     let
