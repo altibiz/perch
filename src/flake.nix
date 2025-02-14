@@ -331,7 +331,7 @@ in
                     "users"
                     [ ];
               })
-              (importNixWrapFlattenAttrs dir);
+              (importNixWrapFlattenAttrs (x: x) dir);
         in
         nixpkgs.lib.flatten
           (builtins.map
