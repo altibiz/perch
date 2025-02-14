@@ -21,7 +21,8 @@
 
       flakePart = libPart.lib.flake.mkFlake {
         inherit inputs;
-        dir = ./scripts/flake;
+        root = ./.;
+        prefix = "scripts/flake";
       };
     in
     libPart // flakePart;

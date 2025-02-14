@@ -397,9 +397,9 @@ in
     imported;
 
 
-  mkFlake = { inputs, dir }:
+  mkFlake = { inputs, root, prefix }:
     let
-      finalDir = dir;
+      finalDir = "${root}/${nixpkgs.lib.removePrefix "/" prefix}";
 
       systemfulPart = flake-utils.lib.eachDefaultSystem
         (system:
