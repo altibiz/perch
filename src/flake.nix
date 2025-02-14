@@ -255,6 +255,12 @@ in
       };
 
       mkHomeManagerModule = module: host: user: {
+        imports = [
+          (mkShared host)
+          (self.lib.module.mkHomeManagerModule module.__import.value)
+          inputs.self.homeManagerModules.default
+        ];
+
         options = {
           user = inputs.nixpkgs.lib.mkOption {
             type = inputs.nixpkgs.lib.types.str;
@@ -263,11 +269,10 @@ in
           };
         };
 
-        imports = [
-          (mkShared host)
-          (self.lib.module.mkHomeManagerModule module.__import.value)
-          inputs.self.homeManagerModules.default
-        ];
+        config = {
+          home.username = user;
+          home.homeDirectory = "/home/${user}";
+        };
       };
 
       mkNixosModules = module: host: users: [
@@ -406,14 +411,16 @@ in
 
   mkFlake = { inputs, dir }:
     let
+      finalDir = builtins.unsafeDiscardStringContext dir;
+
       systemfulPart = flake-utils.lib.eachDefaultSystem
         (system:
           let
-            shellsDir = "${dir}/shells";
-            formattersDir = "${dir}/formatters";
-            checksDir = "${dir}/checks";
-            packagesDir = "${dir}/packages";
-            appsDir = "${dir}/apps";
+            shellsDir = "${finalDir}/shells";
+            formattersDir = "${finalDir}/formatters";
+            checksDir = "${finalDir}/checks";
+            packagesDir = "${finalDir}/packages";
+            appsDir = "${finalDir}/apps";
           in
           (if !(builtins.pathExists shellsDir) then { } else {
             devShells = self.lib.flake.mkShells {
@@ -455,10 +462,10 @@ in
           }));
       systemlessPart =
         let
-          libDir = "${dir}/lib";
-          overlaysDir = "${dir}/overlays";
-          modulesDir = "${dir}/modules";
-          configurationsDir = "${dir}/configurations";
+          libDir = "${finalDir}/lib";
+          overlaysDir = "${finalDir}/overlays";
+          modulesDir = "${finalDir}/modules";
+          configurationsDir = "${finalDir}/configurations";
         in
         (if !(builtins.pathExists overlaysDir) then { } else {
           overlays = self.lib.flake.mkOverlays {

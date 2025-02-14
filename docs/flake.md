@@ -315,10 +315,7 @@ functions are:
 - `mkDeployNodes`: takes an attrset of type `{ inputs }` and produces the
   `deploy.nodes` output as described in the example above.
 
-When passing in the `dir` attribute just make sure to pass it in string form.
-For example instead of passing in a path `./flake` pass it in like so
-`${self}/flake`. This is to prevent errors relating to [strings with contexts
-not being allowed to refer to store paths].
-
-[strings with contexts not being allowed to refer to store paths]:
-  https://discourse.nixos.org/t/not-allowed-to-refer-to-a-store-path-error/5226/3
+When passing in the `dir` attribute just make sure to pass it in path form. This
+is to prevent infinite recursion. The `perch.lib.flake.mkFlake` function calls
+`builtins.unsafeDiscardStringContext` on this path which is fine in most cases
+but good to mention.

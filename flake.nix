@@ -21,7 +21,7 @@
 
       flakePart = libPart.lib.flake.mkFlake {
         inherit inputs;
-        dir = builtins.unsafeDiscardStringContext ./scripts/flake;
+        dir = ./scripts/flake;
       };
     in
     libPart // flakePart;
