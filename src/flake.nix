@@ -58,7 +58,7 @@ let
             (if isHome
             then self.lib.module.mkHomeManagerModule
             else self.lib.module.mkNixosModule)
-              module.__import.value)
+              module.__import.path)
           dir;
     in
     imported // {
@@ -245,7 +245,7 @@ in
       mkHomeManagerModule = module: host: user: {
         imports = [
           (mkShared host)
-          (self.lib.module.mkHomeManagerModule module.__import.value)
+          (self.lib.module.mkHomeManagerModule module.__import.path)
           inputs.self.homeManagerModules.default
         ];
 
@@ -265,7 +265,7 @@ in
 
       mkNixosModules = module: host: users: [
         (mkShared host)
-        (self.lib.module.mkNixosModule module.__import.value)
+        (self.lib.module.mkNixosModule module.__import.path)
         inputs.self.nixosModules.default
         {
           networking.hostName = host;
