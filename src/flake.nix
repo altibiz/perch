@@ -1,20 +1,6 @@
 { self, nixpkgs, flake-utils, ... }:
 
 let
-  mkName = dir: path:
-    nixpkgs.lib.removeSuffix
-      ".default"
-      (nixpkgs.lib.removePrefix
-        "."
-        (builtins.replaceStrings
-          [ "/" "\\" ]
-          [ "." "." ]
-          (nixpkgs.lib.removePrefix
-            dir
-            (nixpkgs.lib.removeSuffix
-              ".nix"
-              path))));
-
   extractAttr = module: attr: default:
     let
       attrset =
@@ -42,7 +28,7 @@ let
       (builtins.map
         (module:
           let
-            name = mkName dir module.__import.path;
+            name = module.__import.name;
           in
           {
             inherit name;
