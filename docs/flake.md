@@ -316,6 +316,4 @@ functions are:
   `deploy.nodes` output as described in the example above.
 
 When passing in the `dir` attribute just make sure to pass it in path form. This
-is to prevent infinite recursion. The `perch.lib.flake.mkFlake` function calls
-`builtins.unsafeDiscardStringContext` on this path which is fine in most cases
-but good to mention.
+is to prevent infinite recursion.
