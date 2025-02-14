@@ -59,7 +59,7 @@ let
       else { };
 
   # NOTE: if pkgs here not demanded other modules don't get access...
-  mkNixosModule = mkNixosModule: maybeImported: { pkgs, ... } @specialArgs:
+  mkNixosModule = mkNixosModule: maybeImported: { pkgs, lib, ... } @specialArgs:
     let
       perchModule =
         if (builtins.isPath maybeImported)
@@ -72,16 +72,18 @@ let
       config = mkConfig specialArgs perchObject;
       module = mkModule [ "system" ] perchObject;
     in
-    {
-      imports = imports ++ [ module ];
-      inherit config options;
-    } // (if (builtins.isPath maybeImported)
-    || (builtins.isString maybeImported) then {
-      _file = maybeImported;
-    } else { });
+    lib.mkMerge [
+      module
+      ({
+        inherit config options imports;
+      } // (if (builtins.isPath maybeImported)
+        || (builtins.isString maybeImported) then {
+        _file = maybeImported;
+      } else { }))
+    ];
 
   # NOTE: if pkgs here not demanded other modules don't get access...
-  mkHomeManagerModule = mkHomeManagerModule: maybeImported: { pkgs, ... } @specialArgs:
+  mkHomeManagerModule = mkHomeManagerModule: maybeImported: { pkgs, lib, ... } @specialArgs:
     let
       perchModule =
         if (builtins.isPath maybeImported)
@@ -94,13 +96,15 @@ let
       config = mkConfig specialArgs perchObject;
       module = mkModule [ "home" ] perchObject;
     in
-    {
-      imports = imports ++ [ module ];
-      inherit options config;
-    } // (if (builtins.isPath maybeImported)
-    || (builtins.isString maybeImported) then {
-      _file = maybeImported;
-    } else { });
+    lib.mkMerge [
+      module
+      ({
+        inherit options config imports;
+      } // (if (builtins.isPath maybeImported)
+        || (builtins.isString maybeImported) then {
+        _file = maybeImported;
+      } else { }))
+    ];
 in
 {
   mkNixosModule = mkNixosModule mkNixosModule;
