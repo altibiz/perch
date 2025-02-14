@@ -2,7 +2,7 @@
 
 let
   mkName = dir: path:
-    nixpkgs.removeSuffix
+    nixpkgs.lib.removeSuffix
       ".default"
       (nixpkgs.lib.removePrefix
         "."
