@@ -29,16 +29,49 @@ let
       importedPerchModule
       // perchModulePathPart;
 
-  exportPerchModule = importedPerchModule:
-    if builtins.isFunction importedPerchModule
+  exportPerchModuleObjectImports = perchModuleObject:
+    if perchModuleObject ? imports
     then
-      perchModuleInputs:
-      (importedPerchModule
-        (perchModuleInputs // {
-          inherit self;
-        }))
+      perchModuleObject // {
+        imports = builtins.map
+          (imported:
+            exportPerchModule
+              (mergePerchModulePath imported));
+      }
     else
-      importedPerchModule;
+      perchModuleObject;
+
+  exportPerchModule = importedPerchModule:
+    let
+      shallowlyExportedPerchModuleObject =
+        if builtins.isFunction importedPerchModule
+        then
+          perchModuleInputs:
+          let
+            importedPerchModuleObject =
+              importedPerchModule
+                (perchModuleInputs // {
+                  inherit self;
+                });
+          in
+          importedPerchModuleObject
+        else
+          importedPerchModule;
+    in
+    exportPerchModuleObjectImports
+      shallowlyExportedPerchModuleObject;
+
+  silencePerchModuleObjectImports = perchModuleObject:
+    if perchModuleObject ? imports
+    then
+      perchModuleObject // {
+        imports = builtins.map
+          (imported:
+            silencePerchModule
+              (mergePerchModulePath imported));
+      }
+    else
+      perchModuleObject;
 
   silencePerchModuleObject = perchModuleObject:
     let
@@ -62,14 +95,19 @@ let
       silencedPerchModuleConfig;
 
   silencePerchModule = importedPerchModule:
-    if builtins.isFunction importedPerchModule
-    then
-      perchModuleInputs:
-      silencePerchModuleObject
-        (importedPerchModule perchModuleInputs)
-    else
-      silencePerchModuleObject
-        importedPerchModule;
+    let
+      shallowlySilencedPerchModuleObject =
+        if builtins.isFunction importedPerchModule
+        then
+          perchModuleInputs:
+          silencePerchModuleObject
+            (importedPerchModule perchModuleInputs)
+        else
+          silencePerchModuleObject
+            importedPerchModule;
+    in
+    silencePerchModuleObjectImports
+      shallowlySilencedPerchModuleObject;
 in
 {
   options.flake.perchModules = lib.mkOption {
