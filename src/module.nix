@@ -1,4 +1,4 @@
-{ self, lib, perchModules ? { }, ... }:
+{ self, lib, ... }:
 
 let
   importPerchModule = perchModule:
