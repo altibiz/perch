@@ -4,12 +4,13 @@ writeShellApplication {
   name = "test";
   runtimeInputs = [ git coreutils nixVersions.stable ];
   text = ''
-    cd "$(git rev-parse --show-toplevel)"
+    root="$(git rev-parse --show-toplevel)"
+    cd "$root"
     for dir in test/*; do
       if [ -d "$dir" ] && [ -f "$dir/flake.nix" ]; then
         nix flake check \
-          --all-systems \
-          --override-input self "path:$(realpath "$dir")"
+          --override-input "perch" "$root" \
+          --all-systems "path:$(realpath "$dir")"
       fi
     done
   '';
