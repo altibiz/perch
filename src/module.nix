@@ -36,30 +36,27 @@ let
         imports = builtins.map
           (imported:
             exportPerchModule
-              (mergePerchModulePath imported));
+              (mergePerchModulePath imported))
+          perchModuleObject.imports;
       }
     else
       perchModuleObject;
 
   exportPerchModule = importedPerchModule:
-    let
-      shallowlyExportedPerchModuleObject =
-        if builtins.isFunction importedPerchModule
-        then
-          perchModuleInputs:
-          let
-            importedPerchModuleObject =
-              importedPerchModule
-                (perchModuleInputs // {
-                  inherit self;
-                });
-          in
-          importedPerchModuleObject
-        else
-          importedPerchModule;
-    in
-    exportPerchModuleObjectImports
-      shallowlyExportedPerchModuleObject;
+    if builtins.isFunction importedPerchModule
+    then
+      perchModuleInputs:
+      let
+        importedPerchModuleObject =
+          importedPerchModule
+            (perchModuleInputs // {
+              inherit self;
+            });
+      in
+      exportPerchModuleObjectImports
+        importedPerchModuleObject
+    else
+      importedPerchModule;
 
   silencePerchModuleObjectImports = perchModuleObject:
     if perchModuleObject ? imports
@@ -73,7 +70,7 @@ let
     else
       perchModuleObject;
 
-  silencePerchModuleObject = perchModuleObject:
+  shallowlySilencePerchModuleObject = perchModuleObject:
     let
       hasConfig = perchModuleObject ? config;
 
@@ -95,19 +92,15 @@ let
       silencedPerchModuleConfig;
 
   silencePerchModule = importedPerchModule:
-    let
-      shallowlySilencedPerchModuleObject =
-        if builtins.isFunction importedPerchModule
-        then
-          perchModuleInputs:
-          silencePerchModuleObject
-            (importedPerchModule perchModuleInputs)
-        else
-          silencePerchModuleObject
-            importedPerchModule;
-    in
-    silencePerchModuleObjectImports
-      shallowlySilencedPerchModuleObject;
+    if builtins.isFunction importedPerchModule
+    then
+      perchModuleInputs:
+      silencePerchModuleObjectImports
+        (shallowlySilencePerchModuleObject
+          (importedPerchModule perchModuleInputs))
+    else
+      shallowlySilencePerchModuleObject
+        importedPerchModule;
 in
 {
   options.flake.perchModules = lib.mkOption {
