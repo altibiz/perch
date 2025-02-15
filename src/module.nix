@@ -111,8 +111,6 @@ in
     '';
   };
 
-  config.flake.perchModules = perchModules;
-
   config.flake.lib.modules.eval =
     { specialArgs
     , selfModules
@@ -147,6 +145,10 @@ in
             defaultExportedPerchModulePart
             // exportedPerchModules;
         };
+
+        config.flake.perchModules =
+          defaultExportedPerchModulePart
+          // exportedPerchModules;
       };
 
       silencedPerchModules =
