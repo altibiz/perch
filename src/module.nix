@@ -1,5 +1,7 @@
 { self, lib, ... }:
 
+# TODO: allow silencing imports of modules
+
 let
   importPerchModule = perchModule:
     if (builtins.isPath perchModule)
