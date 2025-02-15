@@ -62,11 +62,11 @@ let
       silencedPerchModuleConfig;
 
   silencePerchModule = importedPerchModule:
-    if builtins.isFunction importPerchModule
+    if builtins.isFunction importedPerchModule
     then
       perchModuleInputs:
       silencePerchModuleObject
-        (importPerchModule perchModuleInputs)
+        (importedPerchModule perchModuleInputs)
     else
       silencePerchModuleObject
         importedPerchModule;
