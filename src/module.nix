@@ -8,7 +8,7 @@ let
       import perchModule
     else perchModule;
 
-  mergePerchModulePath = perchModule:
+  importAndMergePerchModulePath = perchModule:
     let
       perchModulePathPart =
         if (builtins.isPath perchModule)
@@ -29,20 +29,25 @@ let
       importedPerchModule
       // perchModulePathPart;
 
-  exportPerchModuleObjectImports = perchModuleObject:
+  mapPerchModuleObjectImports =
+    perchModuleObject: mapping:
     if perchModuleObject ? imports
     then
       perchModuleObject // {
         imports = builtins.map
-          (imported:
-            exportPerchModule
-              (mergePerchModulePath imported))
+          (module: mapping
+            (importAndMergePerchModulePath module))
           perchModuleObject.imports;
       }
     else
       perchModuleObject;
 
-  exportPerchModule = importedPerchModule:
+  exportPerchModuleObjectImports = perchModuleObject:
+    mapPerchModuleObjectImports
+      perchModuleObject
+      exportImportedPerchModule;
+
+  exportImportedPerchModule = importedPerchModule:
     if builtins.isFunction importedPerchModule
     then
       perchModuleInputs:
@@ -56,19 +61,13 @@ let
       exportPerchModuleObjectImports
         importedPerchModuleObject
     else
-      importedPerchModule;
+      exportPerchModuleObjectImports
+        importedPerchModule;
 
   silencePerchModuleObjectImports = perchModuleObject:
-    if perchModuleObject ? imports
-    then
-      perchModuleObject // {
-        imports = builtins.map
-          (imported:
-            silencePerchModule
-              (mergePerchModulePath imported));
-      }
-    else
-      perchModuleObject;
+    mapPerchModuleObjectImports
+      perchModuleObject
+      silenceImportedPerchModule;
 
   shallowlySilencePerchModuleObject = perchModuleObject:
     let
@@ -91,7 +90,7 @@ let
     else
       silencedPerchModuleConfig;
 
-  silencePerchModule = importedPerchModule:
+  silenceImportedPerchModule = importedPerchModule:
     if builtins.isFunction importedPerchModule
     then
       perchModuleInputs:
@@ -99,8 +98,9 @@ let
         (shallowlySilencePerchModuleObject
           (importedPerchModule perchModuleInputs))
     else
-      shallowlySilencePerchModuleObject
-        importedPerchModule;
+      silencePerchModuleObjectImports
+        (shallowlySilencePerchModuleObject
+          importedPerchModule);
 in
 {
   options.flake.perchModules = lib.mkOption {
@@ -122,8 +122,9 @@ in
       exportedPerchModules =
         builtins.mapAttrs
           (_: perchModule:
-            exportPerchModule
-              (mergePerchModulePath perchModule))
+            exportImportedPerchModule
+              (importAndMergePerchModulePath
+                perchModule))
           selfModules;
 
       exportedPerchModuleList =
@@ -151,8 +152,8 @@ in
       silencedPerchModules =
         builtins.map
           (perchModule:
-            silencePerchModule
-              (mergePerchModulePath perchModule))
+            silenceImportedPerchModule
+              (importAndMergePerchModulePath perchModule))
           inputModules;
     in
     lib.evalModules {
