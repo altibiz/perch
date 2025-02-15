@@ -1,7 +1,7 @@
 { lib, ... }:
 
 {
-  options.prefix.enableHello = lib.mkEnable "hello";
+  options.prefix.enableHello = lib.mkEnableOption "hello";
 
   config.prefix.enableHello = true;
 }

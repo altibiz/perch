@@ -1,6 +1,6 @@
 {
   outputs = { perch, ... }@inputs:
-    perch.lib.loader.load {
+    perch.lib.modules.load {
       inherit inputs;
       root = ./.;
       prefix = "flake";

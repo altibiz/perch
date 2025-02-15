@@ -32,7 +32,13 @@ test:
 
 repl test:
     cd '{{ root }}/test/{{ test }}'; \
-      nix repl --override-flake perch '{{ root }}'
+      nix repl \
+        --override-flake perch '{{ root }}' \
+        --expr 'rec { \
+          perch = "{{ root }}"; \
+          test = "{{ root }}/test/{{ test }}"; \
+          flake = builtins.getFlake test; \
+        }'
 
 docs:
     rm -rf '{{ artifacts }}'
