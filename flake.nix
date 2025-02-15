@@ -6,6 +6,9 @@
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
   };
 
+  # NOTE: please don't touch this anymore
+  # it easily devolves into infinite recursion
+  # only depend on self.lib inside modules of this repository
   outputs = { nixpkgs, ... } @inputs:
     let
       selflessInputs = builtins.removeAttrs inputs [ "self" ];
