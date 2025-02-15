@@ -36,8 +36,9 @@ repl test:
         --override-flake perch '{{ root }}' \
         --expr 'rec { \
           perch = "{{ root }}"; \
+          perchFlake = builtins.getFlake perch; \
           test = "{{ root }}/test/{{ test }}"; \
-          flake = builtins.getFlake test; \
+          testFlake = builtins.getFlake test; \
         }'
 
 docs:
