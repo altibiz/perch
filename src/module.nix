@@ -1,7 +1,7 @@
-{ lib, perchModules, config, ... }:
+{ lib, perchModules ? [ ], ... }:
 
 {
-  options.perchModules = lib.mkOption {
+  options.flake.perchModules = lib.mkOption {
     type = lib.types.lazyAttrsOf lib.types.raw;
     default = { };
     description = lib.literalMD ''
@@ -9,16 +9,12 @@
     '';
   };
 
-  config.perchModules = perchModules;
-  config.flake.perchModules = config.perchModules;
-
-  config.lib.modules.eval = { specialArgs, modules }:
+  config.flake.perchModules = perchModules;
+  config.flake.lib.modules.eval = { specialArgs, modules }:
     let
-      internalModule = rec {
-        _file = ./modules.nix;
-        key = _file;
-        _module.args = {
-          inherit perchModules;
+      internalModule = {
+        config._module.args = {
+          perchModules = modules;
         };
       };
     in

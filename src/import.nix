@@ -67,7 +67,7 @@ let
 
   importDirToListWithMap = map: dir:
     builtins.map
-      (module: map module.__import.value)
+      map
       (builtins.filter
         (module: module.__import.type == "regular"
           || module.__import.type == "default")
@@ -76,7 +76,7 @@ let
           (importDirToAttrsWithMap (module: module) dir)));
 in
 {
-  lib.import = {
+  flake.lib.import = {
     dirToAttrsWithMap =
       importDirToAttrsWithMap;
 
@@ -84,9 +84,13 @@ in
       importDirToAttrsWithMap
         (imported: imported);
 
-    dirToAttrs =
+    dirToValueAttrs =
       importDirToAttrsWithMap
         (imported: imported.__import.value);
+
+    dirToPathAttrs =
+      importDirToAttrsWithMap
+        (imported: imported.__import.path);
 
     dirToListWithMap =
       importDirToListWithMap;
@@ -95,8 +99,12 @@ in
       importDirToListWithMap
         (imported: imported);
 
-    dirToList =
+    dirToValueList =
       importDirToListWithMap
         (imported: imported.__import.value);
+
+    dirToPathList =
+      importDirToListWithMap
+        (imported: imported.__import.path);
   };
 }

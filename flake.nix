@@ -1,26 +1,24 @@
 {
-  description = "Perch";
-
   inputs = {
     flake-utils.url = "github:numtide/flake-utils/v1.0.0";
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
   };
 
-  # WARNING: don't touch this
-  # it easily devolves into infinite recursion
   outputs = { nixpkgs, ... } @inputs:
     let
       selflessInputs = builtins.removeAttrs inputs [ "self" ];
 
       specialArgs = (selflessInputs // {
         lib = nixpkgs.lib;
-        perchLib = lib;
+        self.lib = lib;
       });
+
+      importLib = ((import ./src/import.nix) specialArgs).flake.lib.import;
 
       eval = nixpkgs.lib.evalModules {
         specialArgs = specialArgs;
         class = "perch";
-        modules = ((import ./src/import.nix) specialArgs).lib.import.dirToList ./src;
+        modules = importLib.import.dirToPathList ./src;
       };
 
       lib = eval.config.flake.lib;
