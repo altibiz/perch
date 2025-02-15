@@ -1,4 +1,4 @@
-{ lib, perchModules ? [ ], ... }:
+{ self, lib, perchModules ? [ ], ... }:
 
 {
   options.flake.perchModules = lib.mkOption {
@@ -9,7 +9,35 @@
     '';
   };
 
-  config.flake.perchModules = perchModules;
+  config.flake.perchModules =
+    builtins.map
+      (perchModule:
+        let
+          perchModulePath =
+            if (builtins.isPath perchModule)
+              || (builtins.isString perchModule)
+            then { _file = perchModule; }
+            else { };
+
+          importedPerchModule =
+            if (builtins.isPath perchModule)
+              || (builtins.isString perchModule)
+            then
+              import perchModule
+            else perchModule;
+
+          perchModuleWithSelf =
+            if (builtins.isFunction importedPerchModule)
+            then
+              { ... }@perchModuleInputs:
+              importedPerchModule
+                (perchModuleInputs // {
+                  inherit self;
+                })
+            else importedPerchModule;
+        in
+        perchModuleWithSelf)
+      perchModules;
   config.flake.lib.modules.eval = { specialArgs, modules }:
     let
       internalModule = {
