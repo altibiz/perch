@@ -74,6 +74,15 @@ let
         (lib.collect
           (builtins.hasAttr "__import")
           (importDirToAttrsWithMap (module: module) dir)));
+
+  importDirToFlatAttrsWithMap = map: dir:
+    builtins.listToAttrs
+      (builtins.map
+        (module: {
+          name = module.__import.name;
+          value = map module;
+        })
+        (importDirToListWithMap map dir));
 in
 {
   flake.lib.import = {
@@ -105,6 +114,21 @@ in
 
     dirToPathList =
       importDirToListWithMap
+        (imported: imported.__import.path);
+
+    dirToFlatAttrsWithMap =
+      importDirToFlatAttrsWithMap;
+
+    dirToFlatAttrsWithMetadata =
+      importDirToFlatAttrsWithMap
+        (imported: imported);
+
+    dirToFlatValueAttrs =
+      importDirToFlatAttrsWithMap
+        (imported: imported.__import.value);
+
+    dirToFlatPathAttrs =
+      importDirToFlatAttrsWithMap
         (imported: imported.__import.path);
   };
 }

@@ -5,7 +5,7 @@
     let
       prefixedRoot = lib.path.append root prefix;
 
-      modules = self.lib.import.dirToPathList prefixedRoot;
+      modules = self.lib.import.dirToFlatPathAttrs prefixedRoot;
 
       eval = self.lib.modules.eval {
         specialArgs = inputs;

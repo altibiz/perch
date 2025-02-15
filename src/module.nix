@@ -47,13 +47,21 @@ in
   config.flake.lib.modules.eval = { specialArgs, modules }:
     let
       actuatedPerchModules =
-        builtins.map
+        builtins.mapAttrs
           actuatePerchModule
           modules;
 
+      defaultPerchModulePart = {
+        default = {
+          imports = builtins.attrValues actuatedPerchModules;
+        };
+      };
+
       perchModulesModule = {
         config._module.args = {
-          perchModules = actuatedPerchModules;
+          perchModules =
+            actuatedPerchModules
+            // defaultPerchModulePart;
         };
       };
     in
