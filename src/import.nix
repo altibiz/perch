@@ -67,13 +67,13 @@ let
 
   importDirToListWithMap = map: dir:
     builtins.map
-      (module: module.__import.value)
+      (module: map module.__import.value)
       (builtins.filter
         (module: module.__import.type == "regular"
           || module.__import.type == "default")
         (lib.collect
           (builtins.hasAttr "__import")
-          (importDirToAttrsWithMap map dir)));
+          (importDirToAttrsWithMap (module: module) dir)));
 in
 {
   lib.import = {

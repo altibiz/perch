@@ -16,7 +16,7 @@
 
       eval = perchLib.lib.modules.eval {
         specialArgs = inputs;
-        inherit modules;
+        modules = modules;
       };
     in
     eval.config.flake;
