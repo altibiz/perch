@@ -13,7 +13,7 @@
         self.lib = lib;
       });
 
-      importLib = ((import ./src/import.nix) specialArgs).flake.lib.import;
+      importLib = ((import ./src/import.nix) specialArgs).flake.lib;
 
       eval = nixpkgs.lib.evalModules {
         specialArgs = specialArgs;

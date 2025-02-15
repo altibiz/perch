@@ -1,54 +1,65 @@
 { self, lib, perchModules ? [ ], ... }:
 
+let
+  actuatePerchModule = perchModule:
+    let
+      perchModulePathPart =
+        if (builtins.isPath perchModule)
+          || (builtins.isString perchModule)
+        then { _file = perchModule; }
+        else { };
+
+      importedPerchModule =
+        if (builtins.isPath perchModule)
+          || (builtins.isString perchModule)
+        then
+          import perchModule
+        else perchModule;
+
+      perchModuleWithSelf =
+        if builtins.isFunction importedPerchModule
+        then
+          { ... }@perchModuleInputs:
+          (importedPerchModule
+            (perchModuleInputs // {
+              inherit self;
+            }) // perchModulePathPart)
+        else
+          importedPerchModule //
+          perchModulePathPart;
+    in
+    perchModuleWithSelf;
+in
 {
   options.flake.perchModules = lib.mkOption {
-    type = lib.types.lazyAttrsOf lib.types.raw;
+    type =
+      lib.types.listOf
+        (lib.types.functionTo
+          lib.types.deferredModule);
     default = { };
     description = lib.literalMD ''
       Create a `perchModules` flake output.
     '';
   };
 
-  config.flake.perchModules =
-    builtins.map
-      (perchModule:
-        let
-          perchModulePath =
-            if (builtins.isPath perchModule)
-              || (builtins.isString perchModule)
-            then { _file = perchModule; }
-            else { };
+  config.flake.perchModules = perchModules;
 
-          importedPerchModule =
-            if (builtins.isPath perchModule)
-              || (builtins.isString perchModule)
-            then
-              import perchModule
-            else perchModule;
-
-          perchModuleWithSelf =
-            if (builtins.isFunction importedPerchModule)
-            then
-              { ... }@perchModuleInputs:
-              importedPerchModule
-                (perchModuleInputs // {
-                  inherit self;
-                })
-            else importedPerchModule;
-        in
-        perchModuleWithSelf)
-      perchModules;
   config.flake.lib.modules.eval = { specialArgs, modules }:
     let
-      internalModule = {
+      actuatedPerchModules =
+        builtins.map
+          actuatePerchModule
+          modules;
+
+      perchModulesModule = {
         config._module.args = {
-          perchModules = modules;
+          perchModules = actuatedPerchModules;
         };
       };
     in
     lib.evalModules {
       class = "perch";
       inherit specialArgs;
-      modules = [ internalModule ] ++ modules;
+      modules = [ perchModulesModule ] ++ modules;
     };
 }

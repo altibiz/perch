@@ -12,5 +12,7 @@
         modules = modules;
       };
     in
-    eval.config.flake;
+    if eval.config ? flake
+    then eval.config.flake
+    else { };
 }
