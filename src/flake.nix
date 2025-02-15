@@ -1,15 +1,46 @@
 { self, lib, ... }:
 
 {
-  config.flake.lib.flake.make = { inputs, root, prefix }:
+  config.flake.lib.flake.make =
+    { inputs
+    , root ? null
+    , prefix ? null
+    , selfModules ? { }
+    , includeInputModulesFromInputs ? true
+    , inputModules ? [ ]
+    }:
     let
-      prefixedRoot = lib.path.append root prefix;
+      prefixedRoot =
+        if root == null || prefix == null then null
+        else lib.path.append root prefix;
 
-      modules = self.lib.import.dirToFlatPathAttrs prefixedRoot;
+      prefixedRootModules =
+        if prefixedRoot == null then [ ]
+        else
+          self.lib.import.dirToFlatPathAttrs
+            prefixedRoot;
+
+      inputModulesFromInputs =
+        if !includeInputModulesFromInputs then [ ]
+        else
+          let
+            selflessInputList =
+              builtins.attrValues
+                (builtins.removeAttrs inputs [ "self" ]);
+          in
+          builtins.filter
+            (module: module != null)
+            (builtins.map
+              (input:
+                if input ? perchModules
+                then input.perchModules.default
+                else null)
+              selflessInputList);
 
       eval = self.lib.modules.eval {
         specialArgs = inputs;
-        modules = modules;
+        selfModules = prefixedRootModules // selfModules;
+        inputModules = inputModulesFromInputs ++ inputModules;
       };
     in
     if eval.config ? flake

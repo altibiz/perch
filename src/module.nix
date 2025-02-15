@@ -1,7 +1,14 @@
-{ self, lib, perchModules ? [ ], ... }:
+{ self, lib, perchModules ? { }, ... }:
 
 let
-  actuatePerchModule = perchModule:
+  importPerchModule = perchModule:
+    if (builtins.isPath perchModule)
+      || (builtins.isString perchModule)
+    then
+      import perchModule
+    else perchModule;
+
+  mergePerchModulePath = perchModule:
     let
       perchModulePathPart =
         if (builtins.isPath perchModule)
@@ -10,32 +17,63 @@ let
         else { };
 
       importedPerchModule =
-        if (builtins.isPath perchModule)
-          || (builtins.isString perchModule)
-        then
-          import perchModule
-        else perchModule;
-
-      perchModuleWithSelf =
-        if builtins.isFunction importedPerchModule
-        then
-          { ... }@perchModuleInputs:
-          (importedPerchModule
-            (perchModuleInputs // {
-              inherit self;
-            }) // perchModulePathPart)
-        else
-          importedPerchModule //
-          perchModulePathPart;
+        importPerchModule
+          perchModule;
     in
-    perchModuleWithSelf;
+    if builtins.isFunction importedPerchModule
+    then
+      perchModuleInputs:
+      (importedPerchModule perchModuleInputs)
+      // perchModulePathPart
+    else
+      importedPerchModule
+      // perchModulePathPart;
+
+  exportPerchModule = importedPerchModule:
+    if builtins.isFunction importedPerchModule
+    then
+      perchModuleInputs:
+      (importedPerchModule
+        (perchModuleInputs // {
+          inherit self;
+        }))
+    else
+      importedPerchModule;
+
+  silencePerchModuleObject = perchModuleObject:
+    let
+      hasConfig = perchModuleObject ? config;
+
+      perchModuleConfig =
+        if hasConfig
+        then perchModuleObject.config
+        else perchModuleObject;
+
+      silencedPerchModuleConfig =
+        builtins.removeAttrs
+          perchModuleConfig
+          [ "flake" ];
+    in
+    if hasConfig
+    then
+      perchModuleObject //
+      { config = silencedPerchModuleConfig; }
+    else
+      silencedPerchModuleConfig;
+
+  silencePerchModule = importedPerchModule:
+    if builtins.isFunction importPerchModule
+    then
+      perchModuleInputs:
+      silencePerchModuleObject
+        (importPerchModule perchModuleInputs)
+    else
+      silencePerchModuleObject
+        importedPerchModule;
 in
 {
   options.flake.perchModules = lib.mkOption {
-    type =
-      lib.types.listOf
-        (lib.types.functionTo
-          lib.types.deferredModule);
+    type = lib.types.attrsOf lib.types.deferredModule;
     default = { };
     description = lib.literalMD ''
       Create a `perchModules` flake output.
@@ -44,30 +82,54 @@ in
 
   config.flake.perchModules = perchModules;
 
-  config.flake.lib.modules.eval = { specialArgs, modules }:
+  config.flake.lib.modules.eval =
+    { specialArgs
+    , selfModules
+    , inputModules ? [ ]
+    }:
     let
-      actuatedPerchModules =
+      exportedPerchModules =
         builtins.mapAttrs
-          actuatePerchModule
-          modules;
+          (_: perchModule:
+            exportPerchModule
+              (mergePerchModulePath perchModule))
+          selfModules;
 
-      defaultPerchModulePart = {
-        default = {
-          imports = builtins.attrValues actuatedPerchModules;
+      exportedPerchModuleList =
+        builtins.attrValues
+          exportedPerchModules;
+
+      defaultExportedPerchModulePart =
+        if (builtins.length exportedPerchModuleList) == 0
+        then { }
+        else {
+          default = {
+            _file = ./modules.nix;
+            imports = exportedPerchModuleList;
+          };
         };
-      };
 
       perchModulesModule = {
         config._module.args = {
           perchModules =
-            actuatedPerchModules
-            // defaultPerchModulePart;
+            defaultExportedPerchModulePart
+            // exportedPerchModules;
         };
       };
+
+      silencedPerchModules =
+        builtins.map
+          (perchModule:
+            silencePerchModule
+              (mergePerchModulePath perchModule))
+          inputModules;
     in
     lib.evalModules {
       class = "perch";
       inherit specialArgs;
-      modules = [ perchModulesModule ] ++ modules;
+      modules =
+        [ perchModulesModule ]
+        ++ (builtins.attrValues selfModules)
+        ++ silencedPerchModules;
     };
 }

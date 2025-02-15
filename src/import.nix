@@ -82,7 +82,7 @@ let
           name = module.__import.name;
           value = map module;
         })
-        (importDirToListWithMap map dir));
+        (importDirToListWithMap (module: module) dir));
 in
 {
   flake.lib.import = {
