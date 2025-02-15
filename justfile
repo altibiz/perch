@@ -30,6 +30,10 @@ upgrade:
 test:
     nix run $".#checks.(nix eval --raw --impure --expr "builtins.currentSystem").test"
 
+repl test:
+    cd '{{ root }}/test/{{ test }}'; \
+      nix repl --override-flake perch '{{ root }}'
+
 docs:
     rm -rf '{{ artifacts }}'
     cd '{{ docs }}'; mdbook build
