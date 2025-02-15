@@ -6,24 +6,28 @@
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
   };
 
-  outputs =
-    { self
-    , nixpkgs
-    , ...
-    } @inputs:
+  outputs = { nixpkgs, ... } @inputs:
     let
-      libPart = {
-        lib =
-          nixpkgs.lib.mapAttrs'
-            (name: value: { inherit name; value = value inputs; })
-            (((import ./src/import.nix) inputs).importDir ./src);
+      selflessInputs = builtins.removeAttrs inputs [ "self" ];
+
+      specialArgs = (selflessInputs // {
+        lib = nixpkgs.lib;
+        self.lib = lib;
+      });
+
+      imports = (import ./src/imports.nix) specialArgs;
+
+      configuration = nixpkgs.lib.evalModules {
+        specialArgs = specialArgs;
+        class = "perch";
+        modules = imports.lib.imports.collect ./src;
       };
 
-      flakePart = libPart.lib.flake.mkFlake {
-        inherit inputs;
-        root = ./.;
-        prefix = "scripts/flake";
-      };
+      lib = configuration.config.flake.lib;
     in
-    libPart // flakePart;
+    lib.flake.make {
+      inherit inputs;
+      root = ./.;
+      prefix = "src";
+    };
 }

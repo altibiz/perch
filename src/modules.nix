@@ -1,23 +1,13 @@
-{ self, nixpkgs, ... }:
+{ self, lib, ... }:
 
 {
-  load = { inputs, root, prefix }:
+  lib.modules.load = { inputs, root, prefix }:
     let
-      prefixedRoot = nixpkgs.lib.path.append root prefix;
-
-      modules =
-        builtins.map
-          (module: module.__import.value)
-          (builtins.filter
-            (module: module.__import.type == "regular"
-              || module.__import.type == "default")
-            (nixpkgs.lib.collect
-              (builtins.hasAttr "__import")
-              (self.lib.import.importDirMeta prefixedRoot)));
+      prefixedRoot = lib.path.append root prefix;
     in
-    nixpkgs.lib.evalModules {
+    lib.evalModules {
       class = "perch";
       specialArgs = inputs;
-      modules = modules;
+      modules = self.lib.imports.collect prefixedRoot;
     };
 }

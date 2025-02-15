@@ -1,8 +1,8 @@
-{ nixpkgs, ... }:
+{ lib, ... }:
 
 let
-  importDir = importDir: prefix: wrap: dir:
-    nixpkgs.lib.attrsets.mapAttrs'
+  initial = importDirWrap: prefix: wrap: dir:
+    lib.attrsets.mapAttrs'
       (name: type:
         let
           basename = builtins.replaceStrings [ ".nix" ] [ "" ] name;
@@ -13,7 +13,7 @@ let
           value =
             if type == "regular"
             then
-              if nixpkgs.lib.hasSuffix ".nix" name
+              if lib.hasSuffix ".nix" name
               then
                 wrap
                   {
@@ -45,14 +45,25 @@ let
                       value = import "${dir}/${name}/default.nix";
                     };
                   }
-              else importDir importDir prefixedName wrap "${dir}/${name}";
+              else importDirWrap importDirWrap prefixedName wrap "${dir}/${name}";
         })
       (builtins.readDir dir);
 
-  importDirWrap = importDir importDir "";
+  importDirWrap = initial initial "";
 in
 {
-  importDirWrap = importDirWrap;
-  importDirMeta = importDirWrap (import: import);
-  importDir = importDirWrap (import: import.__import.value);
+  lib.imports = {
+    wrap = importDirWrap;
+    meta = importDirWrap (imported: imported);
+    dir = importDirWrap (imported: imported.__import.value);
+    collect = dir:
+      builtins.map
+        (module: module.__import.value)
+        (builtins.filter
+          (module: module.__import.type == "regular"
+            || module.__import.type == "default")
+          (lib.collect
+            (builtins.hasAttr "__import")
+            (importDirWrap (imported: imported) dir)));
+  };
 }
