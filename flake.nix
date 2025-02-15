@@ -17,11 +17,10 @@
         perchLib = lib;
       });
 
-
       eval = nixpkgs.lib.evalModules {
         specialArgs = specialArgs;
         class = "perch";
-        modules = ((import ./src/imports.nix) specialArgs).lib.import.dirToList ./src;
+        modules = ((import ./src/import.nix) specialArgs).lib.import.dirToList ./src;
       };
 
       lib = eval.config.flake.lib;
