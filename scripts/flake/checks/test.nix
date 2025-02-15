@@ -1,6 +1,5 @@
 { writeShellApplication, nixVersions, coreutils, git, ... }:
 
-# TODO: https://github.com/NixOS/nix/issues/8881
 writeShellApplication {
   name = "test";
   runtimeInputs = [ git coreutils nixVersions.stable ];

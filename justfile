@@ -27,6 +27,9 @@ lint:
 upgrade:
     nix flake update
 
+test:
+    nix run $".#checks.(nix eval --raw --impure --expr "builtins.currentSystem").test"
+
 docs:
     rm -rf '{{ artifacts }}'
     cd '{{ docs }}'; mdbook build
