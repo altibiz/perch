@@ -1,4 +1,4 @@
-{ self, lib, perchModules, config, ... }:
+{ lib, perchModules, config, ... }:
 
 {
   options.perchModules = lib.mkOption {
@@ -11,11 +11,9 @@
 
   config.perchModules = perchModules;
   config.flake.perchModules = config.perchModules;
-  config.lib.modules.load = { inputs, root, prefix }:
-    let
-      prefixedRoot = lib.path.append root prefix;
-      perchModules = self.lib.imports.collect prefixedRoot;
 
+  config.lib.modules.eval = { specialArgs, modules }:
+    let
       internalModule = rec {
         _file = ./modules.nix;
         key = _file;
@@ -26,7 +24,7 @@
     in
     lib.evalModules {
       class = "perch";
-      specialArgs = inputs;
-      modules = [ internalModule ] ++ perchModules;
+      inherit specialArgs;
+      modules = [ internalModule ] ++ modules;
     };
 }

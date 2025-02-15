@@ -1,7 +1,7 @@
 { lib, ... }:
 
 let
-  initial = importDirWrap: prefix: wrap: dir:
+  initial = importDirToAttrsWithWrap: prefix: wrap: dir:
     lib.attrsets.mapAttrs'
       (name: type:
         let
@@ -45,25 +45,48 @@ let
                       value = import "${dir}/${name}/default.nix";
                     };
                   }
-              else importDirWrap importDirWrap prefixedName wrap "${dir}/${name}";
+              else
+                importDirToAttrsWithWrap
+                  importDirToAttrsWithWrap
+                  prefixedName
+                  wrap "${dir}/${name}";
         })
       (builtins.readDir dir);
 
-  importDirWrap = initial initial "";
+  importDirToAttrsWithWrap = initial initial "";
+
+  importDirToListWithWrap = wrap: dir:
+    builtins.map
+      (module: module.__import.value)
+      (builtins.filter
+        (module: module.__import.type == "regular"
+          || module.__import.type == "default")
+        (lib.collect
+          (builtins.hasAttr "__import")
+          (initial initial "" wrap dir)));
 in
 {
-  lib.imports = {
-    wrap = importDirWrap;
-    meta = importDirWrap (imported: imported);
-    dir = importDirWrap (imported: imported.__import.value);
-    collect = dir:
-      builtins.map
-        (module: module.__import.value)
-        (builtins.filter
-          (module: module.__import.type == "regular"
-            || module.__import.type == "default")
-          (lib.collect
-            (builtins.hasAttr "__import")
-            (importDirWrap (imported: imported) dir)));
+  lib.import = {
+    dirToAttrsWithWrap =
+      importDirToAttrsWithWrap;
+
+    dirToAttrsWithMetadata =
+      importDirToAttrsWithWrap
+        (imported: imported);
+
+    dirToAttrs =
+      importDirToAttrsWithWrap
+        (imported: imported.__import.value);
+
+    dirToListWithWrap =
+      importDirToListWithWrap;
+
+    dirToListWithMetadata =
+      importDirToListWithWrap
+        (imported: imported);
+
+    dirToList =
+      importDirToListWithWrap
+        (imported: imported.__import.value);
   };
 }

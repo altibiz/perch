@@ -6,27 +6,25 @@
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
   };
 
-  # NOTE: please don't touch this anymore
+  # WARNING: don't touch this
   # it easily devolves into infinite recursion
-  # only depend on self.lib inside modules of this repository
   outputs = { nixpkgs, ... } @inputs:
     let
       selflessInputs = builtins.removeAttrs inputs [ "self" ];
 
       specialArgs = (selflessInputs // {
         lib = nixpkgs.lib;
-        self.lib = lib;
+        perchLib = lib;
       });
 
-      imports = (import ./src/imports.nix) specialArgs;
 
-      configuration = nixpkgs.lib.evalModules {
+      eval = nixpkgs.lib.evalModules {
         specialArgs = specialArgs;
         class = "perch";
-        modules = imports.lib.imports.collect ./src;
+        modules = ((import ./src/imports.nix) specialArgs).lib.import.dirToList ./src;
       };
 
-      lib = configuration.config.flake.lib;
+      lib = eval.config.flake.lib;
     in
     lib.flake.make {
       inherit inputs;
