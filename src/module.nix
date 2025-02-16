@@ -1,14 +1,6 @@
 { self, lib, ... }:
 
 let
-  importPerchModule =
-    perchModule:
-    if (builtins.isPath perchModule)
-      || (builtins.isString perchModule)
-    then
-      import perchModule
-    else perchModule;
-
   mapPerchModuleFunctionResult =
     perchModuleFunctionMapping:
     perchModuleFunction:
@@ -45,22 +37,13 @@ let
       mappedPerchModuleFunction
       perchModuleFunctionArgs;
 
-  mapPerchModuleObjectImportedImports =
-    perchModuleImportMapping:
-    perchModuleObject:
-    if perchModuleObject ? imports
+  importPerchModule =
+    perchModule:
+    if (builtins.isPath perchModule)
+      || (builtins.isString perchModule)
     then
-      perchModuleObject // {
-        imports =
-          builtins.map
-            (perchModule:
-              perchModuleImportMapping
-                (importAndMergePerchModulePath
-                  perchModule))
-            perchModuleObject.imports;
-      }
-    else
-      perchModuleObject;
+      import perchModule
+    else perchModule;
 
   importAndMergePerchModulePath =
     perchModule:
@@ -100,6 +83,23 @@ let
       in
       perchModuleObject
       // perchModulePathPart;
+
+  mapPerchModuleObjectImportedImports =
+    perchModuleImportMapping:
+    perchModuleObject:
+    if perchModuleObject ? imports
+    then
+      perchModuleObject // {
+        imports =
+          builtins.map
+            (perchModule:
+              perchModuleImportMapping
+                (importAndMergePerchModulePath
+                  perchModule))
+            perchModuleObject.imports;
+      }
+    else
+      perchModuleObject;
 
   selfPropagatePerchModuleObjectImports =
     perchModuleObject:
