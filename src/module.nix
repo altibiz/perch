@@ -54,12 +54,12 @@ let
     else
       perchModuleObject;
 
-  exportPerchModuleObjectImports = perchModuleObject:
+  selfPropagatePerchModuleObjectImports = perchModuleObject:
     mapImportedPerchModuleObjectImports
-      exportImportedPerchModule
+      selfPropagateImportedPerchModule
       perchModuleObject;
 
-  shallowlyExportPerchModuleObject =
+  shallowlySelfPropagatePerchModuleObject =
     perchModuleObject:
     let
       hasConfig =
@@ -97,6 +97,24 @@ let
     else
       exportedPerchModuleConfig;
 
+  selfPropagateImportedPerchModule =
+    importedPerchModule:
+    if builtins.isFunction importedPerchModule
+    then
+      perchModuleInputs:
+      selfPropagatePerchModuleObjectImports
+        (shallowlySelfPropagatePerchModuleObject
+          (importedPerchModule perchModuleInputs))
+    else
+      selfPropagatePerchModuleObjectImports
+        (shallowlySelfPropagatePerchModuleObject
+          importedPerchModule);
+
+  exportPerchModuleObjectImports = perchModuleObject:
+    mapImportedPerchModuleObjectImports
+      exportImportedPerchModule
+      perchModuleObject;
+
   exportImportedPerchModule =
     importedPerchModule:
     if builtins.isFunction importedPerchModule
@@ -110,16 +128,15 @@ let
             });
       in
       exportPerchModuleObjectImports
-        (shallowlyExportPerchModuleObject
-          perchModuleObject)
+        perchModuleObject
     else
       let
         perchModuleObject =
           importedPerchModule;
       in
       exportPerchModuleObjectImports
-        (shallowlyExportPerchModuleObject
-          perchModuleObject);
+        shallowlySelfPropagatePerchModuleObject
+        perchModuleObject;
 
   silencePerchModuleObjectImports =
     perchModuleObject:
@@ -241,7 +258,7 @@ in
   };
 
   options.propagate = lib.mkOption {
-    type = lib.types.raw;
+    type = lib.types.attrs;
     default = { };
     description = lib.literalMD ''
       Propagate flake outputs to flakes which have this flake as an input.
@@ -249,7 +266,7 @@ in
   };
 
   options.branches = lib.mkOption {
-    type = lib.types.raw;
+    type = lib.types.attrs;
     default = { };
     description = lib.literalMD ''
       Register branches to be pruned by other modules.
@@ -296,8 +313,15 @@ in
                 perchModule))
           inputModules;
 
+      selfPropagatedModules =
+        builtins.mapAttrs
+          (_: module:
+            selfPropagateImportedPerchModule
+              (importAndMergePerchModulePath module))
+          selfModules;
+
       allPerchModules =
-        (builtins.attrValues selfModules)
+        (builtins.attrValues selfPropagatedModules)
         ++ silencedPerchModules;
 
       perchModulesModule = {
