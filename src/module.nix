@@ -260,6 +260,9 @@ in
           allPerchModules =
             allPerchModules;
         };
+      };
+
+      flakePerchModulesModule = {
         flake.perchModules =
           allExportedPerchModules;
       };
@@ -268,7 +271,7 @@ in
       class = "perch";
       inherit specialArgs;
       modules =
-        [ perchModulesModule ]
+        [ perchModulesModule flakePerchModulesModule ]
         ++ allPerchModules;
     };
 
