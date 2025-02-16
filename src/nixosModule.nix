@@ -2,10 +2,30 @@
 
 {
   options.flake.nixosModules = lib.mkOption {
-    type = lib.types.attrsOf lib.types.deferredModule;
+    type =
+      lib.types.attrsOf
+        lib.types.deferredModule;
     default = { };
     description = lib.literalMD ''
       Create a `nixosModules` flake output.
+    '';
+  };
+
+  options.branches.nixosModules = lib.mkOption {
+    type = lib.types.raw;
+    default = { };
+    description = lib.literalMD ''
+      `homeManagerModule` flake output branches.
+    '';
+  };
+
+  options.propagate.nixosModules = lib.mkOption {
+    type =
+      lib.types.attrsOf
+        lib.types.deferredModule;
+    default = { };
+    description = lib.literalMD ''
+      Propagated `nixosModules` flake output.
     '';
   };
 

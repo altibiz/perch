@@ -186,7 +186,7 @@ let
       exportedPerchModuleConfig =
         (builtins.removeAttrs
           perchModuleConfig
-          [ "flake" ]);
+          [ "flake" "seal" "branches" ]);
     in
     if hasConfig
     then
@@ -245,7 +245,7 @@ let
       derivedPerchModuleConfig =
         (builtins.removeAttrs
           perchModuleConfig
-          [ "flake" ]) // {
+          [ "flake" "seal" "branches" ]) // {
           flake =
             if perchModuleConfig ? propagate
             then perchModuleConfig.propagate
@@ -343,22 +343,6 @@ in
     default = { };
     description = lib.literalMD ''
       Create a `perchModules` flake output.
-    '';
-  };
-
-  options.propagate = lib.mkOption {
-    type = lib.types.attrs;
-    default = { };
-    description = lib.literalMD ''
-      Propagate flake outputs to flakes which have this flake as an input.
-    '';
-  };
-
-  options.branches = lib.mkOption {
-    type = lib.types.attrs;
-    default = { };
-    description = lib.literalMD ''
-      Register branches to be pruned by other modules.
     '';
   };
 

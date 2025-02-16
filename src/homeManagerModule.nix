@@ -2,10 +2,30 @@
 
 {
   options.flake.homeManagerModules = lib.mkOption {
-    type = lib.types.attrsOf lib.types.deferredModule;
+    type =
+      lib.types.attrsOf
+        lib.types.deferredModule;
     default = { };
     description = lib.literalMD ''
       Create a `homeManagerModules` flake output.
+    '';
+  };
+
+  options.branches.homeManagerModules = lib.mkOption {
+    type = lib.types.raw;
+    default = { };
+    description = lib.literalMD ''
+      `homeManagerModule` flake output branches.
+    '';
+  };
+
+  options.propagate.homeManagerModules = lib.mkOption {
+    type =
+      lib.types.attrsOf
+        lib.types.deferredModule;
+    default = { };
+    description = lib.literalMD ''
+      Propagated `homeManagerModules` flake output.
     '';
   };
 

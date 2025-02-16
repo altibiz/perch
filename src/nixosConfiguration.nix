@@ -2,10 +2,30 @@
 
 {
   options.flake.nixosConfigurations = lib.mkOption {
-    type = lib.types.attrsOf lib.types.raw;
+    type =
+      lib.types.attrsOf
+        lib.types.raw;
     default = { };
     description = lib.literalMD ''
       Create a `nixosConfigurations` flake output.
+    '';
+  };
+
+  options.branches.nixosConfigurations = lib.mkOption {
+    type = lib.types.raw;
+    default = { };
+    description = lib.literalMD ''
+      `nixosConfigurations` flake output branches.
+    '';
+  };
+
+  options.propagate.nixosConfigurations = lib.mkOption {
+    type =
+      lib.types.attrsOf
+        lib.types.deferredModule;
+    default = { };
+    description = lib.literalMD ''
+      Propagated `nixosConfigurations` flake output.
     '';
   };
 
@@ -21,7 +41,7 @@
         let
           configurationModule =
             self.lib.module.prune
-              "configuration"
+              "nixosConfigurations"
               module;
 
           flakeNixosModules =
