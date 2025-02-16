@@ -429,6 +429,8 @@ in
       };
 
       flakePerchModulesModule = {
+        _file = ./module.nix;
+        key = ./module.nix;
         flake.perchModules =
           allExportedPerchModules;
       };
