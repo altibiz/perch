@@ -1,7 +1,7 @@
 { self, lib, perchModules, ... }:
 
 {
-  options.flake.homaManagerModules = lib.mkOption {
+  options.flake.homeManagerModules = lib.mkOption {
     type = lib.types.attrsOf lib.types.deferredModule;
     default = { };
     description = lib.literalMD ''
