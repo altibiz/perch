@@ -28,21 +28,21 @@ let
       perchModuleFunctionArgs;
 
   mapPerchModuleFunctionArgs =
-    perchModuleFunctionMapping:
+    perchModuleFunctionArgsMapping:
     perchModuleFunction:
     let
       perchModuleFunctionArgs =
         lib.functionArgs
           perchModuleFunction;
 
-      mappedPerchModule =
+      mappedPerchModuleFunction =
         perchModuleFunctionArgs:
         perchModuleFunction
-          (perchModuleFunctionMapping
+          (perchModuleFunctionArgsMapping
             perchModuleFunctionArgs);
     in
     lib.setFunctionArgs
-      mappedPerchModule
+      mappedPerchModuleFunction
       perchModuleFunctionArgs;
 
   mapPerchModuleObjectImportedImports =
@@ -278,11 +278,11 @@ let
           perchModuleImport);
 
   prunePerchModuleObjectImports =
-    prefix:
+    branch:
     perchModuleObject:
     mapPerchModuleObjectImportedImports
       (prunePerchModuleImport
-        prefix)
+        branch)
       perchModuleObject;
 
   shallowlyPrunePerchModuleObject =
@@ -304,18 +304,18 @@ let
         then perchModuleObject.branches
         else { };
 
-      hasPrefix =
+      hasBranch =
         perchModuleConfigBranches ? ${branch};
 
       prunedPerchModuleConfig =
-        if hasPrefix
+        if hasBranch
         then perchModuleConfigBranches.${branch}
         else { };
     in
     prunedPerchModuleConfig;
 
   prunePerchModuleImport =
-    prefix:
+    branch:
     perchModuleImport:
     if lib.isFunction perchModuleImport
     then
@@ -324,8 +324,8 @@ let
       in
       mapPerchModuleFunctionResult
         (perchModuleObject:
-        (prunePerchModuleObjectImports prefix)
-          ((shallowlyPrunePerchModuleObject prefix)
+        (prunePerchModuleObjectImports branch)
+          ((shallowlyPrunePerchModuleObject branch)
             perchModuleObject))
         perchModuleFunction
     else
@@ -333,8 +333,8 @@ let
         perchModuleObject =
           perchModuleImport;
       in
-      (prunePerchModuleObjectImports prefix)
-        ((shallowlyPrunePerchModuleObject prefix)
+      (prunePerchModuleObjectImports branch)
+        ((shallowlyPrunePerchModuleObject branch)
           perchModuleObject);
 in
 {
@@ -416,6 +416,8 @@ in
         ++ derivedPerchModules;
 
       perchModulesModule = {
+        _file = ./module.nix;
+        key = ./module.nix;
         _module.args = {
           perchModules =
             selfPropagatedModules;
