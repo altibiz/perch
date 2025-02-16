@@ -25,13 +25,22 @@ let
     if builtins.isFunction importedPerchModule
     then
       perchModuleInputs:
-      (importedPerchModule perchModuleInputs)
+      let
+        perchModuleObject =
+          importedPerchModule
+            perchModuleInputs;
+      in
+      perchModuleObject
       // perchModulePathPart
     else
-      importedPerchModule
+      let
+        perchModuleObject =
+          importedPerchModule;
+      in
+      perchModuleObject
       // perchModulePathPart;
 
-  mapPerchModuleObjectImports =
+  mapImportedPerchModuleObjectImports =
     mapping:
     perchModuleObject:
     if perchModuleObject ? imports
@@ -46,9 +55,47 @@ let
       perchModuleObject;
 
   exportPerchModuleObjectImports = perchModuleObject:
-    mapPerchModuleObjectImports
+    mapImportedPerchModuleObjectImports
       exportImportedPerchModule
       perchModuleObject;
+
+  shallowlyExportPerchModuleObject =
+    perchModuleObject:
+    let
+      hasConfig =
+        perchModuleObject ? config
+        || perchModuleObject ? options;
+
+      perchModuleConfig =
+        if perchModuleObject ? config
+        then perchModuleObject.config
+        else if perchModuleObject ? options
+        then { }
+        else perchModuleObject;
+
+      perchModuleFlake =
+        if perchModuleConfig ? flake
+        then perchModuleConfig.flake
+        else { };
+
+      perchModulePropagated =
+        if perchModuleConfig ? propagate
+        then perchModuleConfig.propagate
+        else { };
+
+      exportedPerchModuleConfig =
+        perchModuleConfig // {
+          flake =
+            perchModuleFlake
+            // perchModulePropagated;
+        };
+    in
+    if hasConfig
+    then
+      perchModuleObject //
+      { config = exportedPerchModuleConfig; }
+    else
+      exportedPerchModuleConfig;
 
   exportImportedPerchModule =
     importedPerchModule:
@@ -63,18 +110,20 @@ let
             });
       in
       exportPerchModuleObjectImports
-        perchModuleObject
+        (shallowlyExportPerchModuleObject
+          perchModuleObject)
     else
       let
         perchModuleObject =
           importedPerchModule;
       in
       exportPerchModuleObjectImports
-        perchModuleObject;
+        (shallowlyExportPerchModuleObject
+          perchModuleObject);
 
   silencePerchModuleObjectImports =
     perchModuleObject:
-    mapPerchModuleObjectImports
+    mapImportedPerchModuleObjectImports
       silenceImportedPerchModule
       perchModuleObject;
 
@@ -125,7 +174,7 @@ let
   prunePerchModuleObjectImports =
     prefix:
     perchModuleObject:
-    mapPerchModuleObjectImports
+    mapImportedPerchModuleObjectImports
       (pruneImportedPerchModule
         prefix)
       perchModuleObject;
