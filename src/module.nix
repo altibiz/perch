@@ -383,11 +383,6 @@ in
       modules = allPerchModules;
     };
 
-  config.flake.lib.module.export = perchModule:
-    exportImportedPerchModule
-      (importAndMergePerchModulePath
-        perchModule);
-
   config.flake.lib.module.derive = perchModule:
     deriveImportedPerchModule
       (importAndMergePerchModulePath
