@@ -27,4 +27,10 @@
       pkgs.hello
     ];
   };
+
+  config.branches.home = {
+    home.packages = [
+      pkgs.hello
+    ];
+  };
 }
