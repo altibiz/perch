@@ -9,8 +9,8 @@
     '';
   };
 
-  config.propagate.nixosModules =
-    self.lib.module.prune
-      "system"
-      perchModules.default;
+  config.flake.nixosModules =
+    builtins.mapAttrs
+      (_: self.lib.module.prune "system")
+      perchModules;
 }
