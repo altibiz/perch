@@ -301,7 +301,7 @@ let
 
       perchModuleConfigBranches =
         if hasBranches
-        then perchModuleObject.branches
+        then perchModuleConfig.branches
         else { };
 
       hasBranch =

@@ -2,7 +2,7 @@
 
 {
   options.flake.nixosConfigurations = lib.mkOption {
-    type = lib.types.attrsOf lib.types.deferredModule;
+    type = lib.types.attrsOf lib.types.raw;
     default = { };
     description = lib.literalMD ''
       Create a `nixosConfigurations` flake output.

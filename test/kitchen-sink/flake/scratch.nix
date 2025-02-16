@@ -29,4 +29,8 @@
       pkgs.hello
     ];
   };
+
+  config.branches.configuration = {
+    nixpkgs.hostPlatform.system = "x86_64-linux";
+  };
 }
