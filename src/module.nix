@@ -1,4 +1,4 @@
-{ self, lib, options, specialArgs, ... }:
+{ self, lib, options, config, specialArgs, ... }:
 
 let
   mapPerchModuleFunctionResult =
@@ -186,7 +186,7 @@ let
       exportedPerchModuleConfig =
         (builtins.removeAttrs
           perchModuleConfig
-          [ "flake" "seal" "branches" ]);
+          [ "flake" "seal" "branch" "integrate" "systems" ]);
     in
     if hasConfig
     then
@@ -247,7 +247,7 @@ let
       derivedPerchModuleConfig =
         (builtins.removeAttrs
           perchModuleConfig
-          [ "flake" "seal" "branches" ]) // {
+          [ "flake" "seal" "branch" "integrate" "systems" ]) // {
           flake =
             if perchModuleConfig ? propagate
             then perchModuleConfig.propagate
@@ -299,11 +299,11 @@ let
         else perchModuleObject;
 
       hasBranches =
-        perchModuleConfig ? branches;
+        perchModuleConfig ? branch;
 
       perchModuleConfigBranches =
         if hasBranches
-        then perchModuleConfig.branches
+        then perchModuleConfig.branch
         else { };
 
       hasBranch =
@@ -338,6 +338,23 @@ let
       (prunePerchModuleObjectImports branch)
         ((shallowlyPrunePerchModuleObject branch)
           perchModuleObject);
+
+  shallowlyIntegratePerchModuleObject =
+    perchModuleObject:
+    let
+      perchModuleConfig =
+        if perchModuleObject ? config
+        then perchModuleObject.config
+        else if perchModuleObject ? options
+        then { }
+        else perchModuleObject;
+
+      perchModuleSystems =
+        if perchModuleConfig ? systems
+        then perchModuleConfig.systems
+        else config.seal.defaults.systems;
+    in
+    perchModuleObject;
 in
 {
   options.flake = {
@@ -356,6 +373,17 @@ in
       '';
     })
     options.propagate);
+
+  # NOTE: this is not a real option but ra
+  options.systems = lib.mkOption {
+    type =
+      lib.types.listOf
+        lib.types.str;
+    default = config.seal.defaults.systems;
+    description = lib.literalMD ''
+      List of systems in which to integrate.
+    '';
+  };
 
   config.flake.lib.module.eval =
     { specialArgs

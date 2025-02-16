@@ -1,7 +1,7 @@
 { self, lib, config, perchModules, specialArgs, ... }:
 
 {
-  options.branches.nixosConfiguration = lib.mkOption {
+  options.branch.nixosConfiguration = lib.mkOption {
     type = lib.types.raw;
     default = { };
     description = lib.literalMD ''

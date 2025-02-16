@@ -1,7 +1,7 @@
 { self, lib, perchModules, ... }:
 
 {
-  options.branches.homeManagerModule = lib.mkOption {
+  options.branch.homeManagerModule = lib.mkOption {
     type = lib.types.raw;
     default = { };
     description = lib.literalMD ''
