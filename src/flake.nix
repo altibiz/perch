@@ -26,7 +26,9 @@
           let
             selflessInputList =
               builtins.attrValues
-                (builtins.removeAttrs inputs [ "self" ]);
+                (builtins.removeAttrs
+                  inputs
+                  [ "self" ]);
           in
           builtins.filter
             (module: module != null)
