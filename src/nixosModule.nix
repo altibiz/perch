@@ -26,7 +26,18 @@
   };
 
   config.propagate.nixosModules =
-    builtins.mapAttrs
-      (_: self.lib.module.prune "nixosModule")
-      perchModules.current;
+    let
+      nixosModules =
+        builtins.mapAttrs
+          (_: self.lib.module.prune "nixosModule")
+          perchModules.current;
+    in
+    if nixosModules ? default then nixosModules
+    else nixosModules // {
+      default = {
+        imports =
+          builtins.attrValues
+            nixosModules;
+      };
+    };
 }

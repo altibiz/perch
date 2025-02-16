@@ -23,7 +23,8 @@ let
     };
 
     options.function = lib.mkOption {
-      # FIXME: lib.types.functionTo lib.types.package throws
+      # FIXME: throws because not called here with right args
+      # type = lib.types.functionTo lib.types.package;
       type = lib.types.raw;
       description = lib.literalMD ''
         Package function which will be called with `pkgs.callPackage`.
@@ -40,10 +41,7 @@ let
 
     options.nixpkgs.overlays = lib.mkOption {
       type = lib.types.listOf self.lib.type.overlay;
-      default = [
-        # FIXME: attribute default is missing
-        # config.flake.overlays.default 
-      ];
+      default = [ config.flake.overlays.default ];
       description = lib.literalMD ''
         Overlays to pass to nixpkgs when creating `pkgs`.
       '';
@@ -102,6 +100,13 @@ in
     description = lib.literalMD ''
       Propeagated `packages` flake output.
     '';
+  };
+
+  # NOTE: this is so that perch modules can ask for pkgs but
+  # this will only be evaluated in a
+  # lib.evalModules with pkgs context
+  config._module.args = {
+    pkgs = null;
   };
 
   config.propagate.packages =

@@ -26,7 +26,16 @@
   };
 
   config.propagate.homeManagerModules =
-    builtins.mapAttrs
-      (_: self.lib.module.prune "homeManagerModule")
-      perchModules.current;
+    let
+      homeManagerModules =
+        builtins.mapAttrs
+          (_: self.lib.module.prune "homeManagerModule")
+          perchModules.current;
+    in
+    if homeManagerModules ? default then homeManagerModules
+    else homeManagerModules // {
+      default = {
+        imports = builtins.attrValues homeManagerModules;
+      };
+    };
 }

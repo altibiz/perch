@@ -10,9 +10,7 @@
   };
 
   options.propagate.nixosConfigurations = lib.mkOption {
-    type =
-      lib.types.attrsOf
-        lib.types.deferredModule;
+    type = lib.types.attrsOf lib.types.raw;
     default = { };
     description = lib.literalMD ''
       Propagated `nixosConfigurations` flake output.
@@ -34,10 +32,6 @@
               "nixosConfiguration"
               module;
 
-          flakeNixosModules =
-            builtins.attrValues
-              config.flake.nixosModules;
-
           perchModulesModule = {
             _module.args.perchModules = perchModules;
           };
@@ -49,7 +43,8 @@
           modules = [
             perchModulesModule
             configurationModule
-          ] ++ flakeNixosModules;
+            config.flake.nixosModules.default
+          ];
         })
       perchModules.current;
 }

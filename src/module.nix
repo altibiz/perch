@@ -134,8 +134,8 @@ let
       exportedPerchModuleConfig =
         perchModuleConfig // {
           flake =
-            perchModuleFlake
-            // perchModulePropagated;
+            perchModulePropagated
+            // perchModuleFlake;
         };
     in
     if hasConfig
