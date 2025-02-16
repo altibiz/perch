@@ -69,7 +69,7 @@ let
     if lib.isFunction perchModuleImport
     then
       let
-        functionPerchModule = importPerchModule;
+        functionPerchModule = perchModuleImport;
       in
       mapPerchModuleFunctionResult
         (perchModuleObject:
@@ -150,7 +150,7 @@ let
     if lib.isFunction perchModuleImport
     then
       let
-        perchModuleFunction = importPerchModule;
+        perchModuleFunction = perchModuleImport;
       in
       mapPerchModuleFunctionResult
         (perchModuleObject:
@@ -264,7 +264,7 @@ let
     if lib.isFunction perchModuleImport
     then
       let
-        perchModuleFunction = importPerchModule;
+        perchModuleFunction = perchModuleImport;
       in
       mapPerchModuleFunctionResult
         (perchModuleObject:
