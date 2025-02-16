@@ -37,7 +37,7 @@
                 else null)
               selflessInputList);
 
-      eval = self.lib.modules.eval {
+      eval = self.lib.module.eval {
         specialArgs = inputs;
         selfModules = prefixedRootModules // selfModules;
         inputModules = inputModulesFromInputs ++ inputModules;

@@ -1,16 +1,16 @@
 { self, lib, ... }:
 
-# TODO: allow silencing imports of modules
-
 let
-  importPerchModule = perchModule:
+  importPerchModule =
+    perchModule:
     if (builtins.isPath perchModule)
       || (builtins.isString perchModule)
     then
       import perchModule
     else perchModule;
 
-  importAndMergePerchModulePath = perchModule:
+  importAndMergePerchModulePath =
+    perchModule:
     let
       perchModulePathPart =
         if (builtins.isPath perchModule)
@@ -32,7 +32,8 @@ let
       // perchModulePathPart;
 
   mapPerchModuleObjectImports =
-    perchModuleObject: mapping:
+    mapping:
+    perchModuleObject:
     if perchModuleObject ? imports
     then
       perchModuleObject // {
@@ -46,10 +47,11 @@ let
 
   exportPerchModuleObjectImports = perchModuleObject:
     mapPerchModuleObjectImports
-      perchModuleObject
-      exportImportedPerchModule;
+      exportImportedPerchModule
+      perchModuleObject;
 
-  exportImportedPerchModule = importedPerchModule:
+  exportImportedPerchModule =
+    importedPerchModule:
     if builtins.isFunction importedPerchModule
     then
       perchModuleInputs:
@@ -66,14 +68,17 @@ let
       exportPerchModuleObjectImports
         importedPerchModule;
 
-  silencePerchModuleObjectImports = perchModuleObject:
+  silencePerchModuleObjectImports =
+    perchModuleObject:
     mapPerchModuleObjectImports
-      perchModuleObject
-      silenceImportedPerchModule;
+      silenceImportedPerchModule
+      perchModuleObject;
 
-  shallowlySilencePerchModuleObject = perchModuleObject:
+  shallowlySilencePerchModuleObject =
+    perchModuleObject:
     let
-      hasConfig = perchModuleObject ? config;
+      hasConfig =
+        perchModuleObject ? config;
 
       perchModuleConfig =
         if hasConfig
@@ -92,7 +97,8 @@ let
     else
       silencedPerchModuleConfig;
 
-  silenceImportedPerchModule = importedPerchModule:
+  silenceImportedPerchModule =
+    importedPerchModule:
     if builtins.isFunction importedPerchModule
     then
       perchModuleInputs:
@@ -102,6 +108,50 @@ let
     else
       silencePerchModuleObjectImports
         (shallowlySilencePerchModuleObject
+          importedPerchModule);
+
+  prunePerchModuleObjectImports =
+    prefix:
+    perchModuleObject:
+    mapPerchModuleObjectImports
+      (pruneImportedPerchModule
+        prefix)
+      perchModuleObject;
+
+  shallowlyPrunePerchModuleObject =
+    prefix:
+    perchModuleObject:
+    let
+      hasPruning =
+        perchModuleObject ? prune;
+
+      pruningPerchModuleObject =
+        if hasPruning
+        then perchModuleObject.prune
+        else { };
+
+      hasPrefix =
+        pruningPerchModuleObject ? ${prefix};
+
+      prunedPerchModuleObject =
+        if hasPrefix
+        then pruningPerchModuleObject.${prefix}
+        else { };
+    in
+    prunedPerchModuleObject;
+
+  pruneImportedPerchModule =
+    prefix:
+    importedPerchModule:
+    if builtins.isFunction importedPerchModule
+    then
+      perchModuleInputs:
+      (prunePerchModuleObjectImports prefix)
+        ((shallowlyPrunePerchModuleObject prefix)
+          (importedPerchModule perchModuleInputs))
+    else
+      (prunePerchModuleObjectImports prefix)
+        ((shallowlyPrunePerchModuleObject prefix)
           importedPerchModule);
 in
 {
@@ -113,7 +163,15 @@ in
     '';
   };
 
-  config.flake.lib.modules.eval =
+  options.prune = lib.mkOption {
+    type = lib.types.raw;
+    default = { };
+    description = lib.literalMD ''
+      Register objects to be pruned by other modules.
+    '';
+  };
+
+  config.flake.lib.module.eval =
     { specialArgs
     , selfModules
     , inputModules ? [ ]
@@ -141,24 +199,34 @@ in
           };
         };
 
-      perchModulesModule = {
-        config._module.args = {
-          perchModules =
-            defaultExportedPerchModulePart
-            // exportedPerchModules;
-        };
-
-        config.flake.perchModules =
-          defaultExportedPerchModulePart
-          // exportedPerchModules;
-      };
+      allExportedPerchModules =
+        defaultExportedPerchModulePart
+        // exportedPerchModules;
 
       silencedPerchModules =
         builtins.map
           (perchModule:
             silenceImportedPerchModule
-              (importAndMergePerchModulePath perchModule))
+              (importAndMergePerchModulePath
+                perchModule))
           inputModules;
+
+      allPerchModules =
+        (builtins.attrValues selfModules)
+        ++ silencedPerchModules;
+
+      perchModulesModule = {
+        config._module.args = {
+          selfPerchModules =
+            allExportedPerchModules;
+          inputPerchModules =
+            silencedPerchModules;
+          allPerchModules =
+            allPerchModules;
+        };
+        config.flake.perchModules =
+          allExportedPerchModules;
+      };
     in
     lib.evalModules {
       class = "perch";
@@ -168,4 +236,19 @@ in
         ++ (builtins.attrValues selfModules)
         ++ silencedPerchModules;
     };
+
+  config.flake.lib.module.export = perchModule:
+    exportImportedPerchModule
+      (importAndMergePerchModulePath
+        perchModule);
+
+  config.flake.lib.module.silence = perchModule:
+    silenceImportedPerchModule
+      (importAndMergePerchModulePath
+        perchModule);
+
+  config.flake.lib.module.prune = prefix: perchModule:
+    (pruneImportedPerchModule prefix)
+      (importAndMergePerchModulePath
+        perchModule);
 }

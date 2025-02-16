@@ -1,4 +1,11 @@
-{ self, perch, perchModules, lib, ... }:
+{ self
+, perch
+, selfPerchModules
+, inputPerchModules
+, pruningPerchModules
+, lib
+, ...
+}:
 
 {
   options.flake.scratch = lib.mkOption {
@@ -6,6 +13,11 @@
   };
 
   config.flake.scratch = {
-    inherit self perch perchModules;
+    inherit
+      self
+      perch
+      selfPerchModules
+      inputPerchModules
+      pruningPerchModules;
   };
 }
