@@ -9,7 +9,7 @@
     '';
   };
 
-  config.propagated.nixosModules =
+  config.propagate.nixosModules =
     builtins.mapAttrs
       (_: self.lib.module.prune "system")
       perchModules;
