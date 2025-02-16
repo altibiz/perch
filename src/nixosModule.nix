@@ -9,6 +9,12 @@
     '';
   };
 
+  # NOTE: this is so that perch modules can ask for pkgs but
+  # this will only be evaluated in a nixosSystem context
+  config._module.args = {
+    pkgs = null;
+  };
+
   config.propagate.nixosModules =
     builtins.mapAttrs
       (_: self.lib.module.prune "system")

@@ -4,6 +4,7 @@
 , derivedPerchModules
 , allPerchModules
 , lib
+, pkgs
 , ...
 }:
 
@@ -19,5 +20,11 @@
       perchModules
       derivedPerchModules
       allPerchModules;
+  };
+
+  config.branches.system = {
+    environment.systemPackages = [
+      pkgs.hello
+    ];
   };
 }
