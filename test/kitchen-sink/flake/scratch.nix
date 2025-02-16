@@ -1,8 +1,6 @@
 { self
 , perch
 , perchModules
-, derivedPerchModules
-, allPerchModules
 , lib
 , pkgs
 , ...
@@ -17,9 +15,7 @@
     inherit
       self
       perch
-      perchModules
-      derivedPerchModules
-      allPerchModules;
+      perchModules;
   };
 
   config.branches.system = {

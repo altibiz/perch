@@ -18,5 +18,5 @@
   config.propagate.nixosModules =
     builtins.mapAttrs
       (_: self.lib.module.prune "system")
-      perchModules;
+      perchModules.current;
 }

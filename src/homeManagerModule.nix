@@ -18,5 +18,5 @@
   config.propagate.homeManagerModules =
     builtins.mapAttrs
       (_: self.lib.module.prune "home")
-      perchModules;
+      perchModules.current;
 }

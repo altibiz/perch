@@ -416,12 +416,12 @@ in
         ++ derivedPerchModules;
 
       perchModulesModule = {
-        _module.args = {
-          perchModules =
+        _module.args.perchModules = {
+          current =
             selfPropagatedModules;
-          derivedPerchModules =
+          derived =
             derivedPerchModules;
-          allPerchModules =
+          all =
             allPerchModules;
         };
       };
