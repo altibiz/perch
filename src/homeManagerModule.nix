@@ -1,16 +1,6 @@
 { self, lib, perchModules, ... }:
 
 {
-  options.flake.homeManagerModules = lib.mkOption {
-    type =
-      lib.types.attrsOf
-        lib.types.deferredModule;
-    default = { };
-    description = lib.literalMD ''
-      Create a `homeManagerModules` flake output.
-    '';
-  };
-
   options.branches.homeManagerModule = lib.mkOption {
     type = lib.types.raw;
     default = { };

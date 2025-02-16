@@ -1,16 +1,6 @@
 { self, lib, config, perchModules, specialArgs, ... }:
 
 {
-  options.flake.nixosConfigurations = lib.mkOption {
-    type =
-      lib.types.attrsOf
-        lib.types.raw;
-    default = { };
-    description = lib.literalMD ''
-      Create a `nixosConfigurations` flake output.
-    '';
-  };
-
   options.branches.nixosConfiguration = lib.mkOption {
     type = lib.types.raw;
     default = { };

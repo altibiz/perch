@@ -1,4 +1,4 @@
-{ self, lib, specialArgs, ... }:
+{ self, lib, options, specialArgs, ... }:
 
 let
   mapPerchModuleFunctionResult =
@@ -340,13 +340,22 @@ let
           perchModuleObject);
 in
 {
-  options.flake.perchModules = lib.mkOption {
-    type = lib.types.attrsOf lib.types.deferredModule;
-    default = { };
-    description = lib.literalMD ''
-      Create a `perchModules` flake output.
-    '';
-  };
+  options.flake = {
+    perchModules = lib.mkOption {
+      type = lib.types.attrsOf lib.types.deferredModule;
+      default = { };
+      description = lib.literalMD ''
+        Create a `perchModules` flake output.
+      '';
+    };
+  }
+  // (builtins.mapAttrs
+    (name: option: option // {
+      description = lib.literalMD ''
+        Create a `${name}` flake output.
+      '';
+    })
+    options.propagate);
 
   config.flake.lib.module.eval =
     { specialArgs
