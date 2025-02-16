@@ -216,7 +216,7 @@ in
         ++ silencedPerchModules;
 
       perchModulesModule = {
-        config._module.args = {
+        _module.args = {
           selfPerchModules =
             allExportedPerchModules;
           inputPerchModules =
@@ -224,7 +224,7 @@ in
           allPerchModules =
             allPerchModules;
         };
-        config.flake.perchModules =
+        flake.perchModules =
           allExportedPerchModules;
       };
     in

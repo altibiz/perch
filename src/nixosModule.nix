@@ -11,6 +11,6 @@
 
   config.flake.nixosModules =
     builtins.mapAttrs
-      (_: self.lib.modules.prune "system")
+      (_: self.lib.module.prune "system")
       selfPerchModules;
 }
