@@ -416,8 +416,6 @@ in
         ++ derivedPerchModules;
 
       perchModulesModule = {
-        _file = ./module.nix;
-        key = ./module.nix;
         _module.args = {
           perchModules =
             selfPropagatedModules;
@@ -429,8 +427,6 @@ in
       };
 
       flakePerchModulesModule = {
-        _file = ./module.nix;
-        key = ./module.nix;
         flake.perchModules =
           allExportedPerchModules;
       };

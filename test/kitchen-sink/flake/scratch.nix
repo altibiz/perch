@@ -1,8 +1,8 @@
 { self
 , perch
-, selfPerchModules
-, inputPerchModules
-, pruningPerchModules
+, perchModules
+, derivedPerchModules
+, allPerchModules
 , lib
 , ...
 }:
@@ -16,8 +16,8 @@
     inherit
       self
       perch
-      selfPerchModules
-      inputPerchModules
-      pruningPerchModules;
+      perchModules
+      derivedPerchModules
+      allPerchModules;
   };
 }
