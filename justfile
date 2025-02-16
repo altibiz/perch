@@ -27,12 +27,15 @@ lint:
 upgrade:
     nix flake update
 
-test:
-    nix run $".#checks.(nix eval --raw --impure --expr "builtins.currentSystem").test"
+test *args:
+    nix run \
+      {{ args }} \
+      $".#checks.(nix eval --raw --impure --expr "builtins.currentSystem").test"
 
-repl test:
+repl test *args:
     cd '{{ root }}/test/{{ test }}'; \
       nix repl \
+        {{ args }} \
         --override-flake perch '{{ root }}' \
         --expr 'rec { \
           perch = "{{ root }}"; \

@@ -33,4 +33,12 @@
   config.branches.nixosConfiguration = {
     nixpkgs.hostPlatform.system = "x86_64-linux";
   };
+
+  config.seal.packages.scratch.function =
+    ({ writeShellFunction, hello }:
+      writeShellFunction {
+        title = "hello";
+        runtimeInputs = [ hello ];
+        text = "hello";
+      });
 }

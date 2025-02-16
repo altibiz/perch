@@ -1,4 +1,4 @@
-{ self, lib, ... }:
+{ self, lib, specialArgs, ... }:
 
 let
   mapPerchModuleFunctionResult =
@@ -209,7 +209,9 @@ let
             perchModuleObject))
         (mapPerchModuleFunctionArgs
           (perchModuleFunctionArgs:
-          perchModuleFunctionArgs // {
+          perchModuleFunctionArgs
+          // specialArgs
+          // {
             inherit self;
           })
           perchModuleFunction)
