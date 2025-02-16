@@ -10,40 +10,57 @@ let
     else perchModule;
 
   mapPerchModuleFunctionResult =
-    mapping:
+    perchModuleFunctionMapping:
     perchModuleFunction:
     let
-      args =
+      perchModuleFunctionArgs =
         lib.functionArgs
           perchModuleFunction;
 
-      mapped =
-        perchModuleArgs:
-        mapping
+      mappedPerchModuleFunction =
+        perchModuleFunctionArgs:
+        perchModuleFunctionMapping
           (perchModuleFunction
-            perchModuleArgs);
+            perchModuleFunctionArgs);
     in
     lib.setFunctionArgs
-      mapped
-      args;
+      mappedPerchModuleFunction
+      perchModuleFunctionArgs;
 
   mapPerchModuleFunctionArgs =
-    mapping:
+    perchModuleFunctionMapping:
     perchModuleFunction:
     let
-      args =
+      perchModuleFunctionArgs =
         lib.functionArgs
           perchModuleFunction;
 
-      mapped =
-        args:
+      mappedPerchModule =
+        perchModuleFunctionArgs:
         perchModuleFunction
-          (mapping
-            args);
+          (perchModuleFunctionMapping
+            perchModuleFunctionArgs);
     in
     lib.setFunctionArgs
-      mapped
-      args;
+      mappedPerchModule
+      perchModuleFunctionArgs;
+
+  mapPerchModuleObjectImportedImports =
+    perchModuleImportMapping:
+    perchModuleObject:
+    if perchModuleObject ? imports
+    then
+      perchModuleObject // {
+        imports =
+          builtins.map
+            (perchModule:
+              perchModuleImportMapping
+                (importAndMergePerchModulePath
+                  perchModule))
+            perchModuleObject.imports;
+      }
+    else
+      perchModuleObject;
 
   importAndMergePerchModulePath =
     perchModule:
@@ -51,10 +68,16 @@ let
       perchModulePathPart =
         if (builtins.isPath perchModule)
           || (builtins.isString perchModule)
-        then {
-          _file = perchModule;
-        }
-        else { };
+        then
+          let
+            perchModulePath = perchModule;
+          in
+          {
+            _file = perchModulePath;
+            key = perchModulePath;
+          }
+        else
+          { };
 
       perchModuleImport =
         importPerchModule
@@ -78,22 +101,9 @@ let
       perchModuleObject
       // perchModulePathPart;
 
-  mapPerchModuleImportObjectImports =
-    mapping:
+  selfPropagatePerchModuleObjectImports =
     perchModuleObject:
-    if perchModuleObject ? imports
-    then
-      perchModuleObject // {
-        imports = builtins.map
-          (module: mapping
-            (importAndMergePerchModulePath module))
-          perchModuleObject.imports;
-      }
-    else
-      perchModuleObject;
-
-  selfPropagatePerchModuleObjectImports = perchModuleObject:
-    mapPerchModuleImportObjectImports
+    mapPerchModuleObjectImportedImports
       selfPropagatePerchModuleImport
       perchModuleObject;
 
@@ -155,7 +165,7 @@ let
 
   exportPerchModuleObjectImports =
     perchModuleObject:
-    mapPerchModuleImportObjectImports
+    mapPerchModuleObjectImportedImports
       exportPerchModuleImport
       perchModuleObject;
 
@@ -198,7 +208,8 @@ let
           (shallowlyExportPerchModuleObject
             perchModuleObject))
         (mapPerchModuleFunctionArgs
-          (perchModuleArgs: perchModuleArgs // {
+          (perchModuleFunctionArgs:
+          perchModuleFunctionArgs // {
             inherit self;
           })
           perchModuleFunction)
@@ -213,7 +224,7 @@ let
 
   derivePerchModuleObjectImports =
     perchModuleObject:
-    mapPerchModuleImportObjectImports
+    mapPerchModuleObjectImportedImports
       derivePerchModuleImport
       perchModuleObject;
 
@@ -269,7 +280,7 @@ let
   prunePerchModuleObjectImports =
     prefix:
     perchModuleObject:
-    mapPerchModuleImportObjectImports
+    mapPerchModuleObjectImportedImports
       (prunePerchModuleImport
         prefix)
       perchModuleObject;
@@ -400,7 +411,8 @@ in
           selfModules;
 
       allPerchModules =
-        (builtins.attrValues selfPropagatedModules)
+        (builtins.attrValues
+          selfPropagatedModules)
         ++ derivedPerchModules;
 
       perchModulesModule = {
