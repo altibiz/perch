@@ -14,7 +14,7 @@ let
     perchModuleFunction:
     let
       args =
-        lib.getFunctionArgs
+        lib.functionArgs
           perchModuleFunction;
 
       mapped =
@@ -32,7 +32,7 @@ let
     perchModuleFunction:
     let
       args =
-        lib.getFunctionArgs
+        lib.functionArgs
           perchModuleFunction;
 
       mapped =
@@ -60,7 +60,7 @@ let
         importPerchModule
           perchModule;
     in
-    if builtins.isFunction perchModuleImport
+    if lib.isFunction perchModuleImport
     then
       let
         functionPerchModule = importPerchModule;
@@ -137,7 +137,7 @@ let
 
   selfPropagatePerchModuleImport =
     perchModuleImport:
-    if builtins.isFunction perchModuleImport
+    if lib.isFunction perchModuleImport
     then
       let
         perchModuleFunction = importPerchModule;
@@ -187,7 +187,7 @@ let
 
   exportPerchModuleImport =
     perchModuleImport:
-    if builtins.isFunction perchModuleImport
+    if lib.isFunction perchModuleImport
     then
       let
         perchModuleFunction = perchModuleImport;
@@ -250,7 +250,7 @@ let
 
   derivePerchModuleImport =
     perchModuleImport:
-    if builtins.isFunction perchModuleImport
+    if lib.isFunction perchModuleImport
     then
       let
         perchModuleFunction = importPerchModule;
@@ -306,7 +306,7 @@ let
   prunePerchModuleImport =
     prefix:
     perchModuleImport:
-    if builtins.isFunction perchModuleImport
+    if lib.isFunction perchModuleImport
     then
       let
         perchModuleFunction = perchModuleImport;
