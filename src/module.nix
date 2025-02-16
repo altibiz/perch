@@ -2,7 +2,7 @@
 
 let
   mapPerchModuleFunctionResult =
-    perchModuleFunctionMapping:
+    perchModuleFunctionResultMapping:
     perchModuleFunction:
     let
       perchModuleFunctionArgs =
@@ -11,7 +11,7 @@ let
 
       mappedPerchModuleFunction =
         perchModuleFunctionArgs:
-        perchModuleFunctionMapping
+        perchModuleFunctionResultMapping
           (perchModuleFunction
             perchModuleFunctionArgs);
     in
