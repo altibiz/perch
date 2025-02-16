@@ -9,38 +9,76 @@ let
       import perchModule
     else perchModule;
 
+  mapPerchModuleFunctionResult =
+    mapping:
+    perchModuleFunction:
+    let
+      args =
+        lib.getFunctionArgs
+          perchModuleFunction;
+
+      mapped =
+        perchModuleArgs:
+        mapping
+          (perchModuleFunction
+            perchModuleArgs);
+    in
+    lib.setFunctionArgs
+      mapped
+      args;
+
+  mapPerchModuleFunctionArgs =
+    mapping:
+    perchModuleFunction:
+    let
+      args =
+        lib.getFunctionArgs
+          perchModuleFunction;
+
+      mapped =
+        args:
+        perchModuleFunction
+          (mapping
+            args);
+    in
+    lib.setFunctionArgs
+      mapped
+      args;
+
   importAndMergePerchModulePath =
     perchModule:
     let
       perchModulePathPart =
         if (builtins.isPath perchModule)
           || (builtins.isString perchModule)
-        then { _file = perchModule; }
+        then {
+          _file = perchModule;
+        }
         else { };
 
-      importedPerchModule =
+      perchModuleImport =
         importPerchModule
           perchModule;
     in
-    if builtins.isFunction importedPerchModule
+    if builtins.isFunction perchModuleImport
     then
-      perchModuleInputs:
       let
-        perchModuleObject =
-          importedPerchModule
-            perchModuleInputs;
+        functionPerchModule = importPerchModule;
       in
-      perchModuleObject
-      // perchModulePathPart
+      mapPerchModuleFunctionResult
+        (perchModuleObject:
+        perchModuleObject
+        // perchModulePathPart)
+        functionPerchModule
     else
       let
         perchModuleObject =
-          importedPerchModule;
+          perchModuleImport;
       in
       perchModuleObject
       // perchModulePathPart;
 
-  mapImportedPerchModuleObjectImports =
+  mapPerchModuleImportObjectImports =
     mapping:
     perchModuleObject:
     if perchModuleObject ? imports
@@ -55,8 +93,8 @@ let
       perchModuleObject;
 
   selfPropagatePerchModuleObjectImports = perchModuleObject:
-    mapImportedPerchModuleObjectImports
-      selfPropagateImportedPerchModule
+    mapPerchModuleImportObjectImports
+      selfPropagatePerchModuleImport
       perchModuleObject;
 
   shallowlySelfPropagatePerchModuleObject =
@@ -97,23 +135,28 @@ let
     else
       exportedPerchModuleConfig;
 
-  selfPropagateImportedPerchModule =
-    importedPerchModule:
-    if builtins.isFunction importedPerchModule
+  selfPropagatePerchModuleImport =
+    perchModuleImport:
+    if builtins.isFunction perchModuleImport
     then
-      perchModuleInputs:
-      selfPropagatePerchModuleObjectImports
-        (shallowlySelfPropagatePerchModuleObject
-          (importedPerchModule perchModuleInputs))
+      let
+        perchModuleFunction = importPerchModule;
+      in
+      mapPerchModuleFunctionResult
+        (perchModuleObject:
+        selfPropagatePerchModuleObjectImports
+          (shallowlySelfPropagatePerchModuleObject
+            perchModuleObject))
+        perchModuleFunction
     else
       selfPropagatePerchModuleObjectImports
         (shallowlySelfPropagatePerchModuleObject
-          importedPerchModule);
+          perchModuleImport);
 
   exportPerchModuleObjectImports =
     perchModuleObject:
-    mapImportedPerchModuleObjectImports
-      exportImportedPerchModule
+    mapPerchModuleImportObjectImports
+      exportPerchModuleImport
       perchModuleObject;
 
   shallowlyExportPerchModuleObject =
@@ -142,25 +185,27 @@ let
     else
       exportedPerchModuleConfig;
 
-  exportImportedPerchModule =
-    importedPerchModule:
-    if builtins.isFunction importedPerchModule
+  exportPerchModuleImport =
+    perchModuleImport:
+    if builtins.isFunction perchModuleImport
     then
-      perchModuleInputs:
       let
-        perchModuleObject =
-          importedPerchModule
-            (perchModuleInputs // {
-              inherit self;
-            });
+        perchModuleFunction = perchModuleImport;
       in
-      exportPerchModuleObjectImports
-        (shallowlyExportPerchModuleObject
-          perchModuleObject)
+      mapPerchModuleFunctionResult
+        (perchModuleObject:
+        exportPerchModuleObjectImports
+          (shallowlyExportPerchModuleObject
+            perchModuleObject))
+        (mapPerchModuleFunctionArgs
+          (perchModuleArgs: perchModuleArgs // {
+            inherit self;
+          })
+          perchModuleFunction)
     else
       let
         perchModuleObject =
-          importedPerchModule;
+          perchModuleImport;
       in
       exportPerchModuleObjectImports
         (shallowlyExportPerchModuleObject
@@ -168,8 +213,8 @@ let
 
   derivePerchModuleObjectImports =
     perchModuleObject:
-    mapImportedPerchModuleObjectImports
-      deriveImportedPerchModule
+    mapPerchModuleImportObjectImports
+      derivePerchModuleImport
       perchModuleObject;
 
   shallowlyDerivePerchModuleObject =
@@ -203,24 +248,29 @@ let
     else
       derivedPerchModuleConfig;
 
-  deriveImportedPerchModule =
-    importedPerchModule:
-    if builtins.isFunction importedPerchModule
+  derivePerchModuleImport =
+    perchModuleImport:
+    if builtins.isFunction perchModuleImport
     then
-      perchModuleInputs:
-      derivePerchModuleObjectImports
-        (shallowlyDerivePerchModuleObject
-          (importedPerchModule perchModuleInputs))
+      let
+        perchModuleFunction = importPerchModule;
+      in
+      mapPerchModuleFunctionResult
+        (perchModuleObject:
+        derivePerchModuleObjectImports
+          (shallowlyDerivePerchModuleObject
+            perchModuleObject))
+        perchModuleFunction
     else
       derivePerchModuleObjectImports
         (shallowlyDerivePerchModuleObject
-          importedPerchModule);
+          perchModuleImport);
 
   prunePerchModuleObjectImports =
     prefix:
     perchModuleObject:
-    mapImportedPerchModuleObjectImports
-      (pruneImportedPerchModule
+    mapPerchModuleImportObjectImports
+      (prunePerchModuleImport
         prefix)
       perchModuleObject;
 
@@ -253,24 +303,24 @@ let
     in
     prunedPerchModuleConfig;
 
-  pruneImportedPerchModule =
+  prunePerchModuleImport =
     prefix:
-    importedPerchModule:
-    if builtins.isFunction importedPerchModule
+    perchModuleImport:
+    if builtins.isFunction perchModuleImport
     then
-      perchModuleInputs:
       let
-        perchModuleObject =
-          importedPerchModule
-            perchModuleInputs;
+        perchModuleFunction = perchModuleImport;
       in
-      (prunePerchModuleObjectImports prefix)
-        ((shallowlyPrunePerchModuleObject prefix)
-          perchModuleObject)
+      mapPerchModuleFunctionResult
+        (perchModuleObject:
+        (prunePerchModuleObjectImports prefix)
+          ((shallowlyPrunePerchModuleObject prefix)
+            perchModuleObject))
+        perchModuleFunction
     else
       let
         perchModuleObject =
-          importedPerchModule;
+          perchModuleImport;
       in
       (prunePerchModuleObjectImports prefix)
         ((shallowlyPrunePerchModuleObject prefix)
@@ -310,7 +360,7 @@ in
       exportedPerchModules =
         builtins.mapAttrs
           (_: perchModule:
-            exportImportedPerchModule
+            exportPerchModuleImport
               (importAndMergePerchModulePath
                 perchModule))
           selfModules;
@@ -336,7 +386,7 @@ in
       derivedPerchModules =
         builtins.map
           (perchModule:
-            deriveImportedPerchModule
+            derivePerchModuleImport
               (importAndMergePerchModulePath
                 perchModule))
           inputModules;
@@ -344,7 +394,7 @@ in
       selfPropagatedModules =
         builtins.mapAttrs
           (_: module:
-            selfPropagateImportedPerchModule
+            selfPropagatePerchModuleImport
               (importAndMergePerchModulePath
                 module))
           selfModules;
@@ -368,28 +418,23 @@ in
         flake.perchModules =
           allExportedPerchModules;
       };
-
-      modulesModules =
-        lib.evalModules {
-          class = "perch";
-          inherit specialArgs;
-          modules = [
-            perchModulesModule
-            flakePerchModulesModule
-          ];
-        };
     in
-    modulesModules.extendModules {
-      modules = allPerchModules;
+    lib.evalModules {
+      class = "perch";
+      inherit specialArgs;
+      modules = [
+        perchModulesModule
+        flakePerchModulesModule
+      ] ++ allPerchModules;
     };
 
   config.flake.lib.module.derive = perchModule:
-    deriveImportedPerchModule
+    derivePerchModuleImport
       (importAndMergePerchModulePath
         perchModule);
 
   config.flake.lib.module.prune = branch: perchModule:
-    (pruneImportedPerchModule branch)
+    (prunePerchModuleImport branch)
       (importAndMergePerchModulePath
         perchModule);
 }
