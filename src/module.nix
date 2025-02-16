@@ -269,8 +269,7 @@ in
       inherit specialArgs;
       modules =
         [ perchModulesModule ]
-        ++ (builtins.attrValues selfModules)
-        ++ silencedPerchModules;
+        ++ allPerchModules;
     };
 
   config.flake.lib.module.export = perchModule:
