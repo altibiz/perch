@@ -56,17 +56,21 @@ let
     then
       perchModuleInputs:
       let
-        importedPerchModuleObject =
+        perchModuleObject =
           importedPerchModule
             (perchModuleInputs // {
               inherit self;
             });
       in
       exportPerchModuleObjectImports
-        importedPerchModuleObject
+        perchModuleObject
     else
+      let
+        perchModuleObject =
+          importedPerchModule;
+      in
       exportPerchModuleObjectImports
-        importedPerchModule;
+        perchModuleObject;
 
   silencePerchModuleObjectImports =
     perchModuleObject:
@@ -78,17 +82,25 @@ let
     perchModuleObject:
     let
       hasConfig =
-        perchModuleObject ? config;
+        perchModuleObject ? config
+        || perchModuleObject ? options;
 
       perchModuleConfig =
-        if hasConfig
+        if perchModuleObject ? config
         then perchModuleObject.config
+        else if perchModuleObject ? options
+        then { }
         else perchModuleObject;
 
       silencedPerchModuleConfig =
-        builtins.removeAttrs
+        (builtins.removeAttrs
           perchModuleConfig
-          [ "flake" ];
+          [ "flake" ]) // {
+          flake =
+            if perchModuleConfig ? propagate
+            then perchModuleConfig.propagate
+            else { };
+        };
     in
     if hasConfig
     then
@@ -119,26 +131,33 @@ let
       perchModuleObject;
 
   shallowlyPrunePerchModuleObject =
-    prefix:
+    branch:
     perchModuleObject:
     let
-      hasPruning =
-        perchModuleObject ? prune;
+      perchModuleConfig =
+        if perchModuleObject ? config
+        then perchModuleObject.config
+        else if perchModuleObject ? options
+        then { }
+        else perchModuleObject;
 
-      pruningPerchModuleObject =
-        if hasPruning
-        then perchModuleObject.prune
+      hasBranches =
+        perchModuleConfig ? branches;
+
+      perchModuleConfigBranches =
+        if hasBranches
+        then perchModuleObject.branches
         else { };
 
       hasPrefix =
-        pruningPerchModuleObject ? ${prefix};
+        perchModuleConfigBranches ? ${branch};
 
-      prunedPerchModuleObject =
+      prunedPerchModuleConfig =
         if hasPrefix
-        then pruningPerchModuleObject.${prefix}
+        then perchModuleConfigBranches.${branch}
         else { };
     in
-    prunedPerchModuleObject;
+    prunedPerchModuleConfig;
 
   pruneImportedPerchModule =
     prefix:
@@ -146,13 +165,22 @@ let
     if builtins.isFunction importedPerchModule
     then
       perchModuleInputs:
+      let
+        perchModuleObject =
+          importedPerchModule
+            perchModuleInputs;
+      in
       (prunePerchModuleObjectImports prefix)
         ((shallowlyPrunePerchModuleObject prefix)
-          (importedPerchModule perchModuleInputs))
+          perchModuleObject)
     else
+      let
+        perchModuleObject =
+          importedPerchModule;
+      in
       (prunePerchModuleObjectImports prefix)
         ((shallowlyPrunePerchModuleObject prefix)
-          importedPerchModule);
+          perchModuleObject);
 in
 {
   options.flake.perchModules = lib.mkOption {
@@ -163,11 +191,19 @@ in
     '';
   };
 
-  options.prune = lib.mkOption {
+  options.propagate = lib.mkOption {
     type = lib.types.raw;
     default = { };
     description = lib.literalMD ''
-      Register objects to be pruned by other modules.
+      Propagate flake outputs to flakes which have this flake as an input.
+    '';
+  };
+
+  options.branches = lib.mkOption {
+    type = lib.types.raw;
+    default = { };
+    description = lib.literalMD ''
+      Register branches to be pruned by other modules.
     '';
   };
 
@@ -217,7 +253,7 @@ in
 
       perchModulesModule = {
         _module.args = {
-          selfPerchModules =
+          perchModules =
             allExportedPerchModules;
           inputPerchModules =
             silencedPerchModules;
@@ -247,8 +283,8 @@ in
       (importAndMergePerchModulePath
         perchModule);
 
-  config.flake.lib.module.prune = prefix: perchModule:
-    (pruneImportedPerchModule prefix)
+  config.flake.lib.module.prune = branch: perchModule:
+    (pruneImportedPerchModule branch)
       (importAndMergePerchModulePath
         perchModule);
 }

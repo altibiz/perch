@@ -1,4 +1,4 @@
-{ self, lib, selfPerchModules, ... }:
+{ self, lib, perchModules, ... }:
 
 {
   options.flake.nixosModules = lib.mkOption {
@@ -9,8 +9,8 @@
     '';
   };
 
-  config.flake.nixosModules =
-    builtins.mapAttrs
-      (_: self.lib.module.prune "system")
-      selfPerchModules;
+  config.propagate.nixosModules =
+    self.lib.module.prune
+      "system"
+      perchModules.default;
 }
