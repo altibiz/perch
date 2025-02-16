@@ -18,19 +18,19 @@
       perchModules;
   };
 
-  config.branches.system = {
+  config.branches.nixosModule = {
     environment.systemPackages = [
       pkgs.hello
     ];
   };
 
-  config.branches.home = {
+  config.branches.homeManagerModule = {
     home.packages = [
       pkgs.hello
     ];
   };
 
-  config.branches.configuration = {
+  config.branches.nixosConfiguration = {
     nixpkgs.hostPlatform.system = "x86_64-linux";
   };
 }

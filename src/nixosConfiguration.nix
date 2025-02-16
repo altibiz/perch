@@ -11,11 +11,11 @@
     '';
   };
 
-  options.branches.nixosConfigurations = lib.mkOption {
+  options.branches.nixosConfiguration = lib.mkOption {
     type = lib.types.raw;
     default = { };
     description = lib.literalMD ''
-      `nixosConfigurations` flake output branches.
+      `nixosConfigurations` flake output branch.
     '';
   };
 
@@ -41,7 +41,7 @@
         let
           configurationModule =
             self.lib.module.prune
-              "nixosConfigurations"
+              "nixosConfiguration"
               module;
 
           flakeNixosModules =

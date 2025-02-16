@@ -11,11 +11,11 @@
     '';
   };
 
-  options.branches.nixosModules = lib.mkOption {
+  options.branches.nixosModule = lib.mkOption {
     type = lib.types.raw;
     default = { };
     description = lib.literalMD ''
-      `homeManagerModule` flake output branches.
+      `homeManagerModule` flake output branch.
     '';
   };
 
@@ -37,6 +37,6 @@
 
   config.propagate.nixosModules =
     builtins.mapAttrs
-      (_: self.lib.module.prune "system")
+      (_: self.lib.module.prune "nixosModule")
       perchModules.current;
 }

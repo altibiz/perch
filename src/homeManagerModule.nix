@@ -11,11 +11,11 @@
     '';
   };
 
-  options.branches.homeManagerModules = lib.mkOption {
+  options.branches.homeManagerModule = lib.mkOption {
     type = lib.types.raw;
     default = { };
     description = lib.literalMD ''
-      `homeManagerModule` flake output branches.
+      `homeManagerModule` flake output branch.
     '';
   };
 
@@ -37,6 +37,6 @@
 
   config.propagate.homeManagerModules =
     builtins.mapAttrs
-      (_: self.lib.module.prune "home")
+      (_: self.lib.module.prune "homeManagerModule")
       perchModules.current;
 }
