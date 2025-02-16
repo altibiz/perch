@@ -35,9 +35,9 @@
   };
 
   config.seal.packages.scratch.function =
-    ({ writeShellFunction, hello }:
-      writeShellFunction {
-        title = "hello";
+    ({ writeShellApplication, hello, ... }:
+      writeShellApplication {
+        name = "hello";
         runtimeInputs = [ hello ];
         text = "hello";
       });

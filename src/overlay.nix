@@ -3,7 +3,7 @@
 {
   options.flake.overlays = lib.mkOption {
     type = lib.types.attrsOf self.lib.type.overlay;
-    default = [ ];
+    default = { };
     description = lib.literalMD ''
       Create a `overlays` flake output.
     '';

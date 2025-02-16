@@ -1,4 +1,13 @@
-{ self, lib, nixpkgs, flake-utils, config, ... }:
+{ self
+, lib
+, nixpkgs
+, flake-utils
+, config
+, specialArgs
+, ...
+}:
+
+# TODO: figure out how to flatten this out
 
 let
   packageSubmodule = {
@@ -14,9 +23,8 @@ let
     };
 
     options.function = lib.mkOption {
-      type =
-        lib.types.functionTo
-          lib.types.package;
+      # FIXME: lib.types.functionTo lib.types.package throws
+      type = lib.types.raw;
       description = lib.literalMD ''
         Package function which will be called with `pkgs.callPackage`.
       '';
@@ -32,7 +40,10 @@ let
 
     options.nixpkgs.overlays = lib.mkOption {
       type = lib.types.listOf self.lib.type.overlay;
-      default = [ config.flake.overlays.default ];
+      default = [
+        # FIXME: attribute default is missing
+        # config.flake.overlays.default 
+      ];
       description = lib.literalMD ''
         Overlays to pass to nixpkgs when creating `pkgs`.
       '';
@@ -66,20 +77,11 @@ let
           overlays = package.nixpkgs.overlays;
         };
     in
-    pkgs.callPackage package.function;
+    pkgs.callPackage
+      package.function
+      specialArgs;
 in
 {
-  options.flake.packages = lib.mkOption {
-    type =
-      lib.types.attrsOf
-        (lib.types.attrsOf
-          lib.types.package);
-    default = { };
-    description = lib.literalMD ''
-      Create a `packages` flake output.
-    '';
-  };
-
   options.seal.packages = lib.mkOption {
     type =
       lib.types.attrsOf
