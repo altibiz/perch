@@ -30,9 +30,9 @@
     ];
   };
 
-  config.integrate.nixosConfiguration = {
-    systems = [ "x86_64-linux" "x86_64-darwin" ];
+  config.integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
 
+  config.integrate.nixosConfiguration = {
     nixosConfiguration = {
       environment.systemPackages = [
         pkgs.hello
@@ -41,7 +41,7 @@
   };
 
   config.integrate.package = {
-    systems = [ "x86_64-linux" "x86_64-darwin" ];
+    systems = [ "x86_64-linux" ];
 
     package = pkgs.writeShellApplication {
       name = "hello";
