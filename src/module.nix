@@ -2,7 +2,6 @@
 , options
 , config
 , specialArgs
-, flake-utils
 , nixpkgs
 , ...
 }@trunkArgs:
@@ -668,5 +667,5 @@ in
               name = system;
               value = artifacts;
             })
-          flake-utils.lib.defaultSystems));
+          nixpkgs.lib.systems.flakeExposed));
 }

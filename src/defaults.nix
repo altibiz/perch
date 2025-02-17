@@ -1,4 +1,4 @@
-{ self, lib, config, flake-utils, ... }:
+{ self, lib, config, nixpkgs, ... }:
 
 {
   options.seal.defaults.nixpkgs.overlays = lib.mkOption {
@@ -21,7 +21,7 @@
     type =
       lib.types.listOf
         lib.types.str;
-    default = flake-utils.lib.defaultSystems;
+    default = nixpkgs.lib.systems.flakeExposed;
     description = lib.literalMD ''
       Default list of systems in which to integrate.
     '';
