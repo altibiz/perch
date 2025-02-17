@@ -1,7 +1,7 @@
 { self, lib, ... }:
 
 {
-  config.flake.lib.flake.make =
+  flake.lib.flake.make =
     { inputs
     , root ? null
     , prefix ? null
