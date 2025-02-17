@@ -1,7 +1,7 @@
 { self, lib, nixpkgs, specialArgs, ... }:
 
 {
-  config.flake.lib.module.branch.artifacts =
+  flake.lib.module.branch.artifacts =
     branch:
     modules:
     builtins.mapAttrs
@@ -9,7 +9,7 @@
       self.lib.module.branch.prune branch module)
       modules;
 
-  config.flake.lib.module.integration.artifacts =
+  flake.lib.module.integration.artifacts =
     integration:
     module:
     let

@@ -1,4 +1,4 @@
-{ lib, self, ... }:
+{ lib, self, options, config, ... }:
 
 let
   selfPropagateObjectImports =
@@ -64,7 +64,34 @@ let
           imported);
 in
 {
-  flake.lib.module.selfPropagate =
+  options.flake = {
+    perchModules = lib.mkOption {
+      type = lib.types.attrsOf lib.types.deferredModule;
+      default = { };
+      description = lib.literalMD ''
+        Create a `perchModules` flake output.
+      '';
+    };
+  }
+  // (builtins.mapAttrs
+    (name: option: option // {
+      description = lib.literalMD ''
+        Create a `${name}` flake output.
+      '';
+    })
+    options.propagate);
+
+  options.integrate.systems = lib.mkOption {
+    type =
+      lib.types.listOf
+        lib.types.str;
+    default = config.seal.defaults.systems;
+    description = lib.literalMD ''
+      List of systems in which to integrate.
+    '';
+  };
+
+  config.flake.lib.module.selfPropagate =
     module:
     selfPropagateImported
       (self.lib.module.importIfPath
