@@ -89,7 +89,7 @@ let
           object);
 in
 {
-  flake.lib.module.integration.integrate =
+  flake.lib.module.integrate =
     integration:
     module:
     (integrateImported integration)

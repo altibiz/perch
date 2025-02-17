@@ -18,7 +18,7 @@
   config.propagate.nixosModules =
     let
       nixosModules =
-        self.lib.module.branch.artifacts
+        self.lib.module.leaves
           "nixosModule"
           perchModules.current;
     in

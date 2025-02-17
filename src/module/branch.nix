@@ -67,7 +67,7 @@ let
           perchModuleObject);
 in
 {
-  flake.lib.module.branch.prune =
+  flake.lib.module.prune =
     branch:
     module:
     (pruneImported branch)

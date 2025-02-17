@@ -17,7 +17,7 @@
   };
 
   config.propagate.packages =
-    self.lib.module.integration.artifacts
+    self.lib.module.artifacts
       "package"
       perchModules.current;
 }

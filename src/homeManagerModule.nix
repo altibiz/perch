@@ -18,7 +18,7 @@
   config.propagate.homeManagerModules =
     let
       homeManagerModules =
-        self.lib.module.branch.artifacts
+        self.lib.module.leaves
           "homeManagerModule"
           perchModules.current;
     in
