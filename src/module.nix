@@ -1,4 +1,13 @@
-{ self, lib, options, config, specialArgs, ... }:
+{ self
+, lib
+, options
+, config
+, specialArgs
+, perchModules
+, flake-utils
+, nixpkgs
+, ...
+}@trunkArgs:
 
 let
   mapPerchModuleFunctionResult =
@@ -298,21 +307,15 @@ let
         then { }
         else perchModuleObject;
 
-      hasBranches =
-        perchModuleConfig ? branch;
-
       perchModuleConfigBranches =
-        if hasBranches
+        if perchModuleConfig ? branch
         then perchModuleConfig.branch
         else { };
 
-      hasBranch =
-        perchModuleConfigBranches ? ${branch};
-
       prunedPerchModuleConfig =
-        if hasBranch
+        if perchModuleConfigBranches ? ${branch}
         then perchModuleConfigBranches.${branch}
-        else { };
+        else null;
     in
     prunedPerchModuleConfig;
 
@@ -329,7 +332,15 @@ let
         (prunePerchModuleObjectImports branch)
           ((shallowlyPrunePerchModuleObject branch)
             perchModuleObject))
-        perchModuleFunction
+        (mapPerchModuleFunctionArgs
+          (perchModuleFunctionArgs:
+          perchModuleFunctionArgs
+          // specialArgs
+          // {
+            inherit self;
+            inherit trunkArgs;
+          })
+          perchModuleFunction)
     else
       let
         perchModuleObject =
@@ -339,7 +350,16 @@ let
         ((shallowlyPrunePerchModuleObject branch)
           perchModuleObject);
 
+  integratePerchModuleObjectImports =
+    integrate:
+    perchModuleObject:
+    mapPerchModuleObjectImportedImports
+      (integratePerchModuleImport
+        integrate)
+      perchModuleObject;
+
   shallowlyIntegratePerchModuleObject =
+    integrate:
     perchModuleObject:
     let
       perchModuleConfig =
@@ -349,12 +369,67 @@ let
         then { }
         else perchModuleObject;
 
-      perchModuleSystems =
-        if perchModuleConfig ? systems
-        then perchModuleConfig.systems
+      perchModuleIntegrate =
+        if perchModuleConfig ? integrate
+        then perchModuleConfig.integrate
+        else { };
+
+      perchModuleIntegrateSystems =
+        if perchModuleIntegrate ? systems
+        then perchModuleIntegrate.systems
         else config.seal.defaults.systems;
+
+      perchModuleIntegration =
+        if perchModuleIntegrate ? ${integrate}
+        then perchModuleIntegrate.${integrate}
+        else null;
+
+      perchModuleIntegrationSystems =
+        if perchModuleIntegration ? systems
+        then perchModuleIntegration.systems
+        else perchModuleIntegrateSystems;
+
+      perchModuleIntegrations =
+        builtins.listToAttrs
+          (builtins.map
+            (system: {
+              name = system;
+              value = perchModuleIntegration;
+            })
+            perchModuleIntegrationSystems);
     in
-    perchModuleObject;
+    perchModuleIntegrations;
+
+  integratePerchModuleImport =
+    integrate:
+    perchModuleImport:
+    if lib.isFunction perchModuleImport
+    then
+      let
+        perchModuleFunction = perchModuleImport;
+      in
+      mapPerchModuleFunctionResult
+        (perchModuleObject:
+        (integratePerchModuleObjectImports integrate)
+          ((shallowlyIntegratePerchModuleObject integrate)
+            perchModuleObject))
+        (mapPerchModuleFunctionArgs
+          (perchModuleFunctionArgs:
+          perchModuleFunctionArgs
+          // specialArgs
+          // {
+            inherit self;
+            inherit trunkArgs;
+          })
+          perchModuleFunction)
+    else
+      let
+        perchModuleObject =
+          perchModuleImport;
+      in
+      (integratePerchModuleObjectImports integrate)
+        ((shallowlyIntegratePerchModuleObject integrate)
+          perchModuleObject);
 in
 {
   options.flake = {
@@ -374,7 +449,6 @@ in
     })
     options.propagate);
 
-  # NOTE: this is not a real option but ra
   options.systems = lib.mkOption {
     type =
       lib.types.listOf
@@ -453,6 +527,11 @@ in
         flake.perchModules =
           allExportedPerchModules;
       };
+
+      trunkArgsModule = {
+        _module.args.pkgs = null;
+        _module.args.trunkArgs = null;
+      };
     in
     lib.evalModules {
       class = "perch";
@@ -460,16 +539,120 @@ in
       modules = [
         perchModulesModule
         flakePerchModulesModule
+        trunkArgsModule
       ] ++ allPerchModules;
     };
 
-  config.flake.lib.module.derive = perchModule:
+  config.flake.lib.module.derive =
+    perchModule:
     derivePerchModuleImport
       (importAndMergePerchModulePath
         perchModule);
 
-  config.flake.lib.module.prune = branch: perchModule:
+  config.flake.lib.module.branch.prune =
+    branch:
+    perchModule:
     (prunePerchModuleImport branch)
       (importAndMergePerchModulePath
         perchModule);
+
+  config.flake.lib.module.branch.artifacts =
+    branch:
+    builtins.mapAttrs
+      (_: self.lib.module.prune branch)
+      perchModules.current;
+
+  config.flake.lib.module.integration.integrate =
+    integrate:
+    perchModule:
+    (integratePerchModuleImport integrate)
+      (importAndMergePerchModulePath
+        perchModule);
+
+  config.flake.lib.module.integration.artifacts =
+    integrate:
+    let
+      systemPerchModuleEval = system: module:
+        let
+          pkgsModule = {
+            _module.args.pkgs =
+              import nixpkgs {
+                inherit system;
+              };
+          };
+
+          integrationModule =
+            (integratePerchModuleImport integrate)
+              (importAndMergePerchModulePath
+                module);
+
+          artifactModule = { lib, config }: {
+            options.defined = lib.mkOption {
+              type = lib.types.raw;
+            };
+
+            options.artifact = lib.mkOption {
+              type = lib.types.raw;
+            };
+
+            config.defined =
+              builtins.elem config.systems system;
+
+            config.artifact =
+              if builtins.elem config.systems system
+              then config.${system}
+              else null;
+          };
+
+          eval = lib.evalModules {
+            inherit specialArgs;
+            modules = [
+              pkgsModule
+              integrationModule
+              artifactModule
+            ];
+          };
+        in
+        {
+          defined = eval.config.defined;
+          artifact = eval.config.artifact.${integrate};
+        };
+    in
+    builtins.listToAttrs
+      (builtins.filter
+        (x: x != null)
+        (builtins.map
+          (system:
+          let
+            artifacts =
+              builtins.listToAttrs
+                (builtins.filter
+                  (x: x != null)
+                  (lib.mapAttrsToList
+                    (name: module:
+                      let
+                        eval =
+                          systemPerchModuleEval
+                            system
+                            module;
+                      in
+                      if eval.defined
+                      then
+                        {
+                          inherit name;
+                          value = eval.artifact;
+                        }
+                      else null)
+                    perchModules.current));
+          in
+          if (builtins.length
+            (builtins.attrNames artifacts)
+          == 0)
+          then null
+          else
+            {
+              name = system;
+              value = artifacts;
+            })
+          flake-utils.lib.defaultSystems));
 }

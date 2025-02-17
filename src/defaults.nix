@@ -1,6 +1,14 @@
-{ self, lib, flake-utils, ... }:
+{ self, lib, config, flake-utils, ... }:
 
 {
+  options.seal.defaults.nixpkgs.overlays = lib.mkOption {
+    type = lib.listOf self.lib.type.nixpkgs.overlay;
+    default = [ config.flake.overlays.default ];
+    description = lib.literalMD ''
+      Nixpkgs config used for defaults in flake outputs.
+    '';
+  };
+
   options.seal.defaults.nixpkgs.config = lib.mkOption {
     type = self.lib.type.nixpkgs.config;
     default = { };

@@ -1,13 +1,9 @@
-{ self, lib, perchModules, ... }:
+{ self, lib, ... }:
 
 {
-  options.branch.homeManagerModule = lib.mkOption {
-    type = lib.types.raw;
-    default = { };
-    description = lib.literalMD ''
-      `homeManagerModule` flake output branch.
-    '';
-  };
+  options.branch.homeManagerModule =
+    self.lib.option.mkBranchOption
+      "homeManagerModule";
 
   options.propagate.homeManagerModules = lib.mkOption {
     type =
@@ -19,18 +15,11 @@
     '';
   };
 
-  # NOTE: this is so that perch modules can ask for pkgs but
-  # this will only be evaluated in a home-manager.user context
-  config._module.args = {
-    pkgs = null;
-  };
-
   config.propagate.homeManagerModules =
     let
       homeManagerModules =
-        builtins.mapAttrs
-          (_: self.lib.module.prune "homeManagerModule")
-          perchModules.current;
+        self.lib.module.branch.artifacts
+          "homeManagerModule";
     in
     if homeManagerModules ? default then homeManagerModules
     else homeManagerModules // {

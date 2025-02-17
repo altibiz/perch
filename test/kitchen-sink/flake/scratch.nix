@@ -30,15 +30,23 @@
     ];
   };
 
-  config.branch.nixosConfiguration = {
-    nixpkgs.hostPlatform.system = "x86_64-linux";
+  config.integrate.nixosConfiguration = {
+    systems = [ "x86_64-linux" ];
+
+    module = {
+      environment.systemPackages = [
+        pkgs.hello
+      ];
+    };
   };
 
-  config.seal.packages.scratch.function =
-    ({ writeShellApplication, hello, ... }:
-      writeShellApplication {
-        name = "hello";
-        runtimeInputs = [ hello ];
-        text = "hello";
-      });
+  config.integrate.package = {
+    systems = [ "x86_64-linux" ];
+
+    package = pkgs.writeShellApplication {
+      name = "hello";
+      runtimeInputs = [ pkgs.hello ];
+      text = "hello";
+    };
+  };
 }

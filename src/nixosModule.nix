@@ -1,13 +1,9 @@
-{ self, lib, perchModules, ... }:
+{ self, lib, ... }:
 
 {
-  options.branch.nixosModule = lib.mkOption {
-    type = lib.types.raw;
-    default = { };
-    description = lib.literalMD ''
-      `homeManagerModule` flake output branch.
-    '';
-  };
+  options.branch.nixosModule =
+    self.lib.option.mkBranchOption
+      "nixosModule";
 
   options.propagate.nixosModules = lib.mkOption {
     type =
@@ -19,18 +15,11 @@
     '';
   };
 
-  # NOTE: this is so that perch modules can ask for pkgs but
-  # this will only be evaluated in a nixosSystem context
-  config._module.args = {
-    pkgs = null;
-  };
-
   config.propagate.nixosModules =
     let
       nixosModules =
-        builtins.mapAttrs
-          (_: self.lib.module.prune "nixosModule")
-          perchModules.current;
+        self.lib.module.branch.artifacts
+          "nixosModule";
     in
     if nixosModules ? default then nixosModules
     else nixosModules // {
