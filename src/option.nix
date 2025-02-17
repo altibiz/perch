@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ self, lib, config, ... }:
 
 {
   config.flake.lib.option.mkIntegrationOption =
@@ -8,7 +8,23 @@
         type = lib.types.listOf lib.types.str;
         default = [ ];
         description = lib.literalMD ''
-          Systems for which to build the `${name}s` flake output.
+          List of systems in which to integrate.
+        '';
+      };
+
+      nixpkgs.overlays = lib.mkOption {
+        type = lib.types.raw;
+        default = config.seal.defaults.nixpkgs.overlays;
+        description = lib.literalMD ''
+          Nixpkgs overlays of systems in which to integrate.
+        '';
+      };
+
+      nixpkgs.config = lib.mkOption {
+        type = self.lib.type.nixpkgs.config;
+        default = config.seal.defaults.nixpkgs.config;
+        description = lib.literalMD ''
+          Nixpkgs config of systems in which to integrate.
         '';
       };
 

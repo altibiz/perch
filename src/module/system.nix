@@ -1,32 +1,35 @@
-{ self, lib, nixpkgs, specialArgs, ... }:
+{ self, lib, nixpkgs, specialArgs, perchModules, ... }:
 
 {
   flake.lib.module.systems =
     integration:
-    module:
+    modules:
     let
       systemModuleEval = system: module:
         let
           perchModulesModule = {
-            _module.args.perchModules = module;
+            _module.args.perchModules = perchModules;
           };
 
           pkgsModule = { config, ... }: {
-            _module.args.pkgs =
-              import nixpkgs {
-                inherit system;
-                config = config.${integration}.nixpkgs.config;
-                overlays = config.${integration}.nixpkgs.overlays;
-              };
+            nixpkgs.hostPlatform.system = system;
+            nixpkgs.config = config.${integration}.nixpkgs.config;
+            nixpkgs.overlays = config.${integration}.nixpkgs.overlays;
           };
 
-          integrationModule =
+          integratedModule =
             self.lib.module.integrate
               integration
               module;
 
-          artifactModule = { lib, config, ... }: {
-            options.${integration} = lib.mkOption {
+          isolatedModule =
+            self.lib.module.isolate
+              system
+              integration
+              integratedModule;
+
+          definedModule = { lib, config, ... }: {
+            options.integrate = lib.mkOption {
               type = lib.types.raw;
             };
 
@@ -34,17 +37,13 @@
               type = lib.types.raw;
             };
 
-            options.artifact = lib.mkOption {
-              type = lib.types.raw;
-            };
-
             config.defined =
-              builtins.elem system config.${integration}.systems;
-
-            config.artifact =
-              if builtins.elem system config.${integration}.systems
-              then config.${integration}.${system}.${integration}
-              else null;
+              builtins.elem
+                system
+                (lib.attrByPath
+                  [ "integrate" "systems" ]
+                  [ ]
+                  config);
           };
 
           eval = lib.nixosSystem {
@@ -52,51 +51,36 @@
             modules = [
               perchModulesModule
               pkgsModule
-              integrationModule
-              artifactModule
+              integratedModule
+              isolatedModule
+              definedModule
             ];
           };
         in
         {
           defined = eval.config.defined;
-          artifact = eval.config.artifact;
+          system = eval;
         };
     in
     builtins.listToAttrs
       (builtins.filter
         (x: x != null)
         (builtins.map
-          (system:
+          ({ system, module }:
           let
-            artifacts =
-              builtins.listToAttrs
-                (builtins.filter
-                  (x: x != null)
-                  (lib.mapAttrsToList
-                    (name: module:
-                      let
-                        eval =
-                          systemModuleEval
-                            system
-                            module;
-                      in
-                      if eval.defined
-                      then
-                        {
-                          inherit name;
-                          value = eval.artifact;
-                        }
-                      else null)
-                    module));
+            eval = systemModuleEval system module;
           in
-          if (builtins.length
-            (builtins.attrNames artifacts)
-          == 0)
-          then null
-          else
-            {
-              name = system;
-              value = artifacts;
-            })
-          nixpkgs.lib.systems.flakeExposed));
+          if eval.defined then {
+            name = "${module.name}-${system}";
+            value = module.module;
+          } else null)
+          (lib.cartesianProduct {
+            system = nixpkgs.lib.systems.flakeExposed;
+            module =
+              lib.mapAttrsToList
+                (name: module: {
+                  inherit name module;
+                })
+                modules;
+          })));
 }

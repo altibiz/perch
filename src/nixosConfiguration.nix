@@ -14,17 +14,7 @@
   };
 
   config.propagate.nixosConfigurations =
-    builtins.listToAttrs
-      (lib.flatten
-        (lib.mapAttrsToList
-          (system: configurations:
-            lib.mapAttrsToList
-              (name: configuration: {
-                name = "${name}-${system}";
-                value = configuration;
-              })
-              configurations)
-          (self.lib.module.systems
-            "nixosConfiguration"
-            perchModules.current)));
+    self.lib.module.systems
+      "nixosConfiguration"
+      perchModules.current;
 }

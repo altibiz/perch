@@ -1,7 +1,6 @@
-{ config, self, lib, specialArgs, ... }@trunkArgs:
+{ config, self, lib, specialArgs, ... }:
 
 let
-
   integrateObjectImports =
     integrate:
     object:
@@ -75,21 +74,20 @@ let
         then integrationNixpkgs.config
         else integrateNixpkgsConfig;
 
-      integrationConfig =
-        {
-          ${integration} = {
-            systems = integrationSystems;
-            nixpkgs.overlays = integrationNixpkgsOverlays;
-            nixpkgs.config = integrationNixpkgsConfig;
-          }
-          // (builtins.listToAttrs
-            (builtins.map
-              (system: {
-                name = system;
-                value = integrationObject;
-              })
-              integrationSystems));
-        };
+      integrationConfig = {
+        integrate = {
+          systems = integrationSystems;
+          nixpkgs.overlays = integrationNixpkgsOverlays;
+          nixpkgs.config = integrationNixpkgsConfig;
+        }
+        // (builtins.listToAttrs
+          (builtins.map
+            (system: {
+              name = system;
+              value = integrationObject;
+            })
+            integrationSystems));
+      };
     in
     integrationConfig;
 
@@ -107,9 +105,7 @@ let
           ((shallowlyIntegrateObject integration)
             object))
         (self.lib.module.mapFunctionArgs
-          (args: args
-            // specialArgs
-            // { inherit trunkArgs; })
+          (args: args // specialArgs)
           function)
     else
       let

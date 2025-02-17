@@ -1,31 +1,14 @@
-{ self, lib, nixpkgs, specialArgs, ... }:
+{ self, lib, nixpkgs, specialArgs, perchModules, ... }:
 
 {
-  flake.lib.module.leaves =
-    branch:
-    modules:
-    builtins.mapAttrs
-      (_: module:
-      self.lib.module.prune branch module)
-      modules;
-
   flake.lib.module.artifacts =
     integration:
-    module:
+    modules:
     let
       systemModuleEval = system: module:
         let
           perchModulesModule = {
-            _module.args.perchModules = module;
-          };
-
-          pkgsModule = { config, ... }: {
-            _module.args.pkgs =
-              import nixpkgs {
-                inherit system;
-                config = config.${integration}.nixpkgs.config;
-                overlays = config.${integration}.nixpkgs.overlays;
-              };
+            _module.args.perchModules = perchModules;
           };
 
           integrationModule =
@@ -33,8 +16,17 @@
               integration
               module;
 
+          pkgsModule = { config, ... }: {
+            _module.args.pkgs =
+              import nixpkgs {
+                inherit system;
+                config = config.integrate.nixpkgs.config;
+                overlays = config.integrate.nixpkgs.overlays;
+              };
+          };
+
           artifactModule = { lib, config, ... }: {
-            options.${integration} = lib.mkOption {
+            options.integrate = lib.mkOption {
               type = lib.types.raw;
             };
 
@@ -47,11 +39,16 @@
             };
 
             config.defined =
-              builtins.elem system config.${integration}.systems;
+              builtins.elem
+                system
+                (lib.attrByPath
+                  [ "integrate" "systems" ]
+                  [ ]
+                  config);
 
             config.artifact =
-              if builtins.elem system config.${integration}.systems
-              then config.${integration}.${system}.${integration}
+              if config.defined
+              then config.integrate.${system}.${integration}
               else null;
           };
 
@@ -69,6 +66,27 @@
           defined = eval.config.defined;
           artifact = eval.config.artifact;
         };
+
+      systemArtifacts = system:
+        builtins.listToAttrs
+          (builtins.filter
+            (x: x != null)
+            (lib.mapAttrsToList
+              (name: module:
+                let
+                  eval =
+                    systemModuleEval
+                      system
+                      module;
+                in
+                if eval.defined
+                then
+                  {
+                    inherit name;
+                    value = eval.artifact;
+                  }
+                else null)
+              modules));
     in
     builtins.listToAttrs
       (builtins.filter
@@ -76,26 +94,7 @@
         (builtins.map
           (system:
           let
-            artifacts =
-              builtins.listToAttrs
-                (builtins.filter
-                  (x: x != null)
-                  (lib.mapAttrsToList
-                    (name: module:
-                      let
-                        eval =
-                          systemModuleEval
-                            system
-                            module;
-                      in
-                      if eval.defined
-                      then
-                        {
-                          inherit name;
-                          value = eval.artifact;
-                        }
-                      else null)
-                    module));
+            artifacts = systemArtifacts system;
           in
           if (builtins.length
             (builtins.attrNames artifacts)

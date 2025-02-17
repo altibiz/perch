@@ -2,42 +2,40 @@
 , lib
 , specialArgs
 , ...
-}@trunkArgs:
+}:
 
 let
   pruneObjectImports =
-    branch:
+    path:
     object:
     self.lib.module.mapObjectImports
       (pruneImported
-        branch)
+        path)
       object;
 
   shallowlyPruneObject =
-    branch:
+    path:
     object:
     let
-      config =
-        if object ? config
-        then object.config
-        else if object ? options
-        then { }
-        else object;
+      hasConfig =
+        object ? config
+        || object ? options;
 
-      branches =
-        if config ? branch
-        then config.branch
-        else { };
+      configPath =
+        if hasConfig
+        then [ "config" ] ++ path
+        else path;
 
       prunedConfig =
-        if branches ? ${branch}
-        then branches.${branch}
-        else null;
+        lib.attrByPath
+          configPath
+          null
+          object;
     in
     prunedConfig;
 
   pruneImported =
-    branch:
+    path:
     imported:
     if lib.isFunction imported
     then
@@ -46,29 +44,34 @@ let
       in
       self.lib.module.mapFunctionResult
         (object:
-        (pruneObjectImports branch)
-          ((shallowlyPruneObject branch)
+        (pruneObjectImports path)
+          ((shallowlyPruneObject path)
             object))
         (self.lib.module.mapFunctionArgs
-          (args:
-          args
-          // specialArgs
-          // { inherit trunkArgs; })
+          (args: args // specialArgs)
           function)
     else
       let
         perchModuleObject =
           imported;
       in
-      (pruneObjectImports branch)
-        ((shallowlyPruneObject branch)
+      (pruneObjectImports path)
+        ((shallowlyPruneObject path)
           perchModuleObject);
 in
 {
   flake.lib.module.prune =
     branch:
     module:
-    (pruneImported branch)
+    (pruneImported [ "branch" branch ])
+      (self.lib.module.importIfPath
+        module);
+
+  flake.lib.module.isolate =
+    integration:
+    system:
+    module:
+    (pruneImported [ "integrate" system integration ])
       (self.lib.module.importIfPath
         module);
 }
