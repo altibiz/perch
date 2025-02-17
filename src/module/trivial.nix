@@ -5,7 +5,7 @@
     mapping:
     function:
     let
-      args = lib.functionArgs mapped;
+      args = lib.functionArgs function;
       mapped = args: mapping (function args);
     in
     lib.setFunctionArgs mapped args;
