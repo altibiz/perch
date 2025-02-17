@@ -3,7 +3,7 @@
 let
   selfPropagateObjectImports =
     object:
-    self.module.mapObjectImports
+    self.lib.module.mapObjectImports
       selfPropagateImported
       object;
 
