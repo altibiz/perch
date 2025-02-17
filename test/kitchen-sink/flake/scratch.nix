@@ -41,7 +41,7 @@
   };
 
   config.integrate.package = {
-    systems = [ "x86_64-linux" ];
+    systems = [ "x86_64-linux" "x86_64-darwin" ];
 
     package = pkgs.writeShellApplication {
       name = "hello";

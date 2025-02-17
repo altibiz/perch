@@ -386,16 +386,18 @@ let
         else perchModuleIntegrateSystems;
 
       perchModuleIntegrations =
-        builtins.listToAttrs
-          (builtins.map
-            (system: {
-              name = integrate;
-              value = {
-                systems = perchModuleIntegrationSystems;
-                ${system} = perchModuleIntegration;
-              };
-            })
-            perchModuleIntegrationSystems);
+        {
+          ${integrate} = {
+            systems = perchModuleIntegrationSystems;
+          }
+          // (builtins.listToAttrs
+            (builtins.map
+              (system: {
+                name = system;
+                value = perchModuleIntegration;
+              })
+              perchModuleIntegrationSystems));
+        };
     in
     perchModuleIntegrations;
 
