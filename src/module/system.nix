@@ -45,7 +45,7 @@
               else null;
           };
 
-          eval = lib.evalModules {
+          eval = lib.nixosSystem {
             inherit specialArgs;
             modules = [
               perchModulesModule
