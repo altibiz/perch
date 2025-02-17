@@ -21,15 +21,15 @@ let
         object ? config
         || object ? options;
 
-      configPath =
+      actualPath =
         if hasConfig
         then [ "config" ] ++ path
         else path;
 
       prunedConfig =
         lib.attrByPath
-          configPath
-          null
+          actualPath
+          { }
           object;
     in
     prunedConfig;
@@ -68,8 +68,8 @@ in
         module);
 
   flake.lib.module.isolate =
-    integration:
     system:
+    integration:
     module:
     (pruneImported [ "integrate" system integration ])
       (self.lib.module.importIfPath

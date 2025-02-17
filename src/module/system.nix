@@ -13,8 +13,8 @@
 
           pkgsModule = { config, ... }: {
             nixpkgs.hostPlatform.system = system;
-            nixpkgs.config = config.${integration}.nixpkgs.config;
-            nixpkgs.overlays = config.${integration}.nixpkgs.overlays;
+            nixpkgs.config = config.integrate.nixpkgs.config;
+            nixpkgs.overlays = config.integrate.nixpkgs.overlays;
           };
 
           integratedModule =

@@ -2,6 +2,8 @@
 
 {
   options.seal.defaults.nixpkgs.overlays = lib.mkOption {
+    # FIXME: type error
+    # type = lib.types.listOf self.lib.type.overlay;
     type = lib.types.raw;
     default = [
       # FIXME: default not found
