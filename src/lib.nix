@@ -2,6 +2,7 @@
 
 {
   options.flake.lib = lib.mkOption {
+    # NOTE: two levels deep is hopefully enough
     type = lib.types.attrsOf
       (lib.types.either
         (lib.types.functionTo lib.types.raw)
