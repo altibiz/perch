@@ -24,7 +24,7 @@
                 value = configuration;
               })
               configurations)
-          (self.lib.module.artifacts
+          (self.lib.module.systems
             "nixosConfiguration"
             perchModules.current)));
 }
