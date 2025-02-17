@@ -6,7 +6,7 @@
     modules:
     builtins.mapAttrs
       (_: module:
-      self.lib.module.branch.prune branch module)
+      self.lib.module.prune branch module)
       modules;
 
   flake.lib.module.artifacts =
@@ -27,7 +27,7 @@
           };
 
           integrationModule =
-            self.lib.module.integration.integrate
+            self.lib.module.integrate
               integration
               module;
 
