@@ -31,7 +31,7 @@
   };
 
   config.integrate.nixosConfiguration = {
-    systems = [ "x86_64-linux" ];
+    systems = [ "x86_64-linux" "x86_64-darwin" ];
 
     nixosConfiguration = {
       environment.systemPackages = [
