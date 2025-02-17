@@ -31,6 +31,21 @@ let
         then objectIntegrate.systems
         else config.seal.defaults.systems;
 
+      integrateNixpkgs =
+        if objectIntegrate ? nixpkgs
+        then objectIntegrate.nixpkgs
+        else config.seal.defaults.nixpkgs;
+
+      integrateNixpkgsOverlays =
+        if integrateNixpkgs ? overlays
+        then integrateNixpkgs.overlays
+        else config.seal.defaults.nixpkgs.overlays;
+
+      integrateNixpkgsConfig =
+        if integrateNixpkgs ? config
+        then integrateNixpkgs.config
+        else config.seal.defaults.nixpkgs.config;
+
       integrationObject =
         if objectIntegrate ? ${integration}
         then objectIntegrate.${integration}
@@ -43,10 +58,29 @@ let
         then integrationObject.systems
         else integrateSystems;
 
+      integrationNixpkgs =
+        if integrationObject == null
+        then { }
+        else if integrationObject ? nixpkgs
+        then integrationObject.nixpkgs
+        else integrateNixpkgs;
+
+      integrationNixpkgsOverlays =
+        if integrationNixpkgs ? overlays
+        then integrationNixpkgs.overlays
+        else integrateNixpkgsOverlays;
+
+      integrationNixpkgsConfig =
+        if integrationNixpkgs ? config
+        then integrationNixpkgs.config
+        else integrateNixpkgsConfig;
+
       integrationConfig =
         {
           ${integration} = {
             systems = integrationSystems;
+            nixpkgs.overlays = integrationNixpkgsOverlays;
+            nixpkgs.config = integrationNixpkgsConfig;
           }
           // (builtins.listToAttrs
             (builtins.map
@@ -91,6 +125,26 @@ in
       lib.types.listOf
         lib.types.str;
     default = config.seal.defaults.systems;
+    description = lib.literalMD ''
+      List of systems in which to integrate.
+    '';
+  };
+
+  options.integrate.nixpkgs.overlays = lib.mkOption {
+    type =
+      lib.types.listOf
+        lib.types.str;
+    default = config.seal.defaults.nixpkgs.overlays;
+    description = lib.literalMD ''
+      List of systems in which to integrate.
+    '';
+  };
+
+  options.integrate.nixpkgs.config = lib.mkOption {
+    type =
+      lib.types.listOf
+        lib.types.str;
+    default = config.seal.defaults.nixpkgs.config;
     description = lib.literalMD ''
       List of systems in which to integrate.
     '';
