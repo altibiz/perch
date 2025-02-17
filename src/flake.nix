@@ -39,11 +39,11 @@
                 else null)
               selflessInputList);
 
-      eval = builtins.trace self.lib.module (self.lib.module.eval {
+      eval = self.lib.module.eval {
         specialArgs = inputs;
         selfModules = prefixedRootModules // selfModules;
         inputModules = inputModulesFromInputs ++ inputModules;
-      });
+      };
     in
     if eval.config ? flake
     then eval.config.flake

@@ -89,7 +89,17 @@ let
           object);
 in
 {
-  flake.lib.module.integrate =
+  options.integrate.systems = lib.mkOption {
+    type =
+      lib.types.listOf
+        lib.types.str;
+    default = config.seal.defaults.systems;
+    description = lib.literalMD ''
+      List of systems in which to integrate.
+    '';
+  };
+
+  config.flake.lib.module.integrate =
     integration:
     module:
     (integrateImported integration)

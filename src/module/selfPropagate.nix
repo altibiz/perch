@@ -1,4 +1,4 @@
-{ lib, self, options, config, ... }:
+{ lib, self, options, ... }:
 
 let
   selfPropagateObjectImports =
@@ -80,16 +80,6 @@ in
       '';
     })
     options.propagate);
-
-  options.integrate.systems = lib.mkOption {
-    type =
-      lib.types.listOf
-        lib.types.str;
-    default = config.seal.defaults.systems;
-    description = lib.literalMD ''
-      List of systems in which to integrate.
-    '';
-  };
 
   config.flake.lib.module.selfPropagate =
     module:
