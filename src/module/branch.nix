@@ -45,17 +45,15 @@ let
         function = imported;
       in
       self.lib.module.mapFunctionResult
-        (perchModuleObject:
+        (object:
         (pruneObjectImports branch)
           ((shallowlyPruneObject branch)
-            perchModuleObject))
+            object))
         (self.lib.module.mapFunctionArgs
-          (perchModuleFunctionArgs:
-          perchModuleFunctionArgs
+          (args:
+          args
           // specialArgs
-          // {
-            inherit trunkArgs;
-          })
+          // { inherit trunkArgs; })
           function)
     else
       let

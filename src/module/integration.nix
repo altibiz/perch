@@ -73,12 +73,9 @@ let
           ((shallowlyIntegrateObject integration)
             object))
         (self.lib.module.mapFunctionArgs
-          (args:
-          args
-          // specialArgs
-          // {
-            inherit trunkArgs;
-          })
+          (args: args
+            // specialArgs
+            // { inherit trunkArgs; })
           function)
     else
       let

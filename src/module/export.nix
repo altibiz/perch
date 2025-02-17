@@ -46,9 +46,7 @@ let
           (shallowlyExportObject
             objects))
         (self.lib.module.mapFunctionArgs
-          (args:
-          args
-          // specialArgs)
+          (args: args // specialArgs)
           function)
     else
       let
