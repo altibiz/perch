@@ -1,4 +1,4 @@
-{ self, lib, ... }:
+{ self, lib, perchModules, ... }:
 
 {
   options.integrate.package =
@@ -18,5 +18,6 @@
 
   config.propagate.packages =
     self.lib.module.integration.artifacts
-      "package";
+      "package"
+      perchModules.current;
 }

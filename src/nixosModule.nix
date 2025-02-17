@@ -1,4 +1,4 @@
-{ self, lib, ... }:
+{ self, lib, perchModules, ... }:
 
 {
   options.branch.nixosModule =
@@ -19,7 +19,8 @@
     let
       nixosModules =
         self.lib.module.branch.artifacts
-          "nixosModule";
+          "nixosModule"
+          perchModules.current;
     in
     if nixosModules ? default then nixosModules
     else nixosModules // {

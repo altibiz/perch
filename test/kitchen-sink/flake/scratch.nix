@@ -33,7 +33,7 @@
   config.integrate.nixosConfiguration = {
     systems = [ "x86_64-linux" ];
 
-    module = {
+    nixosConfiguration = {
       environment.systemPackages = [
         pkgs.hello
       ];

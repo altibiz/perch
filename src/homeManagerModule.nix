@@ -1,4 +1,4 @@
-{ self, lib, ... }:
+{ self, lib, perchModules, ... }:
 
 {
   options.branch.homeManagerModule =
@@ -19,7 +19,8 @@
     let
       homeManagerModules =
         self.lib.module.branch.artifacts
-          "homeManagerModule";
+          "homeManagerModule"
+          perchModules.current;
     in
     if homeManagerModules ? default then homeManagerModules
     else homeManagerModules // {

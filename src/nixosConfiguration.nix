@@ -1,4 +1,4 @@
-{ self, lib, ... }:
+{ self, lib, perchModules, ... }:
 
 {
   options.integrate.nixosConfiguration =
@@ -23,7 +23,8 @@
                 name = "${name}-${system}";
                 value = configuration;
               })
-              configurations))
-        (self.lib.module.integration.artifacts
-          "nixosConfiguration"));
+              configurations)
+          (self.lib.module.integration.artifacts
+            "nixosConfiguration"
+            perchModules.current)));
 }

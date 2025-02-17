@@ -1,9 +1,7 @@
-{ self
-, lib
+{ lib
 , options
 , config
 , specialArgs
-, perchModules
 , flake-utils
 , nixpkgs
 , ...
@@ -195,7 +193,7 @@ let
       exportedPerchModuleConfig =
         (builtins.removeAttrs
           perchModuleConfig
-          [ "flake" "seal" "branch" "integrate" "systems" ]);
+          [ "flake" "seal" "branch" "integrate" ]);
     in
     if hasConfig
     then
@@ -219,10 +217,7 @@ let
         (mapPerchModuleFunctionArgs
           (perchModuleFunctionArgs:
           perchModuleFunctionArgs
-          // specialArgs
-          // {
-            inherit self;
-          })
+          // specialArgs)
           perchModuleFunction)
     else
       let
@@ -256,7 +251,7 @@ let
       derivedPerchModuleConfig =
         (builtins.removeAttrs
           perchModuleConfig
-          [ "flake" "seal" "branch" "integrate" "systems" ]) // {
+          [ "flake" "seal" "branch" "integrate" ]) // {
           flake =
             if perchModuleConfig ? propagate
             then perchModuleConfig.propagate
@@ -337,7 +332,6 @@ let
           perchModuleFunctionArgs
           // specialArgs
           // {
-            inherit self;
             inherit trunkArgs;
           })
           perchModuleFunction)
@@ -385,7 +379,9 @@ let
         else null;
 
       perchModuleIntegrationSystems =
-        if perchModuleIntegration ? systems
+        if perchModuleIntegration == null
+        then [ ]
+        else if perchModuleIntegration ? systems
         then perchModuleIntegration.systems
         else perchModuleIntegrateSystems;
 
@@ -393,8 +389,11 @@ let
         builtins.listToAttrs
           (builtins.map
             (system: {
-              name = system;
-              value = perchModuleIntegration;
+              name = integrate;
+              value = {
+                systems = perchModuleIntegrationSystems;
+                ${system} = perchModuleIntegration;
+              };
             })
             perchModuleIntegrationSystems);
     in
@@ -418,7 +417,6 @@ let
           perchModuleFunctionArgs
           // specialArgs
           // {
-            inherit self;
             inherit trunkArgs;
           })
           perchModuleFunction)
@@ -528,7 +526,7 @@ in
           allExportedPerchModules;
       };
 
-      trunkArgsModule = {
+      fakeArgsModule = {
         _module.args.pkgs = null;
         _module.args.trunkArgs = null;
       };
@@ -539,7 +537,7 @@ in
       modules = [
         perchModulesModule
         flakePerchModulesModule
-        trunkArgsModule
+        fakeArgsModule
       ] ++ allPerchModules;
     };
 
@@ -558,9 +556,13 @@ in
 
   config.flake.lib.module.branch.artifacts =
     branch:
+    perchModules:
     builtins.mapAttrs
-      (_: self.lib.module.prune branch)
-      perchModules.current;
+      (_: module:
+      (prunePerchModuleImport branch)
+        (importAndMergePerchModulePath
+          module))
+      perchModules;
 
   config.flake.lib.module.integration.integrate =
     integrate:
@@ -571,9 +573,14 @@ in
 
   config.flake.lib.module.integration.artifacts =
     integrate:
+    perchModules:
     let
       systemPerchModuleEval = system: module:
         let
+          perchModulesModule = {
+            _module.args.perchModules = perchModules;
+          };
+
           pkgsModule = {
             _module.args.pkgs =
               import nixpkgs {
@@ -586,7 +593,11 @@ in
               (importAndMergePerchModulePath
                 module);
 
-          artifactModule = { lib, config }: {
+          artifactModule = { lib, config, ... }: {
+            options.${integrate} = lib.mkOption {
+              type = lib.types.raw;
+            };
+
             options.defined = lib.mkOption {
               type = lib.types.raw;
             };
@@ -596,17 +607,18 @@ in
             };
 
             config.defined =
-              builtins.elem config.systems system;
+              builtins.elem system config.${integrate}.systems;
 
             config.artifact =
-              if builtins.elem config.systems system
-              then config.${system}
+              if builtins.elem system config.${integrate}.systems
+              then config.${integrate}.${system}.${integrate}
               else null;
           };
 
           eval = lib.evalModules {
             inherit specialArgs;
             modules = [
+              perchModulesModule
               pkgsModule
               integrationModule
               artifactModule
@@ -615,7 +627,7 @@ in
         in
         {
           defined = eval.config.defined;
-          artifact = eval.config.artifact.${integrate};
+          artifact = eval.config.artifact;
         };
     in
     builtins.listToAttrs
@@ -643,7 +655,7 @@ in
                           value = eval.artifact;
                         }
                       else null)
-                    perchModules.current));
+                    perchModules));
           in
           if (builtins.length
             (builtins.attrNames artifacts)
