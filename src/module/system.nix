@@ -11,10 +11,12 @@
             _module.args.perchModules = module;
           };
 
-          pkgsModule = {
+          pkgsModule = { config, ... }: {
             _module.args.pkgs =
               import nixpkgs {
                 inherit system;
+                config = config.${integration}.nixpkgs.config;
+                overlays = config.${integration}.nixpkgs.overlays;
               };
           };
 
