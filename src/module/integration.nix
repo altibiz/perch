@@ -2,11 +2,10 @@
 
 let
   integrateObjectImports =
-    integrate:
+    integration:
     object:
     self.lib.module.mapObjectImports
-      (integrateImported
-        integrate)
+      (integrateImported integration)
       object;
 
   shallowlyIntegrateObject =

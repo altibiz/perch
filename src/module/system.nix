@@ -68,11 +68,11 @@
         (builtins.map
           ({ system, module }:
           let
-            eval = systemModuleEval system module;
+            eval = systemModuleEval system module.module;
           in
           if eval.defined then {
             name = "${module.name}-${system}";
-            value = module.module;
+            value = eval.system;
           } else null)
           (lib.cartesianProduct {
             system = nixpkgs.lib.systems.flakeExposed;
