@@ -1,6 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, super, ... }:
 
 {
+  integrate.systems = [ "x86_64-linux" "x86_64-linux" ];
+
+  seal.defaults.package = "fizzbuzz";
   integrate.package.package = pkgs.writeShellApplication {
     name = "fizzbuzz";
     text = ''
@@ -16,5 +19,38 @@
         fi
       done
     '';
+  };
+
+  seal.defaults.nixosModule = "fizzbuzz";
+  branch.nixosModule.nixosModule = {
+    environment.systemPackages = [
+      super.config.flake.packages.${pkgs.system}.default
+    ];
+  };
+
+  seal.defaults.homeManagerModule = "fizzbuzz";
+  branch.homeManagerModule.homeManagerModule = {
+    home.packages = [
+      super.config.flake.packages.${pkgs.system}.default
+    ];
+  };
+
+  integrate.nixosConfiguration = {
+    systems = [ "x86_64-linux" ];
+
+    nixosConfiguration = {
+      imports = [
+        super.config.flake.nixosModules.${pkgs.system}.default
+      ];
+
+      fileSystems."/" = {
+        device = "/dev/disk/by-label/NIXOS_SD";
+        fsType = "ext4";
+      };
+
+      boot.loader.grub.device = "nodev";
+
+      system.stateVersion = "24.11";
+    };
   };
 }

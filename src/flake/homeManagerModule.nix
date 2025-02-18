@@ -13,17 +13,17 @@
     '';
   };
 
-  options.seal.defaults.homeManager = lib.mkOption {
+  options.seal.defaults.homeManagerModule = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = null;
     description = lib.literalMD ''
-      The default `homeManagers` flake output.
+      The default `homeManagerModules` flake output.
     '';
   };
 
   config.propagate.homeManagerModules =
     let
-      default = config.seal.defaults.homeManager;
+      default = config.seal.defaults.homeManagerModule;
 
       homeManagerModules =
         self.lib.module.leaves
