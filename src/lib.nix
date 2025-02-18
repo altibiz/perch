@@ -13,7 +13,7 @@
     default =
       { };
     description = lib.literalMD ''
-      Create a `lib` flake output.
+      `lib` flake output.
     '';
   };
 }

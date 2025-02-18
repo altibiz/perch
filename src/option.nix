@@ -1,9 +1,18 @@
 { self, lib, config, ... }:
 
 {
-  config.flake.lib.option.mkIntegrationOption =
+  config.flake.lib.option.mkBranchOption =
     name:
-    {
+    lib.mkOption {
+      type = lib.types.raw;
+      default = { };
+      description = lib.literalMD ''
+        `${name}` flake output branch.
+      '';
+    };
+
+  config.flake.lib.option.mkIntegrationOption =
+    name: {
       systems = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
@@ -35,15 +44,5 @@
           `${name}s` flake output.
         '';
       };
-    };
-
-  config.flake.lib.option.mkBranchOption =
-    name:
-    lib.mkOption {
-      type = lib.types.raw;
-      default = { };
-      description = lib.literalMD ''
-        `${name}` flake output branch.
-      '';
     };
 }
