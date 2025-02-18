@@ -10,7 +10,7 @@ let
 in
 {
   options.flake.lib = lib.mkOption {
-    # NOTE: two levels deep is hopefully enough
+    # NOTE: three levels deep is hopefully enough
     type =
       lib.types.attrsOf
         (nodeType [
