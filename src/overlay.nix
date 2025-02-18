@@ -1,4 +1,9 @@
-{ self, lib, config, ... }:
+{
+  # self, 
+  lib
+, config
+, ...
+}:
 
 {
   options.propagate.overlays = lib.mkOption {
@@ -12,7 +17,9 @@
   };
 
   options.seal.overlays = lib.mkOption {
-    type = lib.types.attrsOf self.lib.type.overlay;
+    # FIXME: causes type error
+    # type = lib.types.attrsOf self.lib.type.overlay;
+    type = lib.types.raw;
     default = { };
     description = lib.literalMD ''
       Create a `overlays` flake output with composed default.
