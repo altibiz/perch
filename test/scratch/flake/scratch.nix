@@ -30,10 +30,19 @@
     ];
   };
 
-  config.integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
+  config.integrate.systems = [ "x86_64-linux" ];
 
   config.integrate.nixosConfiguration = {
     nixosConfiguration = {
+      fileSystems."/" = {
+        device = "/dev/disk/by-label/NIXOS_SD";
+        fsType = "ext4";
+      };
+
+      boot.loader.grub.device = "nodev";
+
+      system.stateVersion = "24.11";
+
       environment.systemPackages = [
         pkgs.hello
       ];
@@ -41,7 +50,7 @@
   };
 
   config.integrate.package = {
-    systems = [ "x86_64-linux" ];
+    systems = [ "x86_64-linux" "x86_64-darwin" ];
 
     package = pkgs.writeShellApplication {
       name = "hello";
