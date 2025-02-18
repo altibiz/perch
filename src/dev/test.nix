@@ -14,7 +14,7 @@
       for dir in test/*; do
         if [ -d "$dir" ] && [ -f "$dir/flake.nix" ]; then
           nix flake check \
-            --override-input "perch" "$root" \
+            --override-flake "perch" "$root" \
             --all-systems "path:$(realpath "$dir")"
         fi
       done
