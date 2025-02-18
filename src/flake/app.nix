@@ -35,6 +35,14 @@ in
     '';
   };
 
+  options.seal.defaults.packagesAsApps = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = lib.literalMD ''
+      Convert all packages to apps.
+    '';
+  };
+
   config.propagate.apps =
     let
       artifacts =

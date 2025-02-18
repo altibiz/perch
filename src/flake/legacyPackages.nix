@@ -16,6 +16,14 @@
     '';
   };
 
+  options.seal.defaults.packagesAsLegacyPackages = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = lib.literalMD ''
+      Convert all packages to legacy packages except the default.
+    '';
+  };
+
   config.propagate.legacyPackages =
     let
       artifacts =

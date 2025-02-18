@@ -1,9 +1,6 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, ... }:
 
 {
-  # TODO: some nicer way do do this
-  flake.devShells.default = config.flake.devShells."dev.dev";
-
   integrate.devShell.devShell = pkgs.mkShell {
     packages = with pkgs; [
       # version control
