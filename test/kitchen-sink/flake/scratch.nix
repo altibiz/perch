@@ -65,4 +65,12 @@
       text = "exit 0";
     };
   };
+
+  config.integrate.devShell = {
+    devShell = pkgs.mkShell {
+      packages = [
+        pkgs.hello
+      ];
+    };
+  };
 }
