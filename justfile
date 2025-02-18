@@ -23,6 +23,7 @@ lint:
       --config .markdown-link-check.json \
       --quiet \
       ...(fd '.*.md' | lines)
+    nix flake check --all-systems
     @just test
 
 upgrade:
