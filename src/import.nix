@@ -1,6 +1,8 @@
 { lib, ... }:
 
 let
+  nameSeparator = "/";
+
   importDirToAttrsWithMap =
     let
       initial =
@@ -13,7 +15,7 @@ let
                 prefixedName =
                   if prefix == ""
                   then nameWithoutExtension
-                  else "${prefix}.${nameWithoutExtension}";
+                  else "${prefix}${nameSeparator}${nameWithoutExtension}";
               in
               {
                 name =
