@@ -2,11 +2,11 @@
 
 let
   pruneObjectImports =
+    specialArgs:
     path:
     object:
     self.lib.module.mapObjectImports
-      (pruneImported
-        path)
+      (pruneImported specialArgs path)
       object;
 
   shallowlyPruneObject =
@@ -41,7 +41,7 @@ let
       in
       self.lib.module.mapFunctionResult
         (object:
-        (pruneObjectImports path)
+        (pruneObjectImports specialArgs path)
           ((shallowlyPruneObject path)
             object))
         (self.lib.module.mapFunctionArgs
@@ -52,7 +52,7 @@ let
         perchModuleObject =
           imported;
       in
-      (pruneObjectImports path)
+      (pruneObjectImports specialArgs path)
         ((shallowlyPruneObject path)
           perchModuleObject);
 in

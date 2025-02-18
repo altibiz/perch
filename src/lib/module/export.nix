@@ -2,9 +2,10 @@
 
 let
   exportPerchModuleObjectImports =
+    specialArgs:
     object:
     self.lib.module.mapObjectImports
-      exportImported
+      (exportImported specialArgs)
       object;
 
   shallowlyExportObject =
@@ -43,9 +44,8 @@ let
       in
       self.lib.module.mapFunctionResult
         (objects:
-        exportPerchModuleObjectImports
-          (shallowlyExportObject
-            objects))
+        (exportPerchModuleObjectImports specialArgs)
+          (shallowlyExportObject objects))
         (self.lib.module.mapFunctionArgs
           (args: args // specialArgs)
           function)
@@ -54,9 +54,8 @@ let
         object =
           imported;
       in
-      exportPerchModuleObjectImports
-        (shallowlyExportObject
-          object);
+      (exportPerchModuleObjectImports specialArgs)
+        (shallowlyExportObject object);
 in
 {
   flake.lib.module.export =
