@@ -1,4 +1,4 @@
-{ config, self, lib, specialArgs, ... }:
+{ config, self, lib, ... }:
 
 let
   integrateObjectImports =
@@ -103,9 +103,7 @@ let
         (integrateObjectImports integration)
           ((shallowlyIntegrateObject integration)
             object))
-        (self.lib.module.mapFunctionArgs
-          (args: args // specialArgs)
-          function)
+        function
     else
       let
         object = imported;
