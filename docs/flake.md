@@ -290,7 +290,7 @@ Explanations for pseudocode variables written in angle brackets (`<...>`):
   input.
 
 As indicated by the optionality of the `host-manager` and `deploy-rs` arguments,
-these integrations are optional. For more information on what these intgrations
+these integrations are optional. For more information on what these integrations
 do please refer to the
 [`home-manager`](https://github.com/nix-community/home-manager) and
 [`deploy-rs`](https://github.com/serokell/deploy-rs) documentation pages. In
