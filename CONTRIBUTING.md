@@ -7,8 +7,9 @@
 - [nushell](https://www.nushell.sh/)
 - [nix](https://nixos.org/)
 
-Please review [the development shell](./scripts/flake/shells/dev.nix) for the
-complete list of tools.
+Please review
+[the development shell](https://github.com/altibiz/perch/blob/main/src/dev/dev.nix)
+for the complete list of tools.
 
 ## Development
 
