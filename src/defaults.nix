@@ -41,4 +41,12 @@
       Convert all packages to apps.
     '';
   };
+
+  options.seal.defaults.packagesAsLegacyPackages = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = lib.literalMD ''
+      Convert all packages to legacy packages except the default.
+    '';
+  };
 }
