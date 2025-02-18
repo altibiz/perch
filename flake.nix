@@ -17,13 +17,18 @@
       eval = nixpkgs.lib.evalModules {
         specialArgs = specialArgs;
         class = "perch";
-        modules = importLib.import.dirToPathList ./src;
+        modules =
+          builtins.attrValues
+            (nixpkgs.lib.filterAttrs
+              (name: _: !(nixpkgs.lib.hasPrefix "dev" name))
+              (importLib.import.dirToFlatPathAttrs ./src));
       };
 
       lib = eval.config.flake.lib;
     in
     lib.flake.make {
       inherit inputs;
-      selfModules = lib.import.dirToFlatPathAttrs ./src;
+      root = ./.;
+      prefix = "src";
     };
 }
