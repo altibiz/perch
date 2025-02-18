@@ -49,4 +49,20 @@
       text = "hello";
     };
   };
+
+  config.integrate.check = {
+    check = pkgs.writeShellApplication {
+      name = "check";
+      runtimeInputs = [ ];
+      text = "exit 0";
+    };
+  };
+
+  config.integrate.formatter = {
+    formatter = pkgs.writeShellApplication {
+      name = "formatter";
+      runtimeInputs = [ ];
+      text = "exit 0";
+    };
+  };
 }
