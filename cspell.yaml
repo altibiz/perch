@@ -26,3 +26,5 @@ words:
   - coreutils
   - realpath
   - foldr
+  - aarch
+  - nodev
