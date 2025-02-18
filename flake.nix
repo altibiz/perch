@@ -27,7 +27,7 @@
       lib = eval.config.flake.lib;
     in
     lib.flake.make {
-      inherit inputs;
+      inputs = specialArgs;
       root = ./.;
       prefix = "src";
     };
