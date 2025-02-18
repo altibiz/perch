@@ -1,4 +1,4 @@
-{ lib, self, specialArgs, ... }:
+{ lib, self, ... }:
 
 let
   exportPerchModuleObjectImports =
@@ -34,6 +34,7 @@ let
       exportedConfig;
 
   exportImported =
+    specialArgs:
     imported:
     if lib.isFunction imported
     then
@@ -59,8 +60,9 @@ let
 in
 {
   flake.lib.module.export =
+    specialArgs:
     module:
-    exportImported
+    (exportImported specialArgs)
       (self.lib.module.importIfPath
         module);
 }
