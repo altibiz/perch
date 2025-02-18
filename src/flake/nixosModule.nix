@@ -1,4 +1,11 @@
-{ self, lib, config, perchModules, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.branch.nixosModule =
@@ -27,6 +34,9 @@
 
       nixosModules =
         self.lib.module.leaves
+          specialArgs
+          options
+          config
           "nixosModule"
           perchModules.current;
     in

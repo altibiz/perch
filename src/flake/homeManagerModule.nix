@@ -1,4 +1,11 @@
-{ self, lib, config, perchModules, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.branch.homeManagerModule =
@@ -27,6 +34,9 @@
 
       homeManagerModules =
         self.lib.module.leaves
+          specialArgs
+          options
+          config
           "homeManagerModule"
           perchModules.current;
     in

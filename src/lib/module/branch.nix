@@ -1,4 +1,4 @@
-{ self, lib, specialArgs, ... }:
+{ self, lib, ... }:
 
 let
   pruneObjectImports =
@@ -31,6 +31,7 @@ let
     prunedConfig;
 
   pruneImported =
+    specialArgs:
     path:
     imported:
     if lib.isFunction imported
@@ -57,9 +58,10 @@ let
 in
 {
   flake.lib.module.prune =
+    specialArgs:
     branch:
     module:
-    (pruneImported [ "branch" branch ])
+    (pruneImported specialArgs [ "branch" branch ])
       (self.lib.module.importIfPath
         module);
 
@@ -67,7 +69,7 @@ in
     system:
     integration:
     module:
-    (pruneImported [ "integrate" system integration ])
+    (pruneImported { } [ "integrate" system integration ])
       (self.lib.module.importIfPath
         module);
 }
