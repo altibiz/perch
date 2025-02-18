@@ -24,24 +24,32 @@ lint:
       --quiet \
       ...(fd '.*.md' | lines)
     nix flake check --all-systems
-    @just test
+    @just test-all
 
 upgrade:
     nix flake update
 
-test *args:
+test-all *args:
     #!/usr/bin/env bash
-    root="$(git rev-parse --show-toplevel)"
-    cd "$root"
+    cd "{{ root }}"
     for dir in test/*; do
       if [ -d "$dir" ] && [ -f "$dir/flake.nix" ]; then
         nix flake check \
-          --override-flake "perch" "$root" \
+          --override-flake "perch" "{{ root }}" \
           --all-systems \
           --no-write-lock-file \
+          {{ args }} \
           "path:$(realpath "$dir")"
       fi
     done
+
+test test *args:
+    nix flake check \
+      --override-flake "perch" "{{ root }}" \
+      --all-systems \
+      --no-write-lock-file \
+      {{ args }} \
+      "path:$(realpath "{{ root }}/test/{{ test }}")"
 
 repl test *args:
     cd '{{ root }}/test/{{ test }}'; \
