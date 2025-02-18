@@ -64,7 +64,6 @@
         markdown-link-check \
           --config .markdown-link-check.json \
           --quiet
-      cd "$root"
     '';
   };
 

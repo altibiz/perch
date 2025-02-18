@@ -1,6 +1,5 @@
 { self
 , lib
-, nixpkgs
 , specialArgs
 , perchModules
 , config
