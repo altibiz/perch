@@ -1,6 +1,8 @@
 { lib, pkgs, ... }:
 
 {
+  seal.defaults.devShell = "dev.dev";
+
   integrate.devShell.devShell = pkgs.mkShell {
     packages = with pkgs; [
       # version control
