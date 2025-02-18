@@ -120,5 +120,5 @@
               name = system;
               value = artifacts;
             })
-          nixpkgs.lib.systems.flakeExposed));
+          self.lib.defaults.systems));
 }

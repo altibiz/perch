@@ -1,4 +1,4 @@
-{ lib, nixpkgs, ... }:
+{ self, lib, ... }:
 
 {
   options.seal.defaults.nixpkgs.overlays = lib.mkOption {
@@ -25,12 +25,17 @@
   };
 
   options.seal.defaults.systems = lib.mkOption {
-    type =
-      lib.types.listOf
-        lib.types.str;
-    default = nixpkgs.lib.systems.flakeExposed;
+    type = lib.types.listOf lib.types.str;
+    default = self.lib.defaults.systems;
     description = lib.literalMD ''
       Default list of systems in which to integrate.
     '';
   };
+
+  config.flake.lib.defaults.systems = [
+    "aarch64-darwin"
+    "aarch64-linux"
+    "x86_64-darwin"
+    "x86_64-linux"
+  ];
 }

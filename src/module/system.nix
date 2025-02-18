@@ -90,7 +90,7 @@
             value = eval.system;
           } else null)
           (lib.cartesianProduct {
-            system = nixpkgs.lib.systems.flakeExposed;
+            system = self.lib.defaults.systems;
             module =
               lib.mapAttrsToList
                 (name: module: {
