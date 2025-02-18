@@ -40,19 +40,21 @@
     ]);
   };
 
-  integrate.check.check = pkgs.writeShellApplication {
-    name = "check";
-    runtimeInputs = with pkgs; [
-      git
-      just
-      nodePackages.cspell
-      nixpkgs-fmt
-      nodePackages.prettier
-      markdownlint-cli
-      nodePackages.markdown-link-check
-      fd
-    ];
-    text = ''
+  integrate.check.check = pkgs.runCommand
+    "check"
+    {
+      buildInputs = with pkgs; [
+        git
+        just
+        nodePackages.cspell
+        nixpkgs-fmt
+        nodePackages.prettier
+        markdownlint-cli
+        nodePackages.markdown-link-check
+        fd
+      ];
+    }
+    ''
       root="$(git rev-parse --show-toplevel)"
       cd "$root"
       just --unstable --fmt --check
@@ -64,8 +66,8 @@
         markdown-link-check \
           --config .markdown-link-check.json \
           --quiet
+      exit 1
     '';
-  };
 
   integrate.formatter.formatter = pkgs.writeShellApplication {
     name = "formatter";
