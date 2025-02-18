@@ -69,14 +69,14 @@ in
       type = lib.types.attrsOf lib.types.deferredModule;
       default = { };
       description = lib.literalMD ''
-        Create a `perchModules` flake output.
+        `perchModules` flake output.
       '';
     };
   }
   // (builtins.mapAttrs
     (name: option: option // {
       description = lib.literalMD ''
-        Create a `${name}` flake output.
+        Propagated `${name}` flake output.
       '';
     })
     options.propagate);
