@@ -1,4 +1,4 @@
-{ self, lib, perchModules, ... }:
+{ self, lib, perchModules, config, ... }:
 
 {
   options.integrate.devShell =
@@ -16,8 +16,33 @@
     '';
   };
 
+  options.seal.defaults.shell = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    description = lib.literalMD ''
+      The default `devShells` flake output.
+    '';
+  };
+
   config.propagate.devShells =
-    self.lib.module.artifacts
-      "devShell"
-      perchModules.current;
+    let
+      default = config.seal.defaults.devShell;
+      artifacts =
+        self.lib.module.artifacts
+          "devShell"
+          perchModules.current;
+    in
+    if default == null
+    then artifacts
+    else
+      builtins.mapAttrs
+        (_: system:
+          if system ? ${default}
+          then
+            system // {
+              default = system.${default};
+            }
+          else
+            system)
+        artifacts;
 }
