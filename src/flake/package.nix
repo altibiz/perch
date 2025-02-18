@@ -1,4 +1,4 @@
-{ self, lib, perchModules, ... }:
+{ self, lib, perchModules, config, ... }:
 
 {
   options.integrate.package =
@@ -16,8 +16,30 @@
     '';
   };
 
+  options.seal.defaults.package = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    description = lib.literalMD ''
+      The default `packages` flake output.
+    '';
+  };
+
   config.propagate.packages =
-    self.lib.module.artifacts
-      "package"
-      perchModules.current;
+    let
+      default = config.seal.defaults.package;
+
+      artifacts =
+        self.lib.module.artifacts
+          "package"
+          perchModules.current;
+    in
+    if default == null
+    then artifacts
+    else
+      builtins.mapAttrs
+        (_: system:
+          system // {
+            default = system.${default};
+          })
+        artifacts;
 }

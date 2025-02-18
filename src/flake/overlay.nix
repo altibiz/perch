@@ -9,29 +9,37 @@
   options.propagate.overlays = lib.mkOption {
     # FIXME: causes infinite recursion
     # type = lib.types.attrsOf self.lib.type.overlay;
-    type = lib.types.raw;
+    type = lib.types.attrsOf lib.types.raw;
     default = { };
     description = lib.literalMD ''
       Create a `overlays` flake output.
     '';
   };
 
-  options.seal.overlays = lib.mkOption {
-    # FIXME: causes type error
-    # type = lib.types.attrsOf self.lib.type.overlay;
-    type = lib.types.raw;
-    default = { };
+  options.seal.defaults.overlay = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
     description = lib.literalMD ''
-      Create a `overlays` flake output with composed default.
+      The default `overlays` flake output.
     '';
   };
 
-  config.propagate.overlays = {
-    default =
-      lib.composeManyExtensions
-        (builtins.attrValues
-          (builtins.removeAttrs
-            config.seal.overlays
-            [ "default" ]));
-  };
+  config.propagate.overlays =
+    let
+      default = config.seal.defaults.overlay;
+    in
+    if default != null
+    then
+      {
+        default = config.flake.overlay.${default};
+      }
+    else
+      {
+        default =
+          lib.composeManyExtensions
+            (builtins.attrValues
+              (builtins.removeAttrs
+                config.flake.overlays
+                [ "default" ]));
+      };
 }

@@ -43,8 +43,18 @@ in
     '';
   };
 
+  options.seal.defaults.app = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    description = lib.literalMD ''
+      The default `apps` flake output.
+    '';
+  };
+
   config.propagate.apps =
     let
+      default = config.seal.defaults.app;
+
       artifacts =
         self.lib.module.artifacts
           "app"
@@ -63,11 +73,22 @@ in
     in
     builtins.mapAttrs
       (_: system:
-        builtins.mapAttrs
-          (_: artifact: {
-            type = "app";
-            program = artifact;
-          })
-          system)
+        let
+          finalSystem =
+            builtins.mapAttrs
+              (_: artifact: {
+                type = "app";
+                program = artifact;
+              })
+              system;
+        in
+        if
+          default != null
+        then
+          finalSystem // {
+            default = finalSystem.${default};
+          }
+        else
+          finalSystem)
       finalArtifacts;
 }

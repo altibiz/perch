@@ -27,22 +27,21 @@
   config.propagate.devShells =
     let
       default = config.seal.defaults.devShell;
+
       artifacts =
         self.lib.module.artifacts
           "devShell"
           perchModules.current;
     in
-    if default == null
-    then artifacts
+    if
+      default == null
+    then
+      artifacts
     else
       builtins.mapAttrs
         (_: system:
-          if system ? ${default}
-          then
-            system // {
-              default = system.${default};
-            }
-          else
-            system)
+          system // {
+            default = system.${default};
+          })
         artifacts;
 }
