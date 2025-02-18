@@ -20,7 +20,9 @@
         modules =
           builtins.attrValues
             (nixpkgs.lib.filterAttrs
-              (name: _: !(nixpkgs.lib.hasPrefix "dev" name))
+              (name: _:
+                !(nixpkgs.lib.hasPrefix "dev" name)
+                && !(nixpkgs.lib.hasPrefix "flake" name))
               (importLib.import.dirToFlatPathAttrs ./src));
       };
 
