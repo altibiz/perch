@@ -36,7 +36,9 @@ test *args:
       if [ -d "$dir" ] && [ -f "$dir/flake.nix" ]; then
         nix flake check \
           --override-flake "perch" "$root" \
-          --all-systems "path:$(realpath "$dir")"
+          --all-systems \
+          --no-write-lock-file \
+          "path:$(realpath "$dir")"
       fi
     done
 
