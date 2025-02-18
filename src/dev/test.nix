@@ -9,6 +9,7 @@
       nixVersions.stable
     ];
     text = ''
+      root="$(git rev-parse --show-toplevel)"
       cd "$root"
       for dir in test/*; do
         if [ -d "$dir" ] && [ -f "$dir/flake.nix" ]; then

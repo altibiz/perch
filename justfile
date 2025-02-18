@@ -30,7 +30,7 @@ upgrade:
 test *args:
     nix run \
       {{ args }} \
-      $".#checks.(nix eval --raw --impure --expr "builtins.currentSystem").test"
+      $".#checks.(nix eval --raw --impure --expr "builtins.currentSystem").\"dev/test\""
 
 repl test *args:
     cd '{{ root }}/test/{{ test }}'; \
