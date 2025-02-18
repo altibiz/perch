@@ -1,8 +1,16 @@
-{ self, lib, perchModules, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.integrate.nixosConfiguration =
     self.lib.option.mkIntegrationOption
+      config
       "nixosConfiguration";
 
   options.propagate.nixosConfigurations = lib.mkOption {
@@ -15,6 +23,10 @@
 
   config.propagate.nixosConfigurations =
     self.lib.module.systems
+      specialArgs
+      perchModules
+      options
+      config
       "nixosConfiguration"
       perchModules.current;
 }

@@ -1,8 +1,16 @@
-{ self, lib, perchModules, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.integrate.check =
     self.lib.option.mkIntegrationOption
+      config
       "check";
 
   options.propagate.checks = lib.mkOption {
@@ -18,6 +26,10 @@
 
   config.propagate.checks =
     self.lib.module.artifacts
+      specialArgs
+      perchModules
+      options
+      config
       "check"
       perchModules.current;
 }

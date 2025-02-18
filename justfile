@@ -49,7 +49,7 @@ test test *args:
       --all-systems \
       --no-write-lock-file \
       {{ args }} \
-      "path:$(realpath "{{ root }}/test/{{ test }}")"
+      $"path:(realpath "{{ root }}/test/{{ test }}")"
 
 repl test *args:
     cd '{{ root }}/test/{{ test }}'; \

@@ -1,4 +1,11 @@
-{ self, lib, perchModules, config, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 let
   appSubmodule = {
@@ -21,6 +28,7 @@ in
 {
   options.integrate.app =
     self.lib.option.mkIntegrationOption
+      config
       "app";
 
   options.propagate.apps = lib.mkOption {
@@ -57,6 +65,10 @@ in
 
       artifacts =
         self.lib.module.artifacts
+          specialArgs
+          perchModules
+          options
+          config
           "app"
           perchModules.current;
 

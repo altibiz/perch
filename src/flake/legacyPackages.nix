@@ -1,8 +1,16 @@
-{ self, lib, perchModules, config, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.integrate.legacyPackage =
     self.lib.option.mkIntegrationOption
+      config
       "legacyPackage";
 
   options.propagate.legacyPackages = lib.mkOption {
@@ -28,6 +36,10 @@
     let
       artifacts =
         self.lib.module.artifacts
+          specialArgs
+          perchModules
+          options
+          config
           "legacyPackage"
           perchModules.current;
 

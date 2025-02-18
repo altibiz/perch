@@ -1,8 +1,4 @@
-{ self
-, lib
-, specialArgs
-, ...
-}:
+{ self, lib, specialArgs, ... }:
 
 let
   pruneObjectImports =

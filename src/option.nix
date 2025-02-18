@@ -1,4 +1,4 @@
-{ self, lib, config, ... }:
+{ self, lib, ... }:
 
 {
   config.flake.lib.option.mkBranchOption =
@@ -12,6 +12,7 @@
     };
 
   config.flake.lib.option.mkIntegrationOption =
+    config:
     name: {
       systems = lib.mkOption {
         type = lib.types.listOf lib.types.str;

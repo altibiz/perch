@@ -1,29 +1,16 @@
-{ self
-, lib
-, specialArgs
-, perchModules
-, config
-, options
-, ...
-}:
+{ self, lib, ... }:
 
 {
   flake.lib.module.systems =
+    specialArgs:
+    perchModules:
+    options:
+    config:
     integration:
     modules:
     let
       systemModuleEval = system: module:
         let
-          perchModulesModule = {
-            _module.args.perchModules = perchModules;
-          };
-
-          superModule = {
-            _module.args.super = {
-              inherit config options;
-            };
-          };
-
           pkgsModule = { config, ... }: {
             nixpkgs.hostPlatform.system = system;
             nixpkgs.config = config.integrate.nixpkgs.config;
@@ -60,10 +47,15 @@
           };
 
           eval = lib.nixosSystem {
-            inherit specialArgs;
+            # NOTE: in here instead of _module.args because
+            # that causes infinite recursion
+            specialArgs = specialArgs // {
+              inherit perchModules;
+              super = {
+                inherit config options;
+              };
+            };
             modules = [
-              perchModulesModule
-              superModule
               pkgsModule
               integratedModule
               isolatedModule

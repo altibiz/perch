@@ -1,8 +1,16 @@
-{ self, lib, perchModules, config, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.integrate.package =
     self.lib.option.mkIntegrationOption
+      config
       "package";
 
   options.propagate.packages = lib.mkOption {
@@ -30,6 +38,10 @@
 
       artifacts =
         self.lib.module.artifacts
+          specialArgs
+          perchModules
+          options
+          config
           "package"
           perchModules.current;
     in

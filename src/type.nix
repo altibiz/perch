@@ -1,5 +1,6 @@
 { lib, ... }:
 
+# FIXME: nixpkgs types cause infinite recursion and type problems
 # NOTE: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/nixpkgs.nix
 
 let

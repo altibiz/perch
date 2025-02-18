@@ -1,8 +1,17 @@
-{ self, lib, nixpkgs, perchModules, ... }:
+{ self
+, lib
+, nixpkgs
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.integrate.formatter =
     self.lib.option.mkIntegrationOption
+      config
       "formatter";
 
   options.propagate.formatter = lib.mkOption {
@@ -19,6 +28,10 @@
     let
       artifacts =
         self.lib.module.artifacts
+          specialArgs
+          perchModules
+          options
+          config
           "formatter"
           perchModules.current;
     in

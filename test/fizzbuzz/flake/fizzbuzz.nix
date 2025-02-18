@@ -1,11 +1,11 @@
 { pkgs, super, ... }:
 
 {
-  integrate.systems = [ "x86_64-linux" "x86_64-linux" ];
+  integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
 
   seal.defaults.package = "fizzbuzz";
   integrate.package.package = pkgs.writeShellApplication {
-    name = "fizzbuzz";
+    name = "hello";
     text = ''
       for i in {1..100}; do
         if (( i % 15 == 0 )); then
@@ -40,7 +40,7 @@
 
     nixosConfiguration = {
       imports = [
-        super.config.flake.nixosModules.${pkgs.system}.default
+        super.config.flake.nixosModules.default
       ];
 
       fileSystems."/" = {

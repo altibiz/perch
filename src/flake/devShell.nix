@@ -1,8 +1,16 @@
-{ self, lib, perchModules, config, ... }:
+{ self
+, lib
+, specialArgs
+, perchModules
+, options
+, config
+, ...
+}:
 
 {
   options.integrate.devShell =
     self.lib.option.mkIntegrationOption
+      config
       "devShell";
 
   options.propagate.devShells = lib.mkOption {
@@ -30,6 +38,10 @@
 
       artifacts =
         self.lib.module.artifacts
+          specialArgs
+          perchModules
+          options
+          config
           "devShell"
           perchModules.current;
     in
