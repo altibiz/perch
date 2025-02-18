@@ -9,7 +9,9 @@
     let
       exportedPerchModules =
         builtins.mapAttrs
-          (_: self.lib.module.export)
+          (_:
+            self.lib.module.export
+              specialArgs)
           selfModules;
 
       exportedPerchModuleList =
