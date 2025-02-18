@@ -23,14 +23,22 @@ lint:
       --config .markdown-link-check.json \
       --quiet \
       ...(fd '.*.md' | lines)
+    @just test
 
 upgrade:
     nix flake update
 
 test *args:
-    nix run \
-      {{ args }} \
-      $".#checks.(nix eval --raw --impure --expr "builtins.currentSystem").\"dev/test\""
+    #!/usr/bin/env bash
+    root="$(git rev-parse --show-toplevel)"
+    cd "$root"
+    for dir in test/*; do
+      if [ -d "$dir" ] && [ -f "$dir/flake.nix" ]; then
+        nix flake check \
+          --override-flake "perch" "$root" \
+          --all-systems "path:$(realpath "$dir")"
+      fi
+    done
 
 repl test *args:
     cd '{{ root }}/test/{{ test }}'; \

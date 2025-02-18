@@ -60,11 +60,7 @@
   };
 
   config.integrate.check = {
-    check = pkgs.writeShellApplication {
-      name = "check";
-      runtimeInputs = [ ];
-      text = "exit 0";
-    };
+    check = pkgs.runCommand "check" { } "touch $out";
   };
 
   config.integrate.formatter = {
