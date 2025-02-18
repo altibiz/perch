@@ -33,4 +33,12 @@
       Default list of systems in which to integrate.
     '';
   };
+
+  options.seal.defaults.packagesAsApps = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = lib.literalMD ''
+      Convert all packages to apps.
+    '';
+  };
 }
