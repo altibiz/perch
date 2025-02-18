@@ -1,4 +1,12 @@
-{ self, lib, nixpkgs, specialArgs, perchModules, ... }:
+{ self
+, lib
+, nixpkgs
+, specialArgs
+, perchModules
+, config
+, options
+, ...
+}:
 
 {
   flake.lib.module.systems =
@@ -9,6 +17,12 @@
         let
           perchModulesModule = {
             _module.args.perchModules = perchModules;
+          };
+
+          superModule = {
+            _module.args.super = {
+              inherit config options;
+            };
           };
 
           pkgsModule = { config, ... }: {
@@ -50,6 +64,7 @@
             inherit specialArgs;
             modules = [
               perchModulesModule
+              superModule
               pkgsModule
               integratedModule
               isolatedModule

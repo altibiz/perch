@@ -63,6 +63,7 @@
 
       fakeArgsModule = {
         _module.args.pkgs = null;
+        _module.args.super = null;
       };
     in
     lib.evalModules {
