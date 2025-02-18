@@ -11,7 +11,7 @@ let
     };
 
     options.program = lib.mkOption {
-      type = lib.types.storePath;
+      type = lib.types.package;
       description = lib.literalMD ''
         App program.
       '';
@@ -27,8 +27,8 @@ in
     type =
       lib.types.attrsOf
         (lib.types.attrsOf
-          lib.types.submodule
-          appSubmodule);
+          (lib.types.submodule
+            appSubmodule));
     default = { };
     description = lib.literalMD ''
       Propagated `apps` flake output.
