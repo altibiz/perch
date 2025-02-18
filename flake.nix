@@ -24,7 +24,6 @@
     in
     lib.flake.make {
       inherit inputs;
-      root = ./.;
-      prefix = "src";
+      selfModules = lib.import.dirToFlatPathAttrs ./src;
     };
 }

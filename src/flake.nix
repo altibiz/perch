@@ -15,7 +15,7 @@
         else lib.path.append root prefix;
 
       prefixedRootModules =
-        if prefixedRoot == null then [ ]
+        if prefixedRoot == null then { }
         else
           self.lib.import.dirToFlatPathAttrs
             prefixedRoot;
