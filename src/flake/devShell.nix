@@ -16,7 +16,7 @@
     '';
   };
 
-  options.seal.defaults.shell = lib.mkOption {
+  options.seal.defaults.devShell = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = null;
     description = lib.literalMD ''
