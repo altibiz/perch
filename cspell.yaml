@@ -6,8 +6,8 @@ ignorePaths:
   - justfile
   - flake.nix
   - cspell.yaml
-  - "docs/book.toml"
-  - "docs/book"
+  - docs/book.toml
+  - docs/book
 words:
   - altibiz
   - nixpkgs
