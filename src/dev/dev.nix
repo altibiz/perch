@@ -29,16 +29,17 @@
       nodePackages.cspell
 
       # misc
+      vscode-langservers-extracted
       nodePackages.prettier
       nodePackages.yaml-language-server
       taplo
+    ] ++ (lib.optionals pkgs.hostPlatform.is64bit [
+      marksman
+    ]) ++ [
 
       # tools
       fd
       coreutils
-    ] ++ (lib.optionals pkgs.hostPlatform.is64bit [
-      # marksman
-      marksman
-    ]);
+    ];
   };
 }
