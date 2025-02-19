@@ -5,6 +5,7 @@ let
     lib.types.oneOf ([
       (lib.types.str)
       (lib.types.listOf lib.types.str)
+      (lib.types.attrsOf lib.types.str)
       (lib.types.functionTo lib.types.raw)
     ] ++ other);
 in
