@@ -6,7 +6,7 @@
     # type = lib.types.listOf self.lib.type.overlay;
     type = lib.types.raw;
     default = [
-      # FIXME: default not found
+      # FIXME: default not found because evaluation context
       # config.flake.overlays.default 
     ];
     description = lib.literalMD ''
