@@ -1,5 +1,7 @@
 { lib, self, ... }:
 
+# TODO: merging propagated with flake
+
 let
   selfPropagateObjectImports =
     object:

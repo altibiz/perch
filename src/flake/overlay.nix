@@ -28,19 +28,19 @@
   config.propagate.overlays =
     let
       default = config.seal.defaults.overlay;
-    in
-    if default != null
-    then
-      {
-        default = config.flake.overlay.${default};
-      }
-    else
-      {
-        default =
+
+      defaultOverlay =
+        if default != null
+        then config.flake.overlay.${default}
+        else if config.flake.overlay ? default
+        then config.flake.overlay.default
+        else
           lib.composeManyExtensions
             (builtins.attrValues
               (builtins.removeAttrs
                 config.flake.overlays
                 [ "default" ]));
-      };
+    in
+    config.flake.overlay //
+    { default = defaultOverlay; };
 }
