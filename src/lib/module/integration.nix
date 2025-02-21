@@ -117,9 +117,10 @@ let
 in
 {
   config.flake.lib.module.integrate =
+    config:
     integration:
     module:
-    (integrateImported integration)
+    (integrateImported config integration)
       (self.lib.module.importIfPath
         module);
 }
