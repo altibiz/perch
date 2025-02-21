@@ -1,7 +1,7 @@
 { self, lib, ... }:
 
 {
-  config.flake.lib.option.mkBranchOption =
+  flake.lib.option.mkBranchOption =
     name:
     lib.mkOption {
       type = lib.types.raw;
@@ -11,7 +11,7 @@
       '';
     };
 
-  config.flake.lib.option.mkIntegrationOption =
+  flake.lib.option.mkIntegrationOption =
     config:
     name: {
       systems = lib.mkOption {

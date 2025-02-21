@@ -19,6 +19,7 @@
 
           integratedModule =
             self.lib.module.integrate
+              config
               integration
               module;
 

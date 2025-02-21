@@ -13,6 +13,7 @@
         let
           integrationModule =
             self.lib.module.integrate
+              config
               integration
               module;
 
