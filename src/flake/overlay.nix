@@ -1,6 +1,5 @@
-{
-  # self, 
-  lib
+{ self
+, lib
 , config
 , ...
 }:
@@ -8,9 +7,9 @@
 {
   options.propagate.overlays = lib.mkOption {
     # FIXME: causes infinite recursion
-    # type = lib.types.attrsOf self.lib.type.overlay;
+    type = lib.types.attrsOf self.lib.type.overlay;
     # type = lib.types.attrsOf lib.types.raw;
-    type = lib.types.raw;
+    # type = lib.types.raw;
     default = { };
     description = lib.literalMD ''
       Create a `overlays` flake output.

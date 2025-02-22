@@ -8,6 +8,7 @@ let
         lib.types.str
         lib.types.bool
         lib.types.int
+        lib.types.optionType
         (lib.types.functionTo lib.types.raw)
       ]
     else
@@ -15,6 +16,7 @@ let
         lib.types.str
         lib.types.bool
         lib.types.int
+        lib.types.optionType
         (lib.types.functionTo lib.types.raw)
         (lib.types.listOf (nest (times - 1)))
         (lib.types.attrsOf (nest (times - 1)))
