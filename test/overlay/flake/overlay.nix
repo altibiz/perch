@@ -1,37 +1,29 @@
-{ pkgs, super, ... }:
+{ super, pkgs, ... }:
 
 {
   integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
 
-  seal.defaults.package = "fizzbuzz";
-  integrate.package.package = pkgs.writeShellApplication {
-    name = "hello";
-    text = ''
-      for i in {1..100}; do
-        if (( i % 15 == 0 )); then
-          echo "FizzBuzz"
-        elif (( i % 3 == 0 )); then
-          echo "Fizz"
-        elif (( i % 5 == 0 )); then
-          echo "Buzz"
-        else
-          echo "$i"
-        fi
-      done
-    '';
-  };
+  defaults.overlays.default = (final: prev: {
+    myHello = final.writeShellApplication {
+      name = "hello";
+      runtimeInputs = [ prev.hello ];
+      text = ''
+        hello
+      '';
+    };
+  });
 
   seal.defaults.nixosModule = "fizzbuzz";
   branch.nixosModule.nixosModule = {
     environment.systemPackages = [
-      super.config.flake.packages.${pkgs.system}.default
+      pkgs.myHello
     ];
   };
 
   seal.defaults.homeManagerModule = "fizzbuzz";
   branch.homeManagerModule.homeManagerModule = {
     home.packages = [
-      super.config.flake.packages.${pkgs.system}.default
+      pkgs.myHello
     ];
   };
 
