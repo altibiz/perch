@@ -13,6 +13,9 @@
 
   integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
 
+  seal.defaults.package = "myHello";
+  integrate.package.package = pkgs.myHello;
+
   seal.defaults.nixosModule = "myHello";
   branch.nixosModule.nixosModule = {
     environment.systemPackages = [
