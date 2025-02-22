@@ -1,9 +1,7 @@
 { super, pkgs, ... }:
 
 {
-  integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
-
-  defaults.overlays.default = (final: prev: {
+  flake.overlays.default = (final: prev: {
     myHello = final.writeShellApplication {
       name = "hello";
       runtimeInputs = [ prev.hello ];
@@ -13,14 +11,16 @@
     };
   });
 
-  seal.defaults.nixosModule = "fizzbuzz";
+  integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
+
+  seal.defaults.nixosModule = "myHello";
   branch.nixosModule.nixosModule = {
     environment.systemPackages = [
       pkgs.myHello
     ];
   };
 
-  seal.defaults.homeManagerModule = "fizzbuzz";
+  seal.defaults.homeManagerModule = "myHello";
   branch.homeManagerModule.homeManagerModule = {
     home.packages = [
       pkgs.myHello
