@@ -22,7 +22,7 @@
   };
 
   config.propagate.overlays =
-    if !(config.flake ? overlay)
+    if !(config.flake ? overlays)
     then { }
     else
       let
@@ -30,9 +30,9 @@
 
         defaultOverlay =
           if default != null
-          then config.flake.overlay.${default}
-          else if config.flake.overlay ? default
-          then config.flake.overlay.default
+          then config.flake.overlays.${default}
+          else if config.flake.overlays ? default
+          then config.flake.overlays.default
           else
             lib.composeManyExtensions
               (builtins.attrValues
@@ -40,6 +40,6 @@
                   config.flake.overlays
                   [ "default" ]));
       in
-      config.flake.overlay //
+      config.flake.overlays //
       { default = defaultOverlay; };
 }
