@@ -1,3 +1,3 @@
 # Defaults
 
-- `lib.defaults.systems`: Default systems.
+- `lib.defaults.systems` (`[str]`): Default systems.

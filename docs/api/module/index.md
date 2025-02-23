@@ -3,9 +3,11 @@
 The module directory contains files with functions that dictate the evaluation
 of modules.
 
-The `module.eval` function is a wrapper over the nixpkgs `lib.evalModules`
-function. In addition to calling `lib.evalModules` with the modules from your
-flake, modules from input flakes and special args it:
+The `module.eval`
+(`{ specialArgs, selfModules, inputModules } -> module evaluation`) function is
+a wrapper over the nixpkgs `lib.evalModules` function. In addition to calling
+`lib.evalModules` with the modules from your flake, modules from input flakes
+and special args it:
 
 1. [exports](./export.md) modules from your flake and sets them to the
    `perchModules` flake output
