@@ -17,7 +17,6 @@
   - [Defaults](./api/defaults.md)
   - [Import](./api/import.md)
   - [Option](./api/option.md)
-  - [Propagate](./api/propagate.md)
   - [Type](./api/type.md)
   - [Module](./api/module/index.md)
     - [Artifact](./api/module/artifact.md)

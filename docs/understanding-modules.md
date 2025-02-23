@@ -28,10 +28,10 @@ This example contains a lot of different parts so lets analyze it line-by-line:
 To the experienced nix users this might be obvious so lets break down how Perch
 does this a bit further.
 
-## Flake, Seal, branch and integrate
+## Flake, seal, propagate, branch and integrate
 
-The `flake`, `seal`, `branch`, and `integrate` option prefixes are special
-prefixes that tell Perch how to treat the options and config inside.
+The `flake`, `seal`, `propagate`, `branch` and `integrate` option prefixes are
+special prefixes that tell Perch how to treat the options and config inside.
 
 - `flake`: These are the flake outputs. This prefix gets evaluated directly by
   Perch to produce a flake. However, if another flake uses your Perch module,
@@ -43,6 +43,9 @@ prefixes that tell Perch how to treat the options and config inside.
   the default package in our flake but consuming flakes might set it to
   something else. In this regard, this prefix is similar to the `flake` prefix
   but it does not produce any flake outputs.
+- `propatate`: This prefix tells Perch to treat options and config under it as
+  options and config to be propagated to consuming flakes. This allows other
+  flakes (not just Perch) to create flake outputs for consuming flakes.
 - `branch`: This prefix tells Perch that in certain contexts, these options and
   config will be the result of pruning our modules. Module pruning allows us to
   then takes these options and config and create modules with only these options
@@ -87,5 +90,8 @@ uses the `integrate` prefix outputs, it is advised that you also read about
 
 For reusable Perch module authors (those of you who want to provide flake
 outputs for consuming flakes), however, it is advised you read about the
-[API](./api/index.md) and especially the
-[`propagate` prefix](./api/propagate.md)
+[API](./api/index.md). For examples, please refer to the [Perch
+`src/flake` directory].
+
+[Perch `src/flake` directory]:
+  https://github.com/altibiz/perch/blob/main/src/flake
