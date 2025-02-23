@@ -25,7 +25,7 @@ which imports a directory hierarchy like this:
     |   default.nix
 ```
 
-into a nix object like so:
+into a nix attrset like so:
 
 ```nix
 {
@@ -48,7 +48,7 @@ into a nix object like so:
 ```
 
 . The function `perch.lib.import.importDirMeta` does the same thing but instead
-of just importing the modules it returns an import object as such for each
+of just importing the modules it returns an import attrset as such for each
 module:
 
 ```nix
@@ -62,7 +62,7 @@ module:
 ```
 
 . The function `perch.lib.import.importDirWrap` takes an additional first
-argument that gets passed the same import object as the ones created by
+argument that gets passed the same import attrset as the ones created by
 `perch.lib.import.importDirMeta`.
 
 An example of usage would be collecting all modules from a directory to pass to

@@ -1,39 +1,39 @@
 { self, lib, ... }:
 
 let
-  integrateObjectImports =
+  integrateAttrsetImports =
     config:
     integration:
-    object:
-    self.lib.module.mapObjectImports
+    attrset:
+    self.lib.module.mapAttrsetImports
       (integrateImported config integration)
-      object;
+      attrset;
 
-  shallowlyIntegrateObject =
+  shallowlyIntegrateAttrset =
     config:
     integration:
-    object:
+    attrset:
     let
-      objectConfig =
-        if object ? config
-        then object.config
-        else if object ? options
+      attrsetConfig =
+        if attrset ? config
+        then attrset.config
+        else if attrset ? options
         then { }
-        else object;
+        else attrset;
 
-      objectIntegrate =
-        if objectConfig ? integrate
-        then objectConfig.integrate
+      attrsetIntegrate =
+        if attrsetConfig ? integrate
+        then attrsetConfig.integrate
         else { };
 
       integrateSystems =
-        if objectIntegrate ? systems
-        then objectIntegrate.systems
+        if attrsetIntegrate ? systems
+        then attrsetIntegrate.systems
         else config.seal.defaults.systems;
 
       integrateNixpkgs =
-        if objectIntegrate ? nixpkgs
-        then objectIntegrate.nixpkgs
+        if attrsetIntegrate ? nixpkgs
+        then attrsetIntegrate.nixpkgs
         else config.seal.defaults.nixpkgs;
 
       integrateNixpkgsOverlays =
@@ -46,23 +46,23 @@ let
         then integrateNixpkgs.config
         else config.seal.defaults.nixpkgs.config;
 
-      integrationObject =
-        if objectIntegrate ? ${integration}
-        then objectIntegrate.${integration}
+      integrationAttrset =
+        if attrsetIntegrate ? ${integration}
+        then attrsetIntegrate.${integration}
         else null;
 
       integrationSystems =
-        if integrationObject == null
+        if integrationAttrset == null
         then [ ]
-        else if integrationObject ? systems
-        then integrationObject.systems
+        else if integrationAttrset ? systems
+        then integrationAttrset.systems
         else integrateSystems;
 
       integrationNixpkgs =
-        if integrationObject == null
+        if integrationAttrset == null
         then { }
-        else if integrationObject ? nixpkgs
-        then integrationObject.nixpkgs
+        else if integrationAttrset ? nixpkgs
+        then integrationAttrset.nixpkgs
         else integrateNixpkgs;
 
       integrationNixpkgsOverlays =
@@ -85,7 +85,7 @@ let
           (builtins.map
             (system: {
               name = system;
-              value = integrationObject;
+              value = integrationAttrset;
             })
             integrationSystems));
       };
@@ -102,18 +102,18 @@ let
         function = imported;
       in
       self.lib.module.mapFunctionResult
-        (object:
-        (integrateObjectImports config integration)
-          ((shallowlyIntegrateObject config integration)
-            object))
+        (attrset:
+        (integrateAttrsetImports config integration)
+          ((shallowlyIntegrateAttrset config integration)
+            attrset))
         function
     else
       let
-        object = imported;
+        attrset = imported;
       in
-      (integrateObjectImports config integration)
-        ((shallowlyIntegrateObject config integration)
-          object);
+      (integrateAttrsetImports config integration)
+        ((shallowlyIntegrateAttrset config integration)
+          attrset);
 in
 {
   config.flake.lib.module.integrate =

@@ -3,25 +3,25 @@
 # TODO: merging propagated with flake
 
 let
-  selfPropagateObjectImports =
-    object:
-    self.lib.module.mapObjectImports
+  selfPropagateAttrsetImports =
+    attrset:
+    self.lib.module.mapAttrsetImports
       selfPropagateImported
-      object;
+      attrset;
 
-  shallowlySelfPropagateObject =
-    object:
+  shallowlySelfPropagateAttrset =
+    attrset:
     let
       hasConfig =
-        object ? config
-        || object ? options;
+        attrset ? config
+        || attrset ? options;
 
       config =
-        if object ? config
-        then object.config
-        else if object ? options
+        if attrset ? config
+        then attrset.config
+        else if attrset ? options
         then { }
-        else object;
+        else attrset;
 
       flakeConfig =
         if config ? flake
@@ -42,7 +42,7 @@ let
     in
     if hasConfig
     then
-      object //
+      attrset //
       { config = selfPropagatedConfig; }
     else
       selfPropagatedConfig;
@@ -55,14 +55,14 @@ let
         function = imported;
       in
       self.lib.module.mapFunctionResult
-        (object:
-        selfPropagateObjectImports
-          (shallowlySelfPropagateObject
-            object))
+        (attrset:
+        selfPropagateAttrsetImports
+          (shallowlySelfPropagateAttrset
+            attrset))
         function
     else
-      selfPropagateObjectImports
-        (shallowlySelfPropagateObject
+      selfPropagateAttrsetImports
+        (shallowlySelfPropagateAttrset
           imported);
 in
 {

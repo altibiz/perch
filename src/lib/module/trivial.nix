@@ -42,24 +42,24 @@
     then
       let function = imported;
       in self.lib.module.mapFunctionResult
-        (object: object // pathPart)
+        (attrset: attrset // pathPart)
         function
     else
-      let object = imported;
-      in object // pathPart;
+      let attrset = imported;
+      in attrset // pathPart;
 
-  flake.lib.module.mapObjectImports =
+  flake.lib.module.mapAttrsetImports =
     mapping:
-    object:
-    if object ? imports
+    attrset:
+    if attrset ? imports
     then
-      object // {
+      attrset // {
         imports =
           builtins.map
             (module: mapping
               (self.lib.module.importIfPath module))
-            object.imports;
+            attrset.imports;
       }
     else
-      object;
+      attrset;
 }

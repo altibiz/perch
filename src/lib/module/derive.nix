@@ -1,25 +1,25 @@
 { lib, self, ... }:
 
 let
-  deriveObjectImports =
-    object:
-    self.lib.module.mapObjectImports
+  deriveAttrsetImports =
+    attrset:
+    self.lib.module.mapAttrsetImports
       deriveImported
-      object;
+      attrset;
 
-  shallowlyDeriveObject =
-    object:
+  shallowlyDeriveAttrset =
+    attrset:
     let
       hasConfig =
-        object ? config
-        || object ? options;
+        attrset ? config
+        || attrset ? options;
 
       config =
-        if object ? config
-        then object.config
-        else if object ? options
+        if attrset ? config
+        then attrset.config
+        else if attrset ? options
         then { }
-        else object;
+        else attrset;
 
       derivedConfig =
         (builtins.removeAttrs
@@ -33,7 +33,7 @@ let
     in
     if hasConfig
     then
-      object //
+      attrset //
       { config = derivedConfig; }
     else
       derivedConfig;
@@ -46,14 +46,14 @@ let
         function = imported;
       in
       self.lib.module.mapFunctionResult
-        (object:
-        deriveObjectImports
-          (shallowlyDeriveObject
-            object))
+        (attrset:
+        deriveAttrsetImports
+          (shallowlyDeriveAttrset
+            attrset))
         function
     else
-      deriveObjectImports
-        (shallowlyDeriveObject
+      deriveAttrsetImports
+        (shallowlyDeriveAttrset
           imported);
 in
 {

@@ -1,21 +1,21 @@
 { self, lib, ... }:
 
 let
-  pruneObjectImports =
+  pruneAttrsetImports =
     specialArgs:
     path:
-    object:
-    self.lib.module.mapObjectImports
+    attrset:
+    self.lib.module.mapAttrsetImports
       (pruneImported specialArgs path)
-      object;
+      attrset;
 
-  shallowlyPruneObject =
+  shallowlyPruneAttrset =
     path:
-    object:
+    attrset:
     let
       hasConfig =
-        object ? config
-        || object ? options;
+        attrset ? config
+        || attrset ? options;
 
       actualPath =
         if hasConfig
@@ -26,7 +26,7 @@ let
         lib.attrByPath
           actualPath
           { }
-          object;
+          attrset;
     in
     prunedConfig;
 
@@ -40,21 +40,21 @@ let
         function = imported;
       in
       self.lib.module.mapFunctionResult
-        (object:
-        (pruneObjectImports specialArgs path)
-          ((shallowlyPruneObject path)
-            object))
+        (attrset:
+        (pruneAttrsetImports specialArgs path)
+          ((shallowlyPruneAttrset path)
+            attrset))
         (self.lib.module.mapFunctionArgs
           (args: args // specialArgs)
           function)
     else
       let
-        perchModuleObject =
+        perchModuleAttrset =
           imported;
       in
-      (pruneObjectImports specialArgs path)
-        ((shallowlyPruneObject path)
-          perchModuleObject);
+      (pruneAttrsetImports specialArgs path)
+        ((shallowlyPruneAttrset path)
+          perchModuleAttrset);
 in
 {
   flake.lib.module.prune =

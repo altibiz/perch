@@ -1,26 +1,26 @@
 { lib, self, ... }:
 
 let
-  exportPerchModuleObjectImports =
+  exportPerchModuleAttrsetImports =
     specialArgs:
-    object:
-    self.lib.module.mapObjectImports
+    attrset:
+    self.lib.module.mapAttrsetImports
       (exportImported specialArgs)
-      object;
+      attrset;
 
-  shallowlyExportObject =
-    object:
+  shallowlyExportAttrset =
+    attrset:
     let
       hasConfig =
-        object ? config
-        || object ? options;
+        attrset ? config
+        || attrset ? options;
 
       config =
-        if object ? config
-        then object.config
-        else if object ? options
+        if attrset ? config
+        then attrset.config
+        else if attrset ? options
         then { }
-        else object;
+        else attrset;
 
       exportedConfig =
         (builtins.removeAttrs
@@ -29,7 +29,7 @@ let
     in
     if hasConfig
     then
-      object //
+      attrset //
       { config = exportedConfig; }
     else
       exportedConfig;
@@ -43,19 +43,19 @@ let
         function = imported;
       in
       self.lib.module.mapFunctionResult
-        (objects:
-        (exportPerchModuleObjectImports specialArgs)
-          (shallowlyExportObject objects))
+        (attrsets:
+        (exportPerchModuleAttrsetImports specialArgs)
+          (shallowlyExportAttrset attrsets))
         (self.lib.module.mapFunctionArgs
           (args: args // specialArgs)
           function)
     else
       let
-        object =
+        attrset =
           imported;
       in
-      (exportPerchModuleObjectImports specialArgs)
-        (shallowlyExportObject object);
+      (exportPerchModuleAttrsetImports specialArgs)
+        (shallowlyExportAttrset attrset);
 in
 {
   flake.lib.module.export =
