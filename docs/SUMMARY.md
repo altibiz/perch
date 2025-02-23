@@ -8,7 +8,7 @@
   - [Defaults](./usage/defaults.md)
   - [Dev shells](./usage/dev-shells.md)
   - [Formatters](./usage/formatters.md)
-  - [Legacy packages](./usage/legacy-packagess.md)
+  - [Legacy packages](./usage/legacy-packages.md)
   - [Nixos configurations](./usage/nixos-configurations.md)
   - [Nixos modules](./usage/nixos-modules.md)
   - [Overlays](./usage/overlays.md)
