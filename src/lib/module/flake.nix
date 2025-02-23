@@ -6,8 +6,8 @@
     , root ? null
     , prefix ? null
     , selfModules ? { }
-    , includeInputModulesFromInputs ? true
     , inputModules ? [ ]
+    , includeInputModulesFromInputs ? true
     }:
     let
       prefixedRoot =

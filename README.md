@@ -17,7 +17,7 @@ Add the following to `flake.nix`:
   };
 
   outputs = { perch, ... } @inputs:
-    perch.lib.flake.mkFlake {
+    perch.lib.flake.make {
       inherit inputs;
       root = ./.;
       prefix = "flake";

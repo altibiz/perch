@@ -79,8 +79,8 @@ from the flake options and config such as the Fizz buzz default nixos module
 ## What's next?
 
 From this point on, you should be fairly accustomed to Perch modules and most
-users shouldn't need to dig much deeper. Of course, you can read more about the
-various flake outputs Perch allows you to produce in the
+users shouldn't need to dig much deeper. You should also read more about general
+usage and the various flake outputs Perch allows you to produce in the
 [Usage](./usage/index.md) section. If you want to create any kind of flake that
 uses the `integrate` prefix outputs, it is advised that you also read about
 [defaults](./usage/defaults.md).
