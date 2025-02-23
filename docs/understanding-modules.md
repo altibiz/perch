@@ -36,8 +36,9 @@ special prefixes that tell Perch how to treat the options and config inside.
 - `flake`: These are the flake outputs. This prefix gets evaluated directly by
   Perch to produce a flake. However, if another flake uses your Perch module,
   the options and config under this prefix will be removed. This is kind of like
-  `lib.mkForce` in reverse but with more isolation. By doing this we are telling
-  Perch that these options and config are internal to our flake.
+  the nixpkgs `lib.mkForce` function in reverse but with more isolation. By
+  doing this we are telling Perch that these options and config are internal to
+  our flake.
 - `seal`: This prefix tells Perch not to propagate these options to flakes that
   would use our module. This is useful because we might want `fizzbuzz` to be
   the default package in our flake but consuming flakes might set it to
