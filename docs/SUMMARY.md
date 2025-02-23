@@ -22,7 +22,6 @@
     - [Artifact](./api/module/artifact.md)
     - [Branch](./api/module/branch.md)
     - [Derive](./api/module/derive.md)
-    - [Eval](./api/module/eval.md)
     - [Export](./api/module/export.md)
     - [Flake](./api/module/flake.md)
     - [Integration](./api/module/integration.md)
