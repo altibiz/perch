@@ -90,7 +90,7 @@ in
             builtins.mapAttrs
               (_: artifact: {
                 type = "app";
-                program = artifact;
+                program = lib.getExe artifact;
               })
               system;
         in

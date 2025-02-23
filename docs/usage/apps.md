@@ -6,5 +6,5 @@ for you. You can configure the default app via the `seal.defaults.app` option
 for apps configured via `integrate.apps`.
 
 By default, Perch converts all `flake.packages` outputs to `flake.apps` using
-the `lib.getExe` function. You can disable this behaviour by setting the
+the nixpkgs `lib.getExe` function. You can disable this behaviour by setting the
 `seal.defaults.packagesAsApps` to false.
