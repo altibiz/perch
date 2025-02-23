@@ -63,7 +63,7 @@ subdirectory of your repository. It is important to understand the flattening
 aspect of this function to understand how the outputs of your flake will be
 organized which is covered in the [naming section](#naming).
 
-## Simple flake
+## Simple
 
 If your flake is simple and you would like to put all of your flake in the
 single `flake.nix` file, you can do so like this:

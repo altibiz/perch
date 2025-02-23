@@ -27,14 +27,14 @@ Add the following to `flake.nix`:
 
 ## Documentation
 
-Documentation can be found on [GitHub Pages](https://altibiz.github.io/perch/).
+Documentation can be found on [GitHub Pages].
 
 ## Contributing
 
-Please review
-[CONTRIBUTING.md](https://github.com/altibiz/perch/blob/main/CONTRIBUTING.md)
+Please review [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 
-This project is licensed under the
-[MIT License](https://github.com/altibiz/perch/blob/main/LICENSE.md).
+This project is licensed under the [MIT License](./LICENSE.md).
+
+[GitHub Pages]: https://altibiz.github.io/perch/

@@ -5,17 +5,17 @@ let
     if times == 0
     then
       lib.types.oneOf [
-        lib.types.str
         lib.types.bool
-        lib.types.int
+        lib.types.number
+        lib.types.str
         lib.types.optionType
         (lib.types.functionTo lib.types.raw)
       ]
     else
       lib.types.oneOf [
-        lib.types.str
         lib.types.bool
-        lib.types.int
+        lib.types.number
+        lib.types.str
         lib.types.optionType
         (lib.types.functionTo lib.types.raw)
         (lib.types.listOf (nest (times - 1)))
