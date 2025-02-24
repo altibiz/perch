@@ -44,7 +44,7 @@ special prefixes that tell Perch how to treat the options and config inside.
   the default package in our flake but consuming flakes might set it to
   something else. In this regard, this prefix is similar to the `flake` prefix
   but it does not produce any flake outputs.
-- `propatate`: This prefix tells Perch to treat options and config under it as
+- `propagate`: This prefix tells Perch to treat options and config under it as
   options and config to be propagated to consuming flakes. This allows other
   flakes (not just Perch) to create flake outputs for consuming flakes.
 - `branch`: This prefix tells Perch that in certain contexts, these options and

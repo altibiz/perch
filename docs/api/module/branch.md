@@ -5,5 +5,5 @@
   [understanding modules](../../understanding-modules.md) chapter.
 
 - `module.isolate` (`system -> integration -> module -> module`): Basically like
-  module prunning but only used for evaluating module configuration for a
-  certain system in the `integrate` prefix.
+  module pruning but only used for evaluating module configuration for a certain
+  system in the `integrate` prefix.

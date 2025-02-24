@@ -4,7 +4,7 @@ You can set the default systems, nixpkgs config, and nixpkgs overlays for all
 `integrate` prefix outputs via the `seal.defaults.systems`,
 `seal.defaults.nixpkgs.config` and `seal.defaults.nixpkgs.overlays` options
 respectively. If your flake has a `flake.overlays.default` output, it will be
-used as the default singular value for the `seal.defaulst.nixpkgs.overlays`
+used as the default singular value for the `seal.defaults.nixpkgs.overlays`
 option.
 
 These options can be overridden by setting `integrate.systems`,

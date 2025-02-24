@@ -5,7 +5,7 @@
   function.
 
 - `module.mapFunctionArgs` (`(? -> ?) -> (? -> ?) -> (? -> ?)`): Maps the
-  function arguments while preservice the `__functionArgs` of the original
+  function arguments while preserving the `__functionArgs` of the original
   function.
 
 - `module.importIfPath` (`module -> imported module`): Imports a module and sets
