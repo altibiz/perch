@@ -23,7 +23,7 @@ function. This function has the following arguments:
   to evaluate to produce flake outputs. You can also use this argument to import
   all of your Perch modules in a controlled manner instead of relying on the
   `root` and `prefix` arguments. If so, you may want to read more about how
-  [Perch imports modules](../api/import.nix).
+  [Perch imports modules](../api/import.md).
 - `inputModules`: This is a flat `list` of additional Perch modules you wish to
   add to the evaluation of your Perch modules.
 - `includeInputModulesFromInputs`: Perch automatically sets the `perchModules`
@@ -138,7 +138,7 @@ between path segments and removing the file extensions to produce `attrset`
 keys. Additionally, when a `default.nix` file is present inside of a directory,
 Perch stops looking for files and directories inside of that directory.
 
-## The following...
+## The following
 
 The following chapters describe how to create flake outputs using Perch. Each
 flake output is covered in its own chapter.

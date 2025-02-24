@@ -1,15 +1,17 @@
-{ super, pkgs, ... }:
+{ lib, super, pkgs, ... }:
 
 {
-  flake.overlays.default = (final: prev: {
-    myHello = final.writeShellApplication {
-      name = "hello";
-      runtimeInputs = [ prev.hello ];
-      text = ''
-        hello
-      '';
-    };
-  });
+  flake.overlays = lib.mkForce {
+    default = (final: prev: {
+      myHello = final.writeShellApplication {
+        name = "hello";
+        runtimeInputs = [ prev.hello ];
+        text = ''
+          hello
+        '';
+      };
+    });
+  };
 
   integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
 
