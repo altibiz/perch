@@ -26,7 +26,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: build
-        run: nix develop .#docs -c just docs
+        run: nix develop .#dev/docs -c just docs
 
       - name: upload
         uses: actions/upload-pages-artifact@v3

@@ -1,53 +1,136 @@
-{ nixpkgs, ... }:
+{ lib, ... }:
 
 let
-  importDir = importDir: wrap: dir:
-    nixpkgs.lib.attrsets.mapAttrs'
-      (name: type: {
-        name =
-          if type == "regular"
-          then (builtins.replaceStrings [ ".nix" ] [ "" ] name)
-          else name;
-        value =
-          if type == "regular"
-          then
-            if nixpkgs.lib.hasSuffix ".nix" name
-            then
-              wrap
-                {
-                  __import = {
-                    path = "${dir}/${name}";
-                    type = "regular";
-                    value = import "${dir}/${name}";
-                  };
-                }
-            else
-              wrap {
-                __import = {
-                  path = "${dir}/${name}";
-                  type = "unknown";
-                  value = null;
-                };
-              }
-          else
-            if builtins.pathExists "${dir}/${name}/default.nix"
-            then
-              wrap
-                {
-                  __import = {
-                    path = "${dir}/${name}/default.nix";
-                    type = "default";
-                    value = import "${dir}/${name}/default.nix";
-                  };
-                }
-            else importDir importDir wrap "${dir}/${name}";
-      })
-      (builtins.readDir dir);
+  nameSeparator = "/";
 
-  importDirWrap = importDir importDir;
+  importDirToAttrsWithMap =
+    let
+      initial =
+        (importDirToAttrsWithMap: prefix: map: dir:
+          lib.attrsets.mapAttrs'
+            (name: type:
+              let
+                nameWithoutExtension =
+                  builtins.replaceStrings [ ".nix" ] [ "" ] name;
+                prefixedName =
+                  if prefix == ""
+                  then nameWithoutExtension
+                  else "${prefix}${nameSeparator}${nameWithoutExtension}";
+              in
+              {
+                name =
+                  if type == "regular"
+                  then nameWithoutExtension
+                  else name;
+                value =
+                  if type == "regular"
+                  then
+                    if lib.hasSuffix ".nix" name
+                    then
+                      map
+                        {
+                          __import = {
+                            path = "${dir}/${name}";
+                            name = prefixedName;
+                            type = "regular";
+                            value = import "${dir}/${name}";
+                          };
+                        }
+                    else
+                      map {
+                        __import = {
+                          path = "${dir}/${name}";
+                          name = prefixedName;
+                          type = "unknown";
+                          value = null;
+                        };
+                      }
+                  else
+                    if builtins.pathExists "${dir}/${name}/default.nix"
+                    then
+                      map
+                        {
+                          __import = {
+                            path = "${dir}/${name}/default.nix";
+                            name = prefixedName;
+                            type = "default";
+                            value = import "${dir}/${name}/default.nix";
+                          };
+                        }
+                    else
+                      importDirToAttrsWithMap
+                        importDirToAttrsWithMap
+                        prefixedName
+                        map "${dir}/${name}";
+              })
+            (builtins.readDir dir));
+    in
+    initial initial "";
+
+  importDirToListWithMap = map: dir:
+    builtins.map
+      map
+      (builtins.filter
+        (module: module.__import.type == "regular"
+          || module.__import.type == "default")
+        (lib.collect
+          (builtins.hasAttr "__import")
+          (importDirToAttrsWithMap (module: module) dir)));
+
+  importDirToFlatAttrsWithMap = map: dir:
+    builtins.listToAttrs
+      (builtins.map
+        (module: {
+          name = module.__import.name;
+          value = map module;
+        })
+        (importDirToListWithMap (module: module) dir));
 in
 {
-  importDirWrap = importDirWrap;
-  importDirMeta = importDirWrap (import: import);
-  importDir = importDirWrap (import: import.__import.value);
+  flake.lib.import = {
+    dirToAttrsWithMap =
+      importDirToAttrsWithMap;
+
+    dirToAttrsWithMetadata =
+      importDirToAttrsWithMap
+        (imported: imported);
+
+    dirToValueAttrs =
+      importDirToAttrsWithMap
+        (imported: imported.__import.value);
+
+    dirToPathAttrs =
+      importDirToAttrsWithMap
+        (imported: imported.__import.path);
+
+    dirToListWithMap =
+      importDirToListWithMap;
+
+    dirToListWithMetadata =
+      importDirToListWithMap
+        (imported: imported);
+
+    dirToValueList =
+      importDirToListWithMap
+        (imported: imported.__import.value);
+
+    dirToPathList =
+      importDirToListWithMap
+        (imported: imported.__import.path);
+
+    dirToFlatAttrsWithMap =
+      importDirToFlatAttrsWithMap;
+
+    dirToFlatAttrsWithMetadata =
+      importDirToFlatAttrsWithMap
+        (imported: imported);
+
+    dirToFlatValueAttrs =
+      importDirToFlatAttrsWithMap
+        (imported: imported.__import.value);
+
+    dirToFlatPathAttrs =
+      importDirToFlatAttrsWithMap
+        (imported: imported.__import.path);
+  };
 }

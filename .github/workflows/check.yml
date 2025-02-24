@@ -17,7 +17,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: format
-        run: nix fmt
+        run: nix develop .#dev/check -c just format
 
       - name: commit
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -26,4 +26,4 @@ jobs:
           branch: ${{ github.head_ref }}
 
       - name: lint
-        run: nix flake check
+        run: nix develop .#dev/check -c just lint

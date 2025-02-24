@@ -2,13 +2,13 @@
 
 ## Prerequisites
 
-- [git](https://git-scm.com/)
-- [just](https://github.com/casey/just)
-- [nushell](https://www.nushell.sh/)
-- [nix](https://nixos.org/)
+- [git]
+- [just]
+- [nushell]
+- [nix]
 
-Please review [the development shell](./scripts/flake/shells/dev.nix) for the
-complete list of tools.
+Please review [the development shell](./src/dev/dev.nix) for the complete list
+of tools.
 
 ## Development
 
@@ -32,3 +32,8 @@ For release pull requests please make sure to:
 - modify `CHANGELOG.md` by moving `Unreleased` changes into a new release
   heading
 - add an appropriate GitHub tag
+
+[git]: https://git-scm.com/
+[just]: https://github.com/casey/just
+[nushell]: https://www.nushell.sh/
+[nix]: https://nixos.org/
