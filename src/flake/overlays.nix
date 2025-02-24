@@ -21,6 +21,14 @@
     '';
   };
 
+  options.seal.overlays = lib.mkOption {
+    type = lib.types.attrsOf self.lib.type.overlay;
+    default = { };
+    description = lib.literalMD ''
+      Create a `overlays` flake output with default.
+    '';
+  };
+
   config.propagate.overlays =
     if !(config.flake ? overlays)
     then { }
@@ -30,16 +38,16 @@
 
         defaultOverlay =
           if default != null
-          then config.flake.overlays.${default}
-          else if config.flake.overlays ? default
-          then config.flake.overlays.default
+          then config.seal.overlays.${default}
+          else if config.seal.overlays ? default
+          then config.seal.overlays.default
           else
             lib.composeManyExtensions
               (builtins.attrValues
                 (builtins.removeAttrs
-                  config.flake.overlays
+                  config.seal.overlays
                   [ "default" ]));
       in
-      config.flake.overlays //
+      config.seal.overlays //
       { default = defaultOverlay; };
 }

@@ -18,7 +18,9 @@
               module;
 
           pkgsModule = { config, ... }: {
-            _module.args.pkgs =
+            _file = ./artifact.nix;
+
+            config._module.args.pkgs =
               import nixpkgs {
                 inherit system;
                 config = config.integrate.nixpkgs.config;
@@ -27,6 +29,8 @@
           };
 
           artifactModule = { lib, config, ... }: {
+            _file = ./artifact.nix;
+
             options.integrate = lib.mkOption {
               type = lib.types.raw;
             };

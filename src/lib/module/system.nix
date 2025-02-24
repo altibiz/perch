@@ -12,6 +12,8 @@
       systemModuleEval = system: module:
         let
           pkgsModule = { config, ... }: {
+            _file = ./system.nix;
+
             nixpkgs.hostPlatform.system = system;
             nixpkgs.config = config.integrate.nixpkgs.config;
             nixpkgs.overlays = config.integrate.nixpkgs.overlays;
@@ -30,6 +32,8 @@
               integratedModule;
 
           definedModule = { lib, config, ... }: {
+            _file = ./system.nix;
+
             options.integrate = lib.mkOption {
               type = lib.types.raw;
             };
