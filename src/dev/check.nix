@@ -3,16 +3,30 @@
 {
   integrate.devShell.devShell = pkgs.mkShell {
     packages = with pkgs; [
+      # version control
       git
+
+      # scripts
       just
-      nodePackages.cspell
+      nushell
+
+      # nix
       nixpkgs-fmt
-      nodePackages.prettier
+      nixVersions.stable
+
+      # markdown
       markdownlint-cli
       nodePackages.markdown-link-check
+
+      # spelling
+      nodePackages.cspell
+
+      # misc
+      nodePackages.prettier
+
+      # tools
       fd
       coreutils
-      nixVersions.stable
     ];
   };
 }
