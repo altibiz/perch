@@ -41,8 +41,8 @@ let
       in
       self.lib.module.mapFunctionResult
         (attrset:
-        (pruneAttrsetImports specialArgs path)
-          ((shallowlyPruneAttrset path)
+        (shallowlyPruneAttrset path)
+          ((pruneAttrsetImports specialArgs path)
             attrset))
         (self.lib.module.mapFunctionArgs
           (args: args // specialArgs)
@@ -52,8 +52,8 @@ let
         perchModuleAttrset =
           imported;
       in
-      (pruneAttrsetImports specialArgs path)
-        ((shallowlyPruneAttrset path)
+      (shallowlyPruneAttrset path)
+        ((pruneAttrsetImports specialArgs path)
           perchModuleAttrset);
 in
 {
@@ -61,7 +61,7 @@ in
     specialArgs:
     branch:
     module:
-    (pruneImported specialArgs [ "branch" branch ])
+    (pruneImported specialArgs [ "branch" branch branch ])
       (self.lib.module.importIfPath
         module);
 
@@ -69,7 +69,7 @@ in
     system:
     integration:
     module:
-    (pruneImported { } [ "integrate" system integration ])
+    (pruneImported { } [ "integrate" system ])
       (self.lib.module.importIfPath
         module);
 }

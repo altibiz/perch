@@ -46,23 +46,23 @@ let
         then integrateNixpkgs.config
         else config.seal.defaults.nixpkgs.config;
 
-      integrationAttrset =
+      integrateAttrset =
         if attrsetIntegrate ? ${integration}
         then attrsetIntegrate.${integration}
         else null;
 
       integrationSystems =
-        if integrationAttrset == null
+        if integrateAttrset == null
         then [ ]
-        else if integrationAttrset ? systems
-        then integrationAttrset.systems
+        else if integrateAttrset ? systems
+        then integrateAttrset.systems
         else integrateSystems;
 
       integrationNixpkgs =
-        if integrationAttrset == null
+        if integrateAttrset == null
         then { }
-        else if integrationAttrset ? nixpkgs
-        then integrationAttrset.nixpkgs
+        else if integrateAttrset ? nixpkgs
+        then integrateAttrset.nixpkgs
         else integrateNixpkgs;
 
       integrationNixpkgsOverlays =
@@ -74,6 +74,11 @@ let
         if integrationNixpkgs ? config
         then integrationNixpkgs.config
         else integrateNixpkgsConfig;
+
+      integrationAttrset =
+        if integrateAttrset ? ${integration}
+        then integrateAttrset.${integration}
+        else null;
 
       integrationConfig = {
         integrate = {
@@ -103,16 +108,16 @@ let
       in
       self.lib.module.mapFunctionResult
         (attrset:
-        (integrateAttrsetImports config integration)
-          ((shallowlyIntegrateAttrset config integration)
+        (shallowlyIntegrateAttrset config integration)
+          ((integrateAttrsetImports config integration)
             attrset))
         function
     else
       let
         attrset = imported;
       in
-      (integrateAttrsetImports config integration)
-        ((shallowlyIntegrateAttrset config integration)
+      (shallowlyIntegrateAttrset config integration)
+        ((integrateAttrsetImports config integration)
           attrset);
 in
 {
