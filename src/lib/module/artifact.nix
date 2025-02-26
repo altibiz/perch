@@ -53,7 +53,7 @@
 
             config.artifact =
               if config.defined
-              then config.integrate.${system}.${integration}
+              then config.integrate.${system}
               else null;
           };
 
