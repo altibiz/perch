@@ -40,7 +40,7 @@
               selflessInputList);
 
       eval = self.lib.module.eval {
-        specialArgs = inputs;
+        specialArgs = inputs // { inherit root; };
         selfModules = prefixedRootModules // selfModules;
         inputModules = inputModulesFromInputs ++ inputModules;
       };

@@ -16,7 +16,9 @@ function. This function has the following arguments:
   along with `prefix` to import modules from a specific subdirectory of your
   flake. These two arguments are not one argument because of string contexts in
   nix. If you want to understand more about string contexts in nix and why this
-  is important you can read more about it in the [nix string context documentation].
+  is important you can read more about it in the [nix string context
+  documentation]. This argument also gets passed as a member of `specialArgs` to
+  your modules.
 - `prefix`: This is the subdirectory from which Perch imports your modules as
   explained above with the `flake` argument.
 - `selfModules`: This is a flat `attrset` of additional Perch modules you wish
@@ -49,7 +51,7 @@ effectively produces the same flake outputs as the
 
   outputs = { perch, ... } @inputs:
     perch.lib.flake.make {
-      inherit inputs;
+      inputs = inputs // { root = ./.; };
       selfModules = perch.lib.import.dirToFlatPathAttrs (./. + "flake");
       inputModules = [ perch.perchModules.default ];
       includeInputModulesFromInputs = false;
