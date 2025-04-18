@@ -1,5 +1,9 @@
 { self, lib, ... }:
 
+let
+  systemRegex = ".*-(.*-.*)";
+  # hostRegex = "(.*)-.*-.*";
+in
 {
   flake.lib.module.systems =
     specialArgs:
@@ -9,89 +13,88 @@
     integration:
     modules:
     let
-      systemModuleEval = system: module:
-        let
-          pkgsModule = { config, ... }: {
-            _file = ./system.nix;
+      modulesSystems =
+        (builtins.listToAttrs
+          (builtins.map
+            ({ system, module }:
+              let
+                integratedModule =
+                  self.lib.module.integrate
+                    config
+                    integration
+                    modules.${module};
+              in
+              {
+                name = "${module}-${system}";
+                value = integratedModule;
+              })
+            (lib.cartesianProduct {
+              system = self.lib.defaults.systems;
+              module = builtins.attrNames modules;
+            })));
 
-            nixpkgs.hostPlatform.system = system;
-            nixpkgs.config = config.integrate.nixpkgs.config;
-            nixpkgs.overlays = config.integrate.nixpkgs.overlays;
-          };
-
-          integratedModule =
-            self.lib.module.integrate
-              config
-              integration
-              module;
-
-          isolatedModule =
-            self.lib.module.isolate
-              system
-              integration
-              integratedModule;
-
-          definedModule = { lib, config, ... }: {
-            _file = ./system.nix;
-
-            options.integrate = lib.mkOption {
-              type = lib.types.raw;
-            };
-
-            options.defined = lib.mkOption {
-              type = lib.types.raw;
-            };
-
-            config.defined =
-              builtins.elem
-                system
-                (lib.attrByPath
-                  [ "integrate" "systems" ]
-                  [ ]
-                  config);
-          };
-
-          eval = lib.nixosSystem {
-            # NOTE: in here instead of _module.args because
-            # that causes infinite recursion
-            specialArgs = specialArgs // {
-              inherit perchModules;
-              super = {
-                inherit config options;
-              };
-            };
-            modules = [
-              pkgsModule
-              integratedModule
-              isolatedModule
-              definedModule
-            ];
-          };
-        in
-        {
-          defined = eval.config.defined;
-          system = eval;
-        };
-    in
-    builtins.listToAttrs
-      (builtins.filter
-        (x: x != null)
-        (builtins.map
-          ({ system, module }:
+      distill = self.lib.module.distill
+        specialArgs
+        perchModules
+        options
+        config
+        (_: integratedModule: integratedModule)
+        (name: module:
           let
-            eval = systemModuleEval system module.module;
+            system = builtins.head
+              (builtins.match systemRegex name);
           in
-          if eval.defined then {
-            name = "${module.name}-${system}";
-            value = eval.system;
-          } else null)
-          (lib.cartesianProduct {
-            system = self.lib.defaults.systems;
-            module =
-              lib.mapAttrsToList
-                (name: module: {
-                  inherit name module;
-                })
-                modules;
-          })));
+          builtins.any
+            (integrateSystem: integrateSystem == system)
+            module.integrate.systems)
+        modulesSystems;
+    in
+    builtins.mapAttrs
+      (name: _:
+      let
+        system = builtins.head
+          (builtins.match systemRegex name);
+
+        integratedModule =
+          modulesSystems.${name};
+
+        isolatedModule =
+          self.lib.module.isolate
+            system
+            integration
+            integratedModule;
+
+        integrateModule = {
+          options.integrate = lib.mkOption {
+            type = lib.types.raw;
+          };
+        };
+
+        pkgsModule = { config, ... }: {
+          _file = ./system.nix;
+
+          nixpkgs.hostPlatform.system = system;
+          nixpkgs.config = config.integrate.nixpkgs.config;
+          nixpkgs.overlays = config.integrate.nixpkgs.overlays;
+        };
+
+        eval = lib.nixosSystem {
+          # NOTE: in here instead of _module.args because
+          # that causes infinite recursion
+          specialArgs = specialArgs // {
+            inherit perchModules;
+            super = {
+              inherit config options;
+            };
+          };
+          modules = [
+            pkgsModule
+            integrateModule
+            integratedModule
+            isolatedModule
+          ];
+        };
+      in
+      eval)
+      distill;
 }
