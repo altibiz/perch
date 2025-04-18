@@ -35,6 +35,7 @@
       nixosModules =
         self.lib.module.leaves
           specialArgs
+          perchModules
           options
           config
           "nixosModule"
