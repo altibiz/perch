@@ -35,6 +35,7 @@
       homeManagerModules =
         self.lib.module.leaves
           specialArgs
+          perchModules
           options
           config
           "homeManagerModule"

@@ -1,5 +1,11 @@
-{ self, lib, nixpkgs, ... }:
+{ nixpkgs, self, lib, ... }:
 
+# FIXME: nixpkgs from module args
+
+let
+  systemRegex = ".*-(.*-.*)";
+  hostRegex = "(.*)-.*-.*";
+in
 {
   flake.lib.module.artifacts =
     specialArgs:
@@ -9,112 +15,87 @@
     integration:
     modules:
     let
-      systemModuleEval = system: module:
-        let
-          integrationModule =
-            self.lib.module.integrate
-              config
-              integration
-              module;
-
-          pkgsModule = { config, ... }: {
-            _file = ./artifact.nix;
-
-            config._module.args.pkgs =
-              import nixpkgs {
-                inherit system;
-                config = config.integrate.nixpkgs.config;
-                overlays = config.integrate.nixpkgs.overlays;
-              };
-          };
-
-          artifactModule = { lib, config, ... }: {
-            _file = ./artifact.nix;
-
-            options.integrate = lib.mkOption {
-              type = lib.types.raw;
-            };
-
-            options.defined = lib.mkOption {
-              type = lib.types.raw;
-            };
-
-            options.artifact = lib.mkOption {
-              type = lib.types.raw;
-            };
-
-            config.defined =
-              builtins.elem
-                system
-                (lib.attrByPath
-                  [ "integrate" "systems" ]
-                  [ ]
-                  config);
-
-            config.artifact =
-              if config.defined
-              then config.integrate.${system}
-              else null;
-          };
-
-          eval = lib.evalModules {
-            # NOTE: in here instead of _module.args because
-            # that causes infinite recursion
-            specialArgs = specialArgs // {
+      distill = self.lib.module.distill
+        specialArgs
+        perchModules
+        options
+        config
+        (name: module: self.lib.module.patch
+          ({ config, ... } @args:
+            let
+              pkgs =
+                import nixpkgs {
+                  system = builtins.head
+                    (builtins.match systemRegex name);
+                  config = config.distill.${name}.integrate.nixpkgs.config;
+                  overlays = config.distill.${name}.integrate.nixpkgs.overlays;
+                };
+            in
+            args // {
+              inherit pkgs;
               inherit perchModules;
               super = {
                 inherit config options;
               };
-            };
-            modules = [
-              pkgsModule
-              integrationModule
-              artifactModule
-            ];
-          };
-        in
-        {
-          defined = eval.config.defined;
-          artifact = eval.config.artifact;
-        };
+            })
+          (result: result)
+          module)
+        (name: module:
+          let
+            system = builtins.head
+              (builtins.match systemRegex name);
+          in
+          builtins.any
+            (integrateSystem: integrateSystem == system)
+            (module.integrate.systems))
+        (builtins.listToAttrs
+          (builtins.map
+            ({ system, module }:
+              let
+                integratedModule =
+                  self.lib.module.integrate
+                    config
+                    integration
+                    modules.${module};
+              in
+              {
+                name = "${module}-${system}";
+                value = integratedModule;
+              })
+            (lib.cartesianProduct {
+              system = self.lib.defaults.systems;
+              module = builtins.attrNames modules;
+            })));
 
-      systemArtifacts = system:
-        builtins.listToAttrs
-          (builtins.filter
-            (x: x != null)
-            (lib.mapAttrsToList
-              (name: module:
-                let
-                  eval =
-                    systemModuleEval
-                      system
-                      module;
-                in
-                if eval.defined
-                then
-                  {
-                    inherit name;
-                    value = eval.artifact;
-                  }
-                else null)
-              modules));
+      systems = lib.unique
+        (builtins.map
+          (name: builtins.head
+            (builtins.match systemRegex name))
+          (builtins.attrNames distill));
+
+      forSystem = system: lib.unique
+        (builtins.filter
+          (name: system == (builtins.head
+            (builtins.match systemRegex name)))
+          (builtins.attrNames distill));
     in
     builtins.listToAttrs
-      (builtins.filter
-        (x: x != null)
-        (builtins.map
-          (system:
-          let
-            artifacts = systemArtifacts system;
-          in
-          if (builtins.length
-            (builtins.attrNames artifacts)
-          == 0)
-          then null
-          else
-            {
-              name = system;
-              value = artifacts;
-            })
-          self.lib.defaults.systems));
+      (builtins.map
+        (system:
+        {
+          name = system;
+          value = builtins.listToAttrs
+            (builtins.map
+              (module:
+                let
+                  host = builtins.head
+                    (builtins.match hostRegex module);
+                in
+                {
+                  name = host;
+                  value = distill.${module}.integrate.${system};
+                })
+              (forSystem system));
+        })
+        systems);
 }

@@ -18,13 +18,13 @@
       perchModules;
   };
 
-  config.branch.nixosModule = {
+  config.branch.nixosModule.nixosModule = {
     environment.systemPackages = [
       pkgs.hello
     ];
   };
 
-  config.branch.homeManagerModule = {
+  config.branch.homeManagerModule.homeManagerModule = {
     home.packages = [
       pkgs.hello
     ];
