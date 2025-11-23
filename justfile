@@ -24,32 +24,51 @@ lint:
       --quiet \
       ...(fd '.*.md' | lines)
     nix flake check --all-systems
-    @just test-all
+    @just test-e2e-all
+    @just test-unit
 
 upgrade:
     nix flake update
 
-test-all *args:
-    #!/usr/bin/env bash
-    cd "{{ root }}"
-    for dir in test/*; do
-      if [ -d "$dir" ] && [ -f "$dir/flake.nix" ]; then
-        nix flake check \
-          --override-flake "perch" "{{ root }}" \
-          --all-systems \
-          --no-write-lock-file \
-          {{ args }} \
-          "path:$(realpath "$dir")"
-      fi
-    done
+test-e2e-all *args:
+    #!/usr/bin/env nu
+    ls "{{ root }}/test" | each {
+      (nix flake check
+        --override-flake "perch" "{{ root }}"
+        --all-systems
+        --no-write-lock-file
+        {{ args }}
+        $"path:(realpath $in)")
+    }
 
-test test *args:
+test-e2e test *args:
     nix flake check \
       --override-flake "perch" "{{ root }}" \
       --all-systems \
       --no-write-lock-file \
       {{ args }} \
-      $"path:(realpath "{{ root }}/test/{{ test }}")"
+      $"path:("{{ root }}/test/{{ test }}")"
+
+test-unit filter="":
+    #!/usr/bin/env nu
+    let result = (nix eval
+      --json
+      --impure
+      --expr
+      '(builtins.getFlake "{{ root }}/test/unit").test {
+        root = "{{ root }}";
+        filter = "{{ filter }}";
+      }') | complete
+    if $result.exit_code != 0 {
+      print -e $result.stderr
+      exit 1
+    }
+
+    let json = $result.stdout | from json
+    print $json.summary
+    if not $json.ok {
+      exit 1
+    }
 
 repl test *args:
     cd '{{ root }}/test/{{ test }}'; \

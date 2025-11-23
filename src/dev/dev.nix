@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, nixt, ... }:
 
 {
   seal.defaults.devShell = "dev/dev";
@@ -16,6 +16,7 @@
       nil
       nixpkgs-fmt
       nixVersions.stable
+      nixt.packages.${pkgs.system}.default
 
       # markdown
       markdownlint-cli

@@ -1,6 +1,8 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
+    nixt.url = "github:nix-community/nixt";
+    nixt.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { nixpkgs, ... } @inputs:
