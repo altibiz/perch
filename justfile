@@ -54,6 +54,7 @@ test-unit filter="":
     let result = (nix eval
       --json
       --impure
+      --show-trace
       --expr
       '(builtins.getFlake "{{ root }}/test/unit").test {
         root = "{{ root }}";
@@ -67,6 +68,7 @@ test-unit filter="":
     let json = $result.stdout | from json
     print $json.summary
     if not $json.ok {
+      print -e $result.stderr
       exit 1
     }
 
