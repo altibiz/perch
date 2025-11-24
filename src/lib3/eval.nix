@@ -88,4 +88,167 @@
               else null;
           })
           (builtins.attrNames modules)));
+
+  flake.lib3.eval.flake =
+    specialArgs:
+    inputModules:
+    selfModules:
+    let
+      anyStageEvalModule = { lib, ... }: {
+        _file = ./eval.nix;
+        key = "eval";
+
+        options = {
+          eval.privateAttrs = lib.mkOption {
+            type = lib.types.listOf
+              (lib.types.listOf
+                lib.types.str);
+            default = [ ];
+          };
+
+          eval.publicAttrs = lib.mkOption {
+            type = lib.types.listOf
+              (lib.types.listOf
+                lib.types.str);
+            default = [ ];
+          };
+
+          eval.allowedArgs = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ ];
+          };
+
+          flake = {
+            modules = lib.mkOption {
+              type = lib.types.attrsOf lib.types.deferredModule;
+              default = { };
+              description = lib.literalMD ''
+                `modules` flake output.
+              '';
+            };
+          };
+        };
+
+        config = {
+          eval.privateAttrs = [
+            [ "flake" "modules" ]
+          ];
+
+          eval.publicAttrs = [
+            [ "eval" "privateAttrs" ]
+            [ "eval" "publicAttrs" ]
+            [ "eval" "allowedArgs" ]
+          ];
+        };
+      };
+
+      inputModuleList = lib.flatten
+        (builtins.map
+          builtins.attrValues
+          (builtins.attrValues
+            inputModules));
+
+      selfModuleList = builtins.attrValues selfModules;
+
+      stageOneModules = builtins.map
+        (module: self.lib3.module.patch
+          (_: args: args)
+          (function: args:
+            let
+              requestedArgs = lib.functionArgs function;
+            in
+            builtins.mapAttrs
+              (name: _:
+                if args ? ${name}
+                then args.${name}
+                else null)
+              requestedArgs)
+          (_: result: result)
+          module)
+        (inputModuleList ++ selfModuleList);
+
+      stageOneEvalModule = { lib, ... }: {
+        _file = ./eval.nix;
+        key = "evalStageOne";
+      };
+
+      stageOneEval = lib.evalModules {
+        class = "flake";
+        specialArgs = specialArgs;
+        modules =
+          [ anyStageEvalModule stageOneEvalModule ]
+          ++ stageOneModules;
+      };
+
+      privateAttrs = stageOneEval.config.eval.privateAttrs;
+      publicAttrs = stageOneEval.config.eval.publicAttrs;
+      allowedArgs = stageOneEval.config.eval.allowedArgs;
+
+      stageTwoModules = builtins.map
+        (module: self.lib3.module.patch
+          (_: args: builtins.mapAttrs
+            (name: optional:
+              if optional
+              then true
+              else builtins.elem name allowedArgs)
+            args)
+          (function: args:
+            let
+              requestedArgs = lib.functionArgs function;
+            in
+            lib.filterAttrs
+              (name: value:
+                value != null
+                || builtins.elem name allowedArgs)
+              (builtins.mapAttrs
+                (name: _:
+                  if args ? ${name}
+                  then args.${name}
+                  else null)
+                requestedArgs))
+          (_: result: result))
+        ((builtins.map
+          (module: self.lib3.module.patch
+            (_: args: args)
+            (_: args: args)
+            (_: result:
+              self.lib3.attrset.removeAttrsByPath
+                privateAttrs
+                result)
+            module)
+          inputModuleList) ++ selfModuleList);
+
+      flakeModules = (builtins.mapAttrs
+        (_: module: self.lib3.module.patch
+          (_: args: args)
+          (_: args: args)
+          (_: result:
+            self.lib3.attrset.keepAttrsByPath
+              publicAttrs
+              result)
+          module)
+        selfModules);
+
+      stageTwoEvalModule = { options, ... }: {
+        _file = ./eval.nix;
+        key = "evalStageTwo";
+
+        _module.args = {
+          flakeModules = selfModules;
+        };
+
+        config = {
+          flake.modules = flakeModules;
+        };
+      };
+
+      stageTwoEval = lib.evalModules {
+        class = "flake";
+        specialArgs = specialArgs;
+        modules =
+          [ anyStageEvalModule stageTwoEvalModule ]
+          ++ stageTwoModules;
+      };
+    in
+    stageTwoEval;
 }
