@@ -1,25 +1,26 @@
 { self, lib, ... }:
 
 {
-  flake.lib3.module.mapFunctionResult =
-    mapping:
+  flake.lib3.trivial.mapFunctionResult =
+    mapResult:
     function:
     let
       args = lib.functionArgs function;
-      mapped = args: mapping (function args);
+      mapped = args: mapResult function (function args);
     in
     lib.setFunctionArgs mapped args;
 
-  flake.lib3.module.mapFunctionArgs =
-    mapping:
+  flake.lib3.trivial.mapFunctionArgs =
+    mapArgsDeclaration:
+    mapArgsDefinition:
     function:
     let
-      args = lib.functionArgs function;
-      mapped = args: function (mapping args);
+      args = mapArgsDeclaration function (lib.functionArgs function);
+      mapped = args: function (mapArgsDefinition function args);
     in
     lib.setFunctionArgs mapped args;
 
-  flake.lib3.module.importIfPath =
+  flake.lib3.trivial.importIfPath =
     module:
     let
       pathPart =
@@ -41,23 +42,23 @@
     if lib.isFunction imported
     then
       let function = imported;
-      in self.lib3.module.mapFunctionResult
-        (attrset: attrset // pathPart)
+      in self.lib3.trivial.mapFunctionResult
+        (_: attrset: attrset // pathPart)
         function
     else
       let attrset = imported;
       in attrset // pathPart;
 
-  flake.lib3.module.mapAttrsetImports =
-    mapping:
+  flake.lib3.trivial.mapAttrsetImports =
+    mapImported:
     attrset:
     if attrset ? imports
     then
       attrset // {
         imports =
           builtins.map
-            (module: mapping
-              (self.lib3.module.importIfPath module))
+            (module: mapImported
+              (self.lib3.trivial.importIfPath module))
             attrset.imports;
       }
     else
