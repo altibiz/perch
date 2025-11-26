@@ -99,14 +99,14 @@
         key = "eval";
 
         options = {
-          eval.privateAttrs = lib.mkOption {
+          eval.privateConfig = lib.mkOption {
             type = lib.types.listOf
               (lib.types.listOf
                 lib.types.str);
             default = [ ];
           };
 
-          eval.publicAttrs = lib.mkOption {
+          eval.publicConfig = lib.mkOption {
             type = lib.types.listOf
               (lib.types.listOf
                 lib.types.str);
@@ -130,13 +130,13 @@
         };
 
         config = {
-          eval.privateAttrs = [
+          eval.privateConfig = [
             [ "flake" "modules" ]
           ];
 
-          eval.publicAttrs = [
-            [ "eval" "privateAttrs" ]
-            [ "eval" "publicAttrs" ]
+          eval.publicConfig = [
+            [ "eval" "privateConfig" ]
+            [ "eval" "publicConfig" ]
             [ "eval" "allowedArgs" ]
           ];
         };
@@ -180,31 +180,36 @@
           ++ stageOneModules;
       };
 
-      privateAttrs = stageOneEval.config.eval.privateAttrs;
-      publicAttrs = stageOneEval.config.eval.publicAttrs;
+      privateAttrs = builtins.concatLists
+        (builtins.map
+          (path: [ ([ "config" ] ++ path) path ])
+          stageOneEval.config.eval.privateConfig);
+      publicAttrs = (builtins.concatLists
+        (builtins.map
+          (path: [ ([ "config" ] ++ path) path ])
+          stageOneEval.config.eval.publicConfig))
+      ++ [ [ "_file" ] [ "key" ] ];
       allowedArgs = stageOneEval.config.eval.allowedArgs;
 
       stageTwoModules = builtins.map
         (module: self.lib3.module.patch
           (_: args: builtins.mapAttrs
-            (name: optional:
-              if optional
-              then true
-              else builtins.elem name allowedArgs)
+            (name: optional: optional
+              || builtins.elem name allowedArgs)
             args)
           (function: args:
             let
               requestedArgs = lib.functionArgs function;
             in
-            lib.filterAttrs
-              (name: value:
-                value != null
-                || builtins.elem name allowedArgs)
-              (builtins.mapAttrs
-                (name: _:
-                  if args ? ${name}
-                  then args.${name}
-                  else null)
+            builtins.mapAttrs
+              (name: _:
+                if args ? ${name}
+                then args.${name}
+                else null)
+              (lib.filterAttrs
+                (name: value:
+                  args ? ${name}
+                  || builtins.elem name allowedArgs)
                 requestedArgs))
           (_: result: result))
         ((builtins.map
@@ -234,7 +239,7 @@
         key = "evalStageTwo";
 
         _module.args = {
-          flakeModules = selfModules;
+          flakeModules = selfModuleList;
         };
 
         config = {
