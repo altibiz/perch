@@ -238,11 +238,11 @@
         _file = ./eval.nix;
         key = "evalStageTwo";
 
-        _module.args = {
-          flakeModules = selfModuleList;
-        };
-
         config = {
+          _module.args = {
+            flakeModules = selfModuleList;
+          };
+
           flake.modules = flakeModules;
         };
       };

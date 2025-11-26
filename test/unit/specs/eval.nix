@@ -9,6 +9,9 @@ in
 
     modules = {
       foo = { lib, ... }: {
+        _file = ./eval.nix;
+        key = "foo";
+
         options.fooOpt = lib.mkOption {
           type = lib.types.str;
           default = "hi";
@@ -16,19 +19,32 @@ in
       };
 
       bar = { ... }: {
+        _file = ./eval.nix;
+        key = "bar";
+
         config.barVal = 123;
       };
 
-      baz = { ... }: { };
+      baz = { ... }: {
+        _file = ./eval.nix;
+        key = "baz";
+      };
     };
 
     filterModule =
       originalOptionsLists: originalConfigLists:
       let
-        optionsNonEmpty =
-          builtins.any (x: x != { }) originalOptionsLists;
+        optionsNonEmpty = builtins.any
+          (module:
+            (builtins.removeAttrs module [ "_file" "key" ])
+            != { })
+          originalOptionsLists;
         configNonEmpty =
-          builtins.any (x: x != { }) originalConfigLists;
+          builtins.any
+            (module:
+              (builtins.removeAttrs module [ "_file" "key" ])
+              != { })
+            originalConfigLists;
       in
       optionsNonEmpty || configNonEmpty;
 
@@ -54,6 +70,9 @@ in
     inputModules = {
       alpha = {
         mod = { lib, pkgs, ... }: {
+          _file = ./eval.nix;
+          key = "input-alpha-mod";
+
           options = {
             nixosModule = lib.mkOption {
               type = lib.types.attrsOf lib.types.any;
@@ -85,6 +104,9 @@ in
 
     selfModules = {
       selfmod = { lib, pkgs, ... }: {
+        _file = ./eval.nix;
+        key = "self-mod";
+
         config.nixosModule = {
           name = "self-mod";
           wantsPkgs = true;
