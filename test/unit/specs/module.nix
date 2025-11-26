@@ -35,20 +35,20 @@ let
     '';
 in
 {
-  patch_plain_attrset =
+  module_patch_plain_attrset =
     let
       out = patch declNoop argsNoop baseResultPatch plainAttr;
     in
     out == { alpha = 1; tag = "patched"; };
 
-  patch_function_module =
+  module_patch_function_module =
     let
       outF = patch declNoop argsNoop baseResultPatch fnModule;
       out = outF { inherit lib; };
     in
     out == { beta = 42; tag = "patched"; };
 
-  patch_preserves_args_and_maps =
+  module_patch_preserves_args_and_maps =
     let
       outF = patch declNoop argsBumpX baseResultPatch fnWithArgs;
       argsMeta = lib.functionArgs outF;
@@ -56,7 +56,7 @@ in
     in
     (argsMeta ? x) && (argsMeta ? y) && (out == { got = (5 + 1) + 10; tag = "patched"; });
 
-  patch_declaration_flags_apply =
+  module_patch_declaration_flags_apply =
     let
       outF = patch declRequireX argsNoop baseResultPatch fnWithArgs;
       argsMeta = lib.functionArgs outF;
@@ -65,7 +65,7 @@ in
     (argsMeta ? x) && (argsMeta.x == false) && (argsMeta ? y)
     && out == { got = 3 + 10; tag = "patched"; };
 
-  patch_recurses_imports_path =
+  module_patch_recurses_imports_path =
     let
       outF = patch declNoop argsNoop baseResultPatch withImportsFile;
       out = outF { inherit lib; };
@@ -78,7 +78,7 @@ in
     in
     out.root == true && subOK && out.tag == "patched";
 
-  patch_string_path_works =
+  module_patch_string_path_works =
     let
       strPath = toString withImportsFile;
       outF = patch declNoop argsNoop baseResultPatch strPath;
@@ -86,7 +86,7 @@ in
     in
     out.tag == "patched";
 
-  patch_plain_value_nested =
+  module_patch_plain_value_nested =
     let
       nested = { imports = [ ({ ... }: { z = 3; }) ]; top = 1; };
       out = patch declNoop argsNoop baseResultPatch nested;
@@ -95,7 +95,7 @@ in
     in
     out.top == 1 && out.tag == "patched" && allPatched;
 
-  patch_args_transform_applies_nested =
+  module_patch_args_transform_applies_nested =
     let
       modF =
         { x, ... }: {

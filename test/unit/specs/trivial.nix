@@ -22,7 +22,7 @@ let
     in f;
 in
 {
-  mapFunctionResult_wraps_result =
+  trivial_mapFunctionResult_wraps_result =
     let
       f = dummyFun;
       mapped = self.lib3.trivial.mapFunctionResult (_: res: res // { tag = "ok"; }) f;
@@ -30,7 +30,7 @@ in
     in
     r == { out = 5; a = 3; b = 2; tag = "ok"; };
 
-  mapFunctionResult_preserves_args =
+  trivial_mapFunctionResult_preserves_args =
     let
       f = dummyFun;
       mapped = self.lib3.trivial.mapFunctionResult (_: res: res) f;
@@ -38,7 +38,7 @@ in
     in
     builtins.all (k: builtins.elem k args) [ "a" "b" ];
 
-  mapFunctionArgs_maps_inputs =
+  trivial_mapFunctionArgs_maps_inputs =
     let
       f = argsOnly;
       mapped = self.lib3.trivial.mapFunctionArgs
@@ -48,7 +48,7 @@ in
     in
     mapped { x = 5; } == { sum = 5 * 2 + 10; };
 
-  mapFunctionArgs_preserves_args =
+  trivial_mapFunctionArgs_preserves_args =
     let
       f = argsOnly;
       mapped = self.lib3.trivial.mapFunctionArgs
@@ -59,7 +59,7 @@ in
     in
     (args ? x) && (args ? y);
 
-  mapFunctionArgs_can_change_declaration =
+  trivial_mapFunctionArgs_can_change_declaration =
     let
       f = argsOnly;
       mapped = self.lib3.trivial.mapFunctionArgs
@@ -72,7 +72,7 @@ in
     (argsMeta ? z) && (argsMeta ? y) && (!(argsMeta ? x))
     && out == { sum = 4 + 6; };
 
-  importIfPath_path_attrset =
+  trivial_importIfPath_path_attrset =
     let
       modFile =
         mkModuleFile ''
@@ -87,7 +87,7 @@ in
     && (result._file == modFile)
     && (result.key == modFile);
 
-  importIfPath_path_plain_attrset =
+  trivial_importIfPath_path_plain_attrset =
     let
       modFile =
         mkModuleFile ''
@@ -97,7 +97,7 @@ in
     in
     imported == { hello = "attrset"; n = 7; _file = modFile; key = modFile; };
 
-  importIfPath_string_path =
+  trivial_importIfPath_string_path =
     let
       modFile =
         mkModuleFile ''
@@ -110,21 +110,21 @@ in
     && (result._file == toString modFile)
     && (result.key == toString modFile);
 
-  importIfPath_function_value =
+  trivial_importIfPath_function_value =
     let
       imported = self.lib3.trivial.importIfPath dummyModule;
       result = imported { inherit lib; };
     in
     (result == { x = 1; y = 2; computed = 42; });
 
-  importIfPath_plain_attrset_value =
+  trivial_importIfPath_plain_attrset_value =
     let
       value = { k = "v"; };
       imported = self.lib3.trivial.importIfPath value;
     in
     imported == value;
 
-  mapAttrsetImports_maps_each_import =
+  trivial_mapAttrsetImports_maps_each_import =
     let
       modA = mkModuleFile '' { lib, ... }: { name = "A"; } '';
       modB = mkModuleFile '' { lib, ... }: { name = "B"; } '';
@@ -151,7 +151,7 @@ in
     && (builtins.length mapped.imports == 2)
     && allGood;
 
-  mapAttrsetImports_noop_when_no_imports =
+  trivial_mapAttrsetImports_noop_when_no_imports =
     let
       attrset = { x = 1; };
       mapped = self.lib3.trivial.mapAttrsetImports (x: x) attrset;
