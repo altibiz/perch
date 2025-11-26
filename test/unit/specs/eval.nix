@@ -68,53 +68,75 @@ in
     flake = self.lib3.eval.flake;
 
     inputModules = {
-      alpha = {
-        mod = { lib, pkgs, ... }: {
+      input = {
+        module = { specialArgs, flakeModules, lib, allowed, ... }: {
           _file = ./eval.nix;
-          key = "input-alpha-mod";
+          key = "input";
 
           options = {
-            nixosModule = lib.mkOption {
-              type = lib.types.attrsOf lib.types.any;
+            private = lib.mkOption {
+              type = lib.types.attrsOf lib.types.raw;
               default = { };
             };
 
-            publicThing = lib.mkOption {
-              type = lib.types.attrsOf lib.types.any;
+            public = lib.mkOption {
+              type = lib.types.attrsOf lib.types.raw;
               default = { };
             };
           };
 
-          config.eval.privateConfig = [ [ "nixosModule" ] ];
-          config.eval.publicConfig = [ [ "publicThing" ] ];
-          config.eval.allowedArgs = [ "pkgs" ];
+          config.eval.privateConfig = [ [ "private" ] ];
+          config.eval.publicConfig = [ [ "public" ] ];
+          config.eval.allowedArgs = [ "allowed" ];
 
-          config.nixosModule = {
-            name = "alpha-mod";
-            wantsPkgs = true;
+          config.private.input = {
+            input = "input";
+            allowed = allowed;
           };
 
-          config.publicThing = {
-            hello = "alpha";
-            ref = pkgs;
-          };
+          config.public.input =
+            let
+              eval = lib.evalModules {
+                specialArgs = specialArgs // { allowed = "inputAllowed"; };
+                modules = (builtins.attrValues flakeModules) ++ [{
+                  options.public = lib.mkOption {
+                    type = lib.types.attrsOf lib.types.raw;
+                    default = { };
+                  };
+                  options.private = lib.mkOption {
+                    type = lib.types.attrsOf lib.types.raw;
+                    default = { };
+                  };
+                }];
+              };
+            in
+            if eval.config.private ? self
+            then {
+              self = eval.config.private.self.allowed;
+              input = "input";
+              allowed = allowed;
+            }
+            else {
+              input = "input";
+              allowed = allowed;
+            };
         };
       };
     };
 
     selfModules = {
-      selfmod = { lib, pkgs, ... }: {
+      self = { lib, allowed, ... }: {
         _file = ./eval.nix;
-        key = "self-mod";
+        key = "self";
 
-        config.nixosModule = {
-          name = "self-mod";
-          wantsPkgs = true;
+        config.private.self = {
+          self = "self";
+          allowed = allowed;
         };
 
-        config.publicThing = {
-          hello = "self";
-          ref = pkgs;
+        config.public.self = {
+          self = "self";
+          allowed = allowed;
         };
       };
     };
@@ -122,32 +144,81 @@ in
     flakeResult = flake specialArgs inputModules selfModules;
   in
   {
-    eval_flake_modules_public_only =
-      let mods = flakeResult.config.flake.modules; in
-      mods.selfmod ? config
-      && mods.selfmod.config ? publicThing
-      && !(mods.selfmod.config ? nixosModule)
-      && mods.mod ? config
-      && mods.mod.config ? publicThing
-      && !(mods.mod.config ? nixosModule);
-
-    eval_flake_args_has_self_full_modules =
+    eval_flake_config_ok =
       let
-        argsMods = flakeResult.config._module.args.flakeModules;
-        m = builtins.head argsMods;
+        config =
+          self.lib3.attrset.removeAttrByPath
+            [ "flake" "modules" "self" ]
+            flakeResult.config;
       in
-      argsMods != null
-      && builtins.length argsMods == 1
-      && m ? options && m ? config
-      && m.config ? nixosModule
-      && m.config ? publicThing;
+      config == {
+        eval.privateConfig = [
+          [ "private" ]
+          [ "flake" "modules" ]
+        ];
+        eval.publicConfig = [
+          [ "public" ]
+          [ "eval" "privateConfig" ]
+          [ "eval" "publicConfig" ]
+          [ "eval" "allowedArgs" ]
+        ];
+        eval.allowedArgs = [ "allowed" ];
 
-    eval_flake_allowedArgs_has_pkgs =
-      builtins.elem "pkgs" flakeResult.config.eval.allowedArgs;
+        public.input = {
+          self = "inputAllowed";
+          input = "input";
+          allowed = null;
+        };
 
-    eval_flake_public_values_ok =
-      let mods = flakeResult.config.flake.modules; in
-      mods.selfmod.config.publicThing.hello == "self"
-      && mods.mod.config.publicThing.hello == "alpha";
+        private.self = {
+          self = "self";
+          allowed = null;
+        };
+
+        public.self = {
+          self = "self";
+          allowed = null;
+        };
+
+        flake.modules = { };
+      };
+
+    eval_exported_flake_public_only =
+      let
+        eval =
+          flake
+            (specialArgs // {
+              allowed = "eval_exported_flake_public_only";
+            })
+            (inputModules // { self = flakeResult.config.flake.modules; })
+            { };
+      in
+      eval.config == {
+        eval.privateConfig = [
+          [ "private" ]
+          [ "flake" "modules" ]
+        ];
+        eval.publicConfig = [
+          [ "public" ]
+          [ "eval" "privateConfig" ]
+          [ "eval" "publicConfig" ]
+          [ "eval" "allowedArgs" ]
+        ];
+        eval.allowedArgs = [ "allowed" ];
+
+        private = { };
+
+        public.input = {
+          input = "input";
+          allowed = "eval_exported_flake_public_only";
+        };
+
+        public.self = {
+          self = "self";
+          allowed = "eval_exported_flake_public_only";
+        };
+
+        flake.modules = { };
+      };
   }
 )

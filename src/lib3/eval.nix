@@ -94,7 +94,7 @@
     inputModules:
     selfModules:
     let
-      anyStageEvalModule = { lib, ... }: {
+      anyStageEvalModule = {
         _file = ./eval.nix;
         key = "eval";
 
@@ -122,9 +122,6 @@
             modules = lib.mkOption {
               type = lib.types.attrsOf lib.types.deferredModule;
               default = { };
-              description = lib.literalMD ''
-                `modules` flake output.
-              '';
             };
           };
         };
@@ -151,8 +148,10 @@
       selfModuleList = builtins.attrValues selfModules;
 
       stageOneModules = builtins.map
-        (module: self.lib3.module.patch
-          (_: args: args)
+        (self.lib3.module.patch
+          (_: args: builtins.mapAttrs
+            (_: false)
+            specialArgs)
           (function: args:
             let
               requestedArgs = lib.functionArgs function;
@@ -163,13 +162,18 @@
                 then args.${name}
                 else null)
               requestedArgs)
-          (_: result: result)
-          module)
+          (_: result: result))
         (inputModuleList ++ selfModuleList);
 
-      stageOneEvalModule = { lib, ... }: {
+      stageOneEvalModule = {
         _file = ./eval.nix;
         key = "evalStageOne";
+
+        config = {
+          _module.args = {
+            flakeModules = selfModules;
+          };
+        };
       };
 
       stageOneEval = lib.evalModules {
@@ -188,14 +192,13 @@
         (builtins.map
           (path: [ ([ "config" ] ++ path) path ])
           stageOneEval.config.eval.publicConfig))
-      ++ [ [ "_file" ] [ "key" ] ];
+      ++ [ [ "_file" ] [ "key" ] [ "disabledModules" ] [ "imports" ] ];
       allowedArgs = stageOneEval.config.eval.allowedArgs;
 
       stageTwoModules = builtins.map
-        (module: self.lib3.module.patch
-          (_: args: builtins.mapAttrs
-            (name: optional: optional
-              || builtins.elem name allowedArgs)
+        (self.lib3.module.patch
+          (_: args: lib.filterAttrs
+            (name: _: !(builtins.elem name allowedArgs))
             args)
           (function: args:
             let
@@ -213,34 +216,32 @@
                 requestedArgs))
           (_: result: result))
         ((builtins.map
-          (module: self.lib3.module.patch
+          (self.lib3.module.patch
             (_: args: args)
             (_: args: args)
             (_: result:
               self.lib3.attrset.removeAttrsByPath
                 privateAttrs
-                result)
-            module)
+                result))
           inputModuleList) ++ selfModuleList);
 
       flakeModules = (builtins.mapAttrs
-        (_: module: self.lib3.module.patch
+        (_: self.lib3.module.patch
           (_: args: args)
           (_: args: args)
           (_: result:
             self.lib3.attrset.keepAttrsByPath
               publicAttrs
-              result)
-          module)
+              result))
         selfModules);
 
-      stageTwoEvalModule = { options, ... }: {
+      stageTwoEvalModule = {
         _file = ./eval.nix;
         key = "evalStageTwo";
 
         config = {
           _module.args = {
-            flakeModules = selfModuleList;
+            flakeModules = selfModules;
           };
 
           flake.modules = flakeModules;
