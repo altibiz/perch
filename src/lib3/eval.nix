@@ -173,8 +173,8 @@
       };
 
       stageOneEval = lib.evalModules {
+        inherit specialArgs;
         class = "flake";
-        specialArgs = specialArgs;
         modules =
           [ anyStageEvalModule stageOneEvalModule ]
           ++ stageOneModules;
@@ -248,8 +248,8 @@
       };
 
       stageTwoEval = lib.evalModules {
+        inherit specialArgs;
         class = "flake";
-        specialArgs = specialArgs;
         modules =
           [ anyStageEvalModule stageTwoEvalModule ]
           ++ stageTwoModules;
