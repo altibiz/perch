@@ -3,6 +3,7 @@
 let
   specialArgs = { inherit lib; };
 in
+({ }) //
 (
   let
     filter = self.lib3.eval.filter;
@@ -151,16 +152,16 @@ in
             [ "flake" "modules" "self" ]
             flakeResult.config;
       in
-      config == {
+      (self.lib3.debug.trace config) == {
         eval.privateConfig = [
-          [ "private" ]
           [ "flake" "modules" ]
+          [ "private" ]
         ];
         eval.publicConfig = [
-          [ "public" ]
           [ "eval" "privateConfig" ]
           [ "eval" "publicConfig" ]
           [ "eval" "allowedArgs" ]
+          [ "public" ]
         ];
         eval.allowedArgs = [ "allowed" ];
 
@@ -183,7 +184,7 @@ in
         flake.modules = { };
       };
 
-    eval_exported_flake_public_only =
+    eval_flake_exported_public_only =
       let
         eval =
           flake
@@ -195,14 +196,14 @@ in
       in
       eval.config == {
         eval.privateConfig = [
-          [ "private" ]
           [ "flake" "modules" ]
+          [ "private" ]
         ];
         eval.publicConfig = [
-          [ "public" ]
           [ "eval" "privateConfig" ]
           [ "eval" "publicConfig" ]
           [ "eval" "allowedArgs" ]
+          [ "public" ]
         ];
         eval.allowedArgs = [ "allowed" ];
 

@@ -1,13 +1,13 @@
 { self, lib, ... }:
 
 {
-  flake.lib3.eval.filter =
+  flake.lib3.eval.preEval =
     specialArgs:
-    filterModule:
+    evalModule:
     modules:
     let
       mappedModules = builtins.map
-        (module: self.lib3.module.patch
+        (self.lib3.module.patch
           (_: args: args)
           (function: args:
             let
@@ -19,6 +19,27 @@
                 then args.${name}
                 else null)
               requestedArgs)
+          (_: result: result))
+        modules;
+
+      eval = lib.evalModules {
+        inherit specialArgs;
+        modules =
+          [ evalModule ]
+          ++ mappedModules;
+      };
+    in
+    eval;
+
+  flake.lib3.eval.filter =
+    specialArgs:
+    filterModule:
+    modules:
+    let
+      mappedModules = builtins.map
+        (module: self.lib3.module.patch
+          (_: args: args)
+          (_: args: args)
           (_: result:
             let
               config =
@@ -69,12 +90,10 @@
             (builtins.attrNames modules));
       };
 
-      eval = lib.evalModules {
-        inherit specialArgs;
-        modules =
-          [ filteringModule ]
-          ++ mappedModules;
-      };
+      eval = self.lib3.eval.preEval
+        specialArgs
+        filteringModule
+        mappedModules;
     in
     builtins.listToAttrs
       (builtins.filter
@@ -147,27 +166,11 @@
 
       selfModuleList = builtins.attrValues selfModules;
 
-      stageOneModules = builtins.map
-        (self.lib3.module.patch
-          (_: args: builtins.mapAttrs
-            (_: false)
-            specialArgs)
-          (function: args:
-            let
-              requestedArgs = lib.functionArgs function;
-            in
-            builtins.mapAttrs
-              (name: _:
-                if args ? ${name}
-                then args.${name}
-                else null)
-              requestedArgs)
-          (_: result: result))
-        (inputModuleList ++ selfModuleList);
-
       stageOneEvalModule = {
         _file = ./eval.nix;
         key = "evalStageOne";
+
+        imports = [ anyStageEvalModule ];
 
         config = {
           _module.args = {
@@ -176,13 +179,10 @@
         };
       };
 
-      stageOneEval = lib.evalModules {
-        inherit specialArgs;
-        class = "flake";
-        modules =
-          [ anyStageEvalModule stageOneEvalModule ]
-          ++ stageOneModules;
-      };
+      stageOneEval = self.lib3.eval.preEval
+        specialArgs
+        stageOneEvalModule
+        (inputModuleList ++ selfModuleList);
 
       privateAttrs = builtins.concatLists
         (builtins.map
@@ -239,6 +239,8 @@
         _file = ./eval.nix;
         key = "evalStageTwo";
 
+        imports = [ anyStageEvalModule ];
+
         config = {
           _module.args = {
             flakeModules = selfModules;
@@ -252,7 +254,7 @@
         inherit specialArgs;
         class = "flake";
         modules =
-          [ anyStageEvalModule stageTwoEvalModule ]
+          [ stageTwoEvalModule ]
           ++ stageTwoModules;
       };
     in
