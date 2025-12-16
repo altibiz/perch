@@ -158,12 +158,6 @@
         };
       };
 
-      inputModuleList = lib.flatten
-        (builtins.map
-          builtins.attrValues
-          (builtins.attrValues
-            inputModules));
-
       selfModuleList = builtins.attrValues selfModules;
 
       stageOneEvalModule = {
@@ -182,7 +176,7 @@
       stageOneEval = self.lib3.eval.preEval
         specialArgs
         stageOneEvalModule
-        (inputModuleList ++ selfModuleList);
+        (inputModules ++ selfModuleList);
 
       privateAttrs = builtins.concatLists
         (builtins.map
@@ -223,7 +217,7 @@
               self.lib3.attrset.removeAttrsByPath
                 privateAttrs
                 result))
-          inputModuleList) ++ selfModuleList);
+          inputModules) ++ selfModuleList);
 
       flakeModules = (builtins.mapAttrs
         (_: self.lib3.module.patch

@@ -67,62 +67,60 @@ in
   let
     flake = self.lib3.eval.flake;
 
-    inputModules = {
-      input = {
-        module = { specialArgs, flakeModules, lib, allowed, ... }: {
-          _file = ./eval.nix;
-          key = "input";
+    inputModules = [
+      ({ specialArgs, flakeModules, lib, allowed, ... }: {
+        _file = ./eval.nix;
+        key = "input";
 
-          options = {
-            private = lib.mkOption {
-              type = lib.types.attrsOf lib.types.raw;
-              default = { };
-            };
-
-            public = lib.mkOption {
-              type = lib.types.attrsOf lib.types.raw;
-              default = { };
-            };
+        options = {
+          private = lib.mkOption {
+            type = lib.types.attrsOf lib.types.raw;
+            default = { };
           };
 
-          config.eval.privateConfig = [ [ "private" ] ];
-          config.eval.publicConfig = [ [ "public" ] ];
-          config.eval.allowedArgs = [ "allowed" ];
+          public = lib.mkOption {
+            type = lib.types.attrsOf lib.types.raw;
+            default = { };
+          };
+        };
 
-          config.private.input = {
+        config.eval.privateConfig = [ [ "private" ] ];
+        config.eval.publicConfig = [ [ "public" ] ];
+        config.eval.allowedArgs = [ "allowed" ];
+
+        config.private.input = {
+          input = "input";
+          allowed = allowed;
+        };
+
+        config.public.input =
+          let
+            eval = lib.evalModules {
+              specialArgs = specialArgs // { allowed = "inputAllowed"; };
+              modules = (builtins.attrValues flakeModules) ++ [{
+                options.public = lib.mkOption {
+                  type = lib.types.attrsOf lib.types.raw;
+                  default = { };
+                };
+                options.private = lib.mkOption {
+                  type = lib.types.attrsOf lib.types.raw;
+                  default = { };
+                };
+              }];
+            };
+          in
+          if eval.config.private ? self
+          then {
+            self = eval.config.private.self.allowed;
+            input = "input";
+            allowed = allowed;
+          }
+          else {
             input = "input";
             allowed = allowed;
           };
-
-          config.public.input =
-            let
-              eval = lib.evalModules {
-                specialArgs = specialArgs // { allowed = "inputAllowed"; };
-                modules = (builtins.attrValues flakeModules) ++ [{
-                  options.public = lib.mkOption {
-                    type = lib.types.attrsOf lib.types.raw;
-                    default = { };
-                  };
-                  options.private = lib.mkOption {
-                    type = lib.types.attrsOf lib.types.raw;
-                    default = { };
-                  };
-                }];
-              };
-            in
-            if eval.config.private ? self
-            then {
-              self = eval.config.private.self.allowed;
-              input = "input";
-              allowed = allowed;
-            }
-            else {
-              input = "input";
-              allowed = allowed;
-            };
-        };
-      };
-    };
+      })
+    ];
 
     selfModules = {
       self = { lib, allowed, ... }: {
@@ -191,7 +189,7 @@ in
             (specialArgs // {
               allowed = "eval_exported_flake_public_only";
             })
-            (inputModules // { self = flakeResult.config.flake.modules; })
+            (inputModules ++ (builtins.attrValues flakeResult.config.flake.modules))
             { };
       in
       # NOTE: flake.modules.default.imports.0._file points to local file

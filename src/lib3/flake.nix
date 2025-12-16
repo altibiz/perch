@@ -34,8 +34,8 @@
             (module: module != null)
             (builtins.map
               (input:
-                if input ? flakeModules
-                then input.flakeModules.default
+                if input ? modules
+                then input.modules.default
                 else null)
               selflessInputList);
 
