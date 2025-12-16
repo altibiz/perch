@@ -246,7 +246,11 @@
             flakeModules = selfModules;
           };
 
-          flake.modules = flakeModules;
+          flake.modules = flakeModules // {
+            default = {
+              imports = builtins.attrValues flakeModules;
+            };
+          };
         };
       };
 

@@ -3,7 +3,6 @@
 let
   specialArgs = { inherit lib; };
 in
-({ }) //
 (
   let
     filter = self.lib3.eval.filter;
@@ -152,7 +151,8 @@ in
             [ "flake" "modules" "self" ]
             flakeResult.config;
       in
-      (self.lib3.debug.trace config) == {
+      # NOTE: flake.modules.default contains functions
+      (lib.recursiveUpdate config { flake.modules.default = null; }) == {
         eval.privateConfig = [
           [ "flake" "modules" ]
           [ "private" ]
@@ -181,7 +181,7 @@ in
           allowed = null;
         };
 
-        flake.modules = { };
+        flake.modules.default = null;
       };
 
     eval_flake_exported_public_only =
@@ -194,7 +194,15 @@ in
             (inputModules // { self = flakeResult.config.flake.modules; })
             { };
       in
-      eval.config == {
+      # NOTE: flake.modules.default.imports.0._file points to local file
+      (builtins.length eval.config.flake.modules.default.imports) == 1
+      && (builtins.attrNames (builtins.head eval.config.flake.modules.default.imports)
+      == [ "_file" "imports" ])
+      && (builtins.head eval.config.flake.modules.default.imports).imports
+      == [{ imports = [ ]; }]
+      && (lib.recursiveUpdate eval.config {
+        flake.modules.default = null;
+      }) == {
         eval.privateConfig = [
           [ "flake" "modules" ]
           [ "private" ]
@@ -219,7 +227,11 @@ in
           allowed = "eval_exported_flake_public_only";
         };
 
-        flake.modules = { };
+        flake = {
+          modules = {
+            default = null;
+          };
+        };
       };
   }
 )
