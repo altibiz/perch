@@ -95,7 +95,7 @@ in
     , nixpkgs
     , nixpkgsConfig
     , config
-    , artifactType ? (lib.types.attrsOf (lib.types.attrsOf lib.types.raw))
+    , artifactType ? lib.types.attrsOf (lib.types.attrsOf lib.types.raw)
     , mapArtifacts ? (_: _)
     }:
     let
@@ -113,7 +113,7 @@ in
     {
       config.eval.allowedArgs = [ [ "pkgs" ] ];
 
-      options.${configs} = lib.mkOption {
+      options.${config} = lib.mkOption {
         type = lib.types.raw;
       };
       options.${nixpkgsConfig} = lib.mkOption {
