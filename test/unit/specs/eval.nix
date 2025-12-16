@@ -195,6 +195,7 @@ in
             { };
       in
       # NOTE: flake.modules.default.imports.0._file points to local file
+        # because flake.modules gets stripped from public cuz its private config
       (builtins.length eval.config.flake.modules.default.imports) == 1
       && (builtins.attrNames (builtins.head eval.config.flake.modules.default.imports)
       == [ "_file" "imports" ])
