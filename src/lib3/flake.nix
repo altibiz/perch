@@ -34,7 +34,7 @@
             (module: module != null)
             (builtins.map
               (input:
-                if input ? modules
+                if input ? modules && input.modules ? default
                 then input.modules.default
                 else null)
               selflessInputList);

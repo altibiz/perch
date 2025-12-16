@@ -10,25 +10,29 @@ let
           ({ perch, lib, flakeModules, ... }:
             let
               nixosModules = builtins.mapAttrs
-                (perch.lib3.module.patch
+                (_: perch.lib3.module.patch
                   (_: args: args)
                   (_: args: args)
                   (_: result:
                     if result ? nixosModule
                     then result.nixosModule
                     else if result ? config
-                    then
-                      if result.config ? nixosModule
-                      then result.config.nixosModule
-                      else { }
+                      && result.config ? nixosModule
+                    then result.config.nixosModule
                     else { }))
                 flakeModules;
             in
             {
+              _file = ./flake.nix;
+              key = "input";
               options.nixosModule = lib.mkOption {
                 type = lib.types.attrsOf lib.types.raw;
               };
+              options.flake.nixosModules = lib.mkOption {
+                type = lib.types.attrsOf lib.types.raw;
+              };
               config.eval.privateConfig = [ [ "nixosModule" ] ];
+              config.eval.publicConfig = [ [ "flake" "nixosModules" ] ];
               config.flake.nixosModules = nixosModules // {
                 default = {
                   imports = builtins.attrValues nixosModules;
@@ -42,6 +46,8 @@ let
 
   selfModules = {
     module = {
+      _file = ./flake.nix;
+      key = "self";
       nixosModule = {
         environment.systemPackages = [ "my package" ];
       };
@@ -51,7 +57,7 @@ let
   result = makeFlake { inherit inputs selfModules; };
 in
 {
-  flake_make_result_correct = result.flake.nixosModules == {
+  flake_make_nixos_modules_result_correct = result.nixosModules == {
     module = {
       environment.systemPackages = [ "my package" ];
     };
