@@ -1,7 +1,7 @@
 { self, lib, ... }:
 
 {
-  flake.lib3.trivial.mapFunctionResult =
+  flake.lib.trivial.mapFunctionResult =
     mapResult:
     function:
     let
@@ -10,7 +10,7 @@
     in
     lib.setFunctionArgs mapped args;
 
-  flake.lib3.trivial.mapFunctionArgs =
+  flake.lib.trivial.mapFunctionArgs =
     mapArgsDeclaration:
     mapArgsDefinition:
     function:
@@ -20,7 +20,7 @@
     in
     lib.setFunctionArgs mapped args;
 
-  flake.lib3.trivial.importIfPath =
+  flake.lib.trivial.importIfPath =
     module:
     let
       pathPart =
@@ -42,14 +42,14 @@
     if lib.isFunction imported
     then
       let function = imported;
-      in self.lib3.trivial.mapFunctionResult
+      in self.lib.trivial.mapFunctionResult
         (_: attrset: attrset // pathPart)
         function
     else
       let attrset = imported;
       in attrset // pathPart;
 
-  flake.lib3.trivial.mapAttrsetImports =
+  flake.lib.trivial.mapAttrsetImports =
     mapImported:
     attrset:
     if attrset ? imports
@@ -58,7 +58,7 @@
         imports =
           builtins.map
             (module: mapImported
-              (self.lib3.trivial.importIfPath module))
+              (self.lib.trivial.importIfPath module))
             attrset.imports;
       }
     else

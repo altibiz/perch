@@ -1,7 +1,7 @@
 { self, ... }:
 
 let
-  makeFlake = self.lib3.flake.make;
+  makeFlake = self.lib.flake.make;
 
   inputs = {
     perch = self // {
@@ -10,7 +10,7 @@ let
           ({ perch, lib, flakeModules, ... }:
             let
               nixosModules = builtins.mapAttrs
-                (_: perch.lib3.module.patch
+                (_: perch.lib.module.patch
                   (_: args: args)
                   (_: args: args)
                   (_: result:

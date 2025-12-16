@@ -26,11 +26,11 @@ let
       ]);
 in
 {
-  options.flake.lib3 = lib.mkOption {
+  options.flake.lib = lib.mkOption {
     type = nest 8;
     default = { };
     description = lib.literalMD ''
-      `lib3` flake output.
+      `lib` flake output.
     '';
   };
 }

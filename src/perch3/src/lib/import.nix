@@ -90,7 +90,7 @@ let
         (importDirToListWithMap (module: module) separator dir));
 in
 {
-  flake.lib3.import = {
+  flake.lib.import = {
     dirToAttrsWithMap =
       importDirToAttrsWithMap;
 

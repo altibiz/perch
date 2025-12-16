@@ -10,23 +10,23 @@
 
         specialArgs = {
           lib = lib;
-          self.lib3 = flake.lib3;
+          self.lib = flake.lib;
         };
 
-        importLib = ((import "${root}/src/perch3/src/lib/import.nix" specialArgs).flake.lib3);
+        importLib = ((import "${root}/src/perch3/src/lib/import.nix" specialArgs).flake.lib);
 
         eval = lib.evalModules {
           specialArgs = specialArgs;
           class = "perch";
           modules = builtins.attrValues
             (lib.filterAttrs
-              (name: _: lib.hasPrefix "lib3" name)
-              (importLib.import.dirToFlatPathAttrs "${root}/src/perch3/src"));
+              (name: _: lib.hasPrefix "lib" name)
+              (importLib.import.dirToFlatPathAttrs "-" "${root}/src/perch3/src"));
         };
 
-        flake = eval.config.flake.perch3;
+        flake = eval.config.flake;
 
-        specs = importLib.import.dirToFlatValueAttrs "${self}/specs";
+        specs = importLib.import.dirToFlatValueAttrs "-" "${self}/specs";
 
         results = lib.flatten
           (builtins.map

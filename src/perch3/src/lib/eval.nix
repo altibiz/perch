@@ -1,13 +1,13 @@
 { self, lib, ... }:
 
 {
-  flake.lib3.eval.preEval =
+  flake.lib.eval.preEval =
     specialArgs:
     evalModule:
     modules:
     let
       mappedModules = builtins.map
-        (self.lib3.module.patch
+        (self.lib.module.patch
           (_: args: args)
           (function: args:
             let
@@ -31,13 +31,13 @@
     in
     eval;
 
-  flake.lib3.eval.filter =
+  flake.lib.eval.filter =
     specialArgs:
     filterModule:
     modules:
     let
       mappedModules = builtins.map
-        (module: self.lib3.module.patch
+        (module: self.lib.module.patch
           (_: args: args)
           (_: args: args)
           (_: result:
@@ -90,7 +90,7 @@
             (builtins.attrNames modules));
       };
 
-      eval = self.lib3.eval.preEval
+      eval = self.lib.eval.preEval
         specialArgs
         filteringModule
         mappedModules;
@@ -108,7 +108,7 @@
           })
           (builtins.attrNames modules)));
 
-  flake.lib3.eval.flake =
+  flake.lib.eval.flake =
     specialArgs:
     inputModules:
     selfModules:
@@ -173,7 +173,7 @@
         };
       };
 
-      stageOneEval = self.lib3.eval.preEval
+      stageOneEval = self.lib.eval.preEval
         specialArgs
         stageOneEvalModule
         (inputModules ++ selfModuleList);
@@ -190,7 +190,7 @@
       allowedArgs = stageOneEval.config.eval.allowedArgs;
 
       stageTwoModules = builtins.map
-        (self.lib3.module.patch
+        (self.lib.module.patch
           (_: args: lib.filterAttrs
             (name: _: !(builtins.elem name allowedArgs))
             args)
@@ -210,21 +210,21 @@
                 requestedArgs))
           (_: result: result))
         ((builtins.map
-          (self.lib3.module.patch
+          (self.lib.module.patch
             (_: args: args)
             (_: args: args)
             (_: result:
-              self.lib3.attrset.removeAttrsByPath
+              self.lib.attrset.removeAttrsByPath
                 privateAttrs
                 result))
           inputModules) ++ selfModuleList);
 
       flakeModules = (builtins.mapAttrs
-        (_: self.lib3.module.patch
+        (_: self.lib.module.patch
           (_: args: args)
           (_: args: args)
           (_: result:
-            self.lib3.attrset.keepAttrsByPath
+            self.lib.attrset.keepAttrsByPath
               publicAttrs
               result))
         selfModules);

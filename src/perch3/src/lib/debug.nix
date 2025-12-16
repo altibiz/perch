@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  flake.lib3.debug.trace = value:
+  flake.lib.debug.trace = value:
     let
       removeFunctions = value:
         if builtins.isFunction value

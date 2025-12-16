@@ -6,7 +6,7 @@ let
     mapArgsDefinition:
     mapResult:
     attrset:
-    self.lib3.trivial.mapAttrsetImports
+    self.lib.trivial.mapAttrsetImports
       (patchImported
         mapArgsDeclaration
         mapArgsDefinition
@@ -23,10 +23,10 @@ let
       let
         function = imported;
       in
-      self.lib3.trivial.mapFunctionArgs
+      self.lib.trivial.mapFunctionArgs
         mapArgsDeclaration
         mapArgsDefinition
-        (self.lib3.trivial.mapFunctionResult
+        (self.lib.trivial.mapFunctionResult
           (function: attrset: mapResult
             function
             (patchAttrsetImports
@@ -45,7 +45,7 @@ let
           imported);
 in
 {
-  flake.lib3.module.patch =
+  flake.lib.module.patch =
     mapArgsDeclaration:
     mapArgsDefinition:
     mapResult:
@@ -54,6 +54,6 @@ in
       mapArgsDeclaration
       mapArgsDefinition
       mapResult
-      (self.lib3.trivial.importIfPath
+      (self.lib.trivial.importIfPath
         module);
 }

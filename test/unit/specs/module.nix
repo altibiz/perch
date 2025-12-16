@@ -1,7 +1,7 @@
 { self, lib, ... }:
 
 let
-  patch = self.lib3.module.patch;
+  patch = self.lib.module.patch;
 
   mkModuleFile = content: builtins.toFile "mod.nix" content;
 

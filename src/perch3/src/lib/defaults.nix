@@ -1,5 +1,5 @@
 {
-  flake.lib3.defaults.systems = [
+  flake.lib.defaults.systems = [
     "aarch64-darwin"
     "aarch64-linux"
     "x86_64-darwin"

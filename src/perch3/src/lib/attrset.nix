@@ -23,7 +23,7 @@ let
   removeAttrsByPath =
     paths: attrs:
     builtins.foldl'
-      (acc: next: self.lib3.attrset.removeAttrByPath next acc)
+      (acc: next: self.lib.attrset.removeAttrByPath next acc)
       attrs
       paths;
 
@@ -82,11 +82,11 @@ let
       paths;
 in
 {
-  flake.lib3.attrset.removeAttrByPath = removeAttrByPath;
+  flake.lib.attrset.removeAttrByPath = removeAttrByPath;
 
-  flake.lib3.attrset.removeAttrsByPath = removeAttrsByPath;
+  flake.lib.attrset.removeAttrsByPath = removeAttrsByPath;
 
-  flake.lib3.attrset.keepAttrByPath = keepAttrByPath;
+  flake.lib.attrset.keepAttrByPath = keepAttrByPath;
 
-  flake.lib3.attrset.keepAttrsByPath = keepAttrsByPath;
+  flake.lib.attrset.keepAttrsByPath = keepAttrsByPath;
 }

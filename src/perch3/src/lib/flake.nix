@@ -1,7 +1,7 @@
 { self, lib, ... }:
 
 {
-  flake.lib3.flake.make =
+  flake.lib.flake.make =
     { inputs
     , root ? null
     , prefix ? null
@@ -17,7 +17,7 @@
       prefixedRootModules =
         if prefixedRoot == null then { }
         else
-          self.lib3.import.dirToFlatPathAttrs
+          self.lib.import.dirToFlatPathAttrs
             prefixedRoot;
 
       inputModulesFromInputs =
@@ -39,7 +39,7 @@
                 else null)
               selflessInputList);
 
-      eval = self.lib3.eval.flake
+      eval = self.lib.eval.flake
         (inputs // { inherit root; })
         (inputModulesFromInputs ++ inputModules)
         (prefixedRootModules // selfModules);

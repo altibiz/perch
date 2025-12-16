@@ -1,7 +1,7 @@
 { self, ... }:
 
 let
-  trace = self.lib3.debug.trace;
+  trace = self.lib.debug.trace;
 
   f1 = x: x + 1;
   f2 = { a, ... }: a;

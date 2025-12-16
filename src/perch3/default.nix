@@ -10,10 +10,10 @@ let
 
   specialArgs = (selflessInputs // {
     lib = nixpkgs.lib;
-    self.lib3 = lib3;
+    self.lib = lib;
   });
 
-  importLib = ((import ./src/lib/import.nix) specialArgs).flake.lib3;
+  importLib = ((import ./src/lib/import.nix) specialArgs).flake.lib;
 
   # NOTE: it is important to be mindful of this eval context
   # this context makes it wrong to request anything that
@@ -38,14 +38,14 @@ let
           (importLib.import.dirToFlatPathAttrs ./src));
   };
 
-  lib3 = eval.config.flake.lib3;
+  lib = eval.config.flake.lib;
 in
 {
   options.flake.perch3 = {
     type = lib.types.raw;
   };
 
-  config.flake.perch3 = lib3.flake.make {
+  config.flake.perch3 = lib.flake.make {
     inputs = specialArgs;
     root = ./.;
     prefix = "src";

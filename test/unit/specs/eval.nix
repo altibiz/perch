@@ -5,7 +5,7 @@ let
 in
 (
   let
-    filter = self.lib3.eval.filter;
+    filter = self.lib.eval.filter;
 
     modules = {
       foo = { lib, ... }: {
@@ -65,7 +65,7 @@ in
   }
 ) // (
   let
-    flake = self.lib3.eval.flake;
+    flake = self.lib.eval.flake;
 
     inputModules = [
       ({ specialArgs, flakeModules, lib, allowed, ... }: {
@@ -145,7 +145,7 @@ in
     eval_flake_config_ok =
       let
         config =
-          self.lib3.attrset.removeAttrByPath
+          self.lib.attrset.removeAttrByPath
             [ "flake" "modules" "self" ]
             flakeResult.config;
       in

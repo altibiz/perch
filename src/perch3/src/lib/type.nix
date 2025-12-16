@@ -43,7 +43,7 @@ let
   };
 in
 {
-  flake.lib3.type.overlay = overlayType;
+  flake.lib.type.overlay = overlayType;
 
-  flake.lib3.type.nixpkgs.config = nixpkgsConfigType;
+  flake.lib.type.nixpkgs.config = nixpkgsConfigType;
 }
