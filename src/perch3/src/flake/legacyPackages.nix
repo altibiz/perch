@@ -7,6 +7,6 @@
 
 self.lib.module.mkArtifactModule {
   inherit specialArgs flakeModules nixpkgs;
-  nixpkgsConfig = "devShellNixpkgs";
-  config = "devShell";
+  nixpkgsConfig = "legacyPackageNixpkgs";
+  config = "legacyPackage";
 }
