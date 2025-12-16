@@ -1,4 +1,4 @@
-{ self, nixpkgs, nixt, lib, ... }:
+{ self, nixpkgs, nixt, ... }:
 
 let
   inputs = {
@@ -35,14 +35,14 @@ let
       builtins.attrValues
         (nixpkgs.lib.filterAttrs
           (name: _: nixpkgs.lib.hasPrefix "lib" name)
-          (importLib.import.dirToFlatPathAttrs ./src));
+          (importLib.import.dirToFlatPathAttrs "-" ./src));
   };
 
   lib = eval.config.flake.lib;
 in
 {
-  options.flake.perch3 = {
-    type = lib.types.raw;
+  options.flake.perch3 = nixpkgs.lib.mkOption {
+    type = nixpkgs.lib.types.raw;
   };
 
   config.flake.perch3 = lib.flake.make {
