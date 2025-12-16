@@ -10,7 +10,7 @@ let
     _: configs:
     builtins.any
       (config:
-      config ? nixoModule
+      config ? nixosModule
       || config ? config
       && config.config ? nixosModule)
       configs;
