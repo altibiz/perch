@@ -55,7 +55,7 @@
       });
     in
     {
-      config.eval.allowedArgs = [ [ "pkgs" ] ];
+      config.eval.allowedArgs = [ "pkgs" ];
 
       options.${config} = lib.mkOption {
         type = lib.types.raw;
