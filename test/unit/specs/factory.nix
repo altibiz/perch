@@ -7,6 +7,13 @@ let
       config = "nixosModule";
     };
 
+  nixosConfigurationModule = { specialArgs, nixpkgs, flakeModules, ... }:
+    self.lib.factory.configurationModule {
+      inherit specialArgs nixpkgs flakeModules;
+      config = "nixosConfiguration";
+      nixpkgsConfig = "nixosConfigurationNixpkgs";
+    };
+
   packageModule = { specialArgs, nixpkgs, flakeModules, ... }:
     self.lib.factory.artifactModule {
       inherit specialArgs nixpkgs flakeModules;
@@ -30,11 +37,23 @@ let
             nixosModule
             packageModule
             appModule
+            nixosConfigurationModule
           ];
         };
       };
     };
     selfModules = {
+      nixosConfigurationModule = {
+        nixosConfigurationNixpkgs.system = "x86_64-linux";
+        nixosConfiguration = {
+          fileSystems."/" = {
+            device = "/dev/disk/by-label/NIXROOT";
+            fsType = "ext4";
+          };
+          boot.loader.grub.device = "nodev";
+          system.stateVersion = "24.11";
+        };
+      };
       someNixosModule = {
         nixosModule = { value = "some hello :)"; };
         defaultNixosModule = true;
@@ -59,6 +78,16 @@ let
 in
 rec {
   factory_submodule_artifact_correct = (self.lib.debug.trace (builtins.removeAttrs flakeResult [ "modules" ])) == {
+    nixosConfigurations = {
+      nixosConfigurationModule-x86_64-linux = {
+        fileSystems."/" = {
+          device = "/dev/disk/by-label/NIXROOT";
+          fsType = "ext4";
+        };
+        boot.loader.grub.device = "nodev";
+        system.stateVersion = "24.11";
+      };
+    };
     apps = {
       aarch64-darwin = {
         allDefaultSystems = "aarch64-darwin hello all default systems :)";
