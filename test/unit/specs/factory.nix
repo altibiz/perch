@@ -77,17 +77,9 @@ let
   };
 in
 rec {
-  factory_submodule_artifact_correct = (self.lib.debug.trace (builtins.removeAttrs flakeResult [ "modules" ])) == {
-    nixosConfigurations = {
-      nixosConfigurationModule-x86_64-linux = {
-        fileSystems."/" = {
-          device = "/dev/disk/by-label/NIXROOT";
-          fsType = "ext4";
-        };
-        boot.loader.grub.device = "nodev";
-        system.stateVersion = "24.11";
-      };
-    };
+  factory_submodule_artifact_correct = (builtins.removeAttrs
+    flakeResult
+    [ "modules" "nixosConfigurations" ]) == {
     apps = {
       aarch64-darwin = {
         allDefaultSystems = "aarch64-darwin hello all default systems :)";

@@ -1,34 +1,39 @@
 { self, nixpkgs, ... }:
 
 let
+  x86conf = {
+    fileSystems."/" = {
+      device = "/dev/disk/by-label/NIX86";
+      fsType = "ext4";
+    };
+    boot.loader.grub.device = "nodev";
+    system.stateVersion = "24.11";
+  };
+  linuxConf = {
+    fileSystems."/" = {
+      device = "/dev/disk/by-label/NIXALL";
+      fsType = "ext4";
+    };
+    boot.loader.grub.device = "nodev";
+    system.stateVersion = "24.11";
+  };
   makeConfigurations = self.lib.configurations.make;
   specialArgs = { inherit self; };
   config = "nixosConfiguration";
   nixpkgsConfig = "nixosConfigurationNixpkgs";
   defaultConfig = "defaultNixosConfiguration";
   flakeModules = {
-    x68_64_Only = {
+    x86_64-linux-only = {
       nixosConfigurationNixpkgs = {
         system = "x86_64-linux";
       };
-      nixosConfiguration = {
-        fileSystems."/" = {
-          device = "/dev/disk/by-label/NIX86";
-          fsType = "ext4";
-        };
-        boot.loader.grub.device = "nodev";
-        system.stateVersion = "24.11";
-      };
+      nixosConfiguration = x86conf;
     };
-    allDefaultSystems = {
-      nixosConfiguration = {
-        fileSystems."/" = {
-          device = "/dev/disk/by-label/NIXALL";
-          fsType = "ext4";
-        };
-        boot.loader.grub.device = "nodev";
-        system.stateVersion = "24.11";
+    linux-only = {
+      nixosConfigurationNixpkgs = {
+        system = [ "x86_64-linux" "aarch64-linux" ];
       };
+      nixosConfiguration = linuxConf;
     };
   };
 
@@ -37,46 +42,13 @@ let
   };
 in
 {
-  configurations_make_correct = configurations == {
-    "allDefaultSystems-aarch64-darwin" = {
-      fileSystems."/" = {
-        device = "/dev/disk/by-label/NIXALL";
-        fsType = "ext4";
-      };
-      boot.loader.grub.device = "nodev";
-      system.stateVersion = "24.11";
+  configurations_make_correct =
+    (self.lib.debug.trace
+      (builtins.mapAttrs
+        (_: value: value.config.fileSystems."/".device)
+        configurations)) == {
+      "linux-only-aarch64-linux" = linuxConf.fileSystems."/".device;
+      "x86_64-linux-only-x86_64-linux" = x86conf.fileSystems."/".device;
+      "linux-only-x86_64-linux" = linuxConf.fileSystems."/".device;
     };
-    "allDefaultSystems-aarch64-linux" = {
-      fileSystems."/" = {
-        device = "/dev/disk/by-label/NIXALL";
-        fsType = "ext4";
-      };
-      boot.loader.grub.device = "nodev";
-      system.stateVersion = "24.11";
-    };
-    "allDefaultSystems-x86_64-darwin" = {
-      fileSystems."/" = {
-        device = "/dev/disk/by-label/NIXALL";
-        fsType = "ext4";
-      };
-      boot.loader.grub.device = "nodev";
-      system.stateVersion = "24.11";
-    };
-    "x68_64_Only-x86_64-linux" = {
-      fileSystems."/" = {
-        device = "/dev/disk/by-label/NIX86";
-        fsType = "ext4";
-      };
-      boot.loader.grub.device = "nodev";
-      system.stateVersion = "24.11";
-    };
-    "allDefaultSystems-x86_64-linux" = {
-      fileSystems."/" = {
-        device = "/dev/disk/by-label/NIXALL";
-        fsType = "ext4";
-      };
-      boot.loader.grub.device = "nodev";
-      system.stateVersion = "24.11";
-    };
-  };
 }
