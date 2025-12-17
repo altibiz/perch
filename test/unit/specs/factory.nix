@@ -35,6 +35,7 @@ let
       allDefaultSystems = {
         nixosModule = { value = "hello all default systems :)"; };
         package = "hello all default systems :)";
+        defaultPackage = true;
       };
       none = { };
     };
@@ -62,15 +63,19 @@ rec {
     };
     packages = {
       aarch64-darwin = {
+        default = "hello all default systems :)";
         allDefaultSystems = "hello all default systems :)";
       };
       aarch64-linux = {
+        default = "hello all default systems :)";
         allDefaultSystems = "hello all default systems :)";
       };
       x86_64-darwin = {
+        default = "hello all default systems :)";
         allDefaultSystems = "hello all default systems :)";
       };
       x86_64-linux = {
+        default = "hello all default systems :)";
         allDefaultSystems = "hello all default systems :)";
         x86_64_Only = "x86_64 hello :)";
       };
