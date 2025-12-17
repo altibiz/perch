@@ -12,10 +12,10 @@
       filterModule =
         _: configs:
         builtins.any
-          (config:
-          config ? ${config}
-          || config ? config
-          && config.config ? ${config})
+          (conf:
+          conf ? ${config}
+          || conf ? config
+          && conf.config ? ${config})
           configs;
 
       filteredModules = self.lib.eval.filter
