@@ -10,12 +10,17 @@
     }:
     let
       configs = "${config}s";
+      defaultConfig = "default${self.lib.string.capitalize config}";
 
       submodules = mapSubmodules (self.lib.submodules.make {
-        inherit flakeModules specialArgs config;
+        inherit flakeModules specialArgs config defaultConfig;
       });
     in
     {
+      options.${defaultConfig} = lib.mkOption {
+        type = lib.types.boolean;
+        default = false;
+      };
       options.${config} = lib.mkOption {
         type = lib.types.attrsOf lib.types.raw;
       };
@@ -23,12 +28,7 @@
 
       options.flake.${configs} = lib.mkOption {
         type = submoduleType;
-        default =
-          submodules // {
-            default = {
-              imports = builtins.attrValues submodules;
-            };
-          };
+        default = submodules;
       };
       config.eval.publicConfig = [ [ "flake" configs ] ];
     };

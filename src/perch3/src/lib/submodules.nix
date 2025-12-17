@@ -7,6 +7,7 @@
     { flakeModules
     , specialArgs
     , config
+    , defaultConfig
     }:
     let
       filterModule =
@@ -23,6 +24,32 @@
         filterModule
         flakeModules;
 
+      filterDefaultModule =
+        _: configs:
+        builtins.any
+          (conf:
+          (conf ? ${defaultConfig}
+          && conf.${defaultConfig})
+          || (conf ? config
+          && conf.config ? ${defaultConfig}
+          && conf.config.${defaultConfig}))
+          configs;
+
+      defaultModule =
+        let
+          defaultModules = builtins.attrValues (self.lib.eval.filter
+            specialArgs
+            filterDefaultModule
+            filteredModules);
+        in
+        if (builtins.length defaultModules) == 0
+        then {
+          default = { imports = builtins.attrValues filteredModules; };
+        }
+        else {
+          default = builtins.head defaultModules;
+        };
+
       configModules = builtins.mapAttrs
         (_: self.lib.module.patch
           (_: args: args)
@@ -34,7 +61,7 @@
               && result.config ? ${config}
             then result.config.${config}
             else { }))
-        filteredModules;
+        (filteredModules // defaultModule);
     in
     configModules;
 }

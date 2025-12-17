@@ -29,6 +29,7 @@ let
     selfModules = {
       x86_64_Only = {
         nixosModule = { value = "x86_64 hello :)"; };
+        defaultNixosModule = true;
         package = "x86_64 hello :)";
         packageNixpkgs.system = "x86_64-linux";
       };
@@ -48,14 +49,7 @@ rec {
         value = "hello all default systems :)";
       };
       default = {
-        imports = [
-          {
-            value = "hello all default systems :)";
-          }
-          {
-            value = "x86_64 hello :)";
-          }
-        ];
+        value = "x86_64 hello :)";
       };
       x86_64_Only = {
         value = "x86_64 hello :)";
