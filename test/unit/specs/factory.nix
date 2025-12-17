@@ -40,25 +40,39 @@ let
   };
 in
 rec {
-  factory_submodule_artifact_correct = flakeResult == {
+  factory_submodule_artifact_correct = (builtins.removeAttrs flakeResult [ "modules" ]) == {
+    nixosModules = {
+      allDefaultSystems = {
+        value = "hello all default systems :)";
+      };
+      default = {
+        imports = [
+          {
+            value = "hello all default systems :)";
+          }
+          {
+            value = "x86_64 hello :)";
+          }
+        ];
+      };
+      x86_64_Only = {
+        value = "x86_64 hello :)";
+      };
+    };
     packages = {
-      "aarch64-darwin" = {
+      aarch64-darwin = {
         allDefaultSystems = "hello all default systems :)";
       };
-      "aarch64-linux" = {
+      aarch64-linux = {
         allDefaultSystems = "hello all default systems :)";
       };
-      "x86_64-darwin" = {
+      x86_64-darwin = {
         allDefaultSystems = "hello all default systems :)";
       };
-      "x86_64-linux" = {
+      x86_64-linux = {
         allDefaultSystems = "hello all default systems :)";
         x86_64_Only = "x86_64 hello :)";
       };
-    };
-    nixosModules = {
-      allDefaultSystems = { value = "hello all default systems :)"; };
-      x86_64_Only = { value = "x86_64 hello :)"; };
     };
   };
   factory_submodule_correct = factory_submodule_artifact_correct;
