@@ -33,9 +33,13 @@
                 else { };
 
               systems =
-                if !(exists) then [ ]
+                if !(exists)
+                then [ ]
                 else if nixpkgs ? system
-                then [ nixpkgs.system ]
+                then
+                  if builtins.isList nixpkgs.system
+                  then nixpkgs.system
+                  else [ nixpkgs.system ]
                 else self.lib.defaults.systems;
 
               configs = builtins.map

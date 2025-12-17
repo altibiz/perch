@@ -32,7 +32,7 @@ upgrade:
 
 test-e2e-all *args:
     #!/usr/bin/env nu
-    ls "{{ root }}/test" | each {
+    ls "{{ root }}/test/e2e" | get name | each {
       (nix flake check
         --override-flake "perch" "{{ root }}"
         --all-systems
@@ -47,7 +47,7 @@ test-e2e test *args:
       --all-systems \
       --no-write-lock-file \
       {{ args }} \
-      $"path:("{{ root }}/test/{{ test }}")"
+      $"path:("{{ root }}/test/e2e/{{ test }}")"
 
 test-unit filter="":
     #!/usr/bin/env nu
