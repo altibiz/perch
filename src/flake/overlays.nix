@@ -1,53 +1,22 @@
-{ self
-, lib
-, config
-, ...
-}:
+{ self, lib, config, ... }:
 
 {
-  options.propagate.overlays = lib.mkOption {
+  options.overlays = lib.mkOption {
     type = lib.types.attrsOf self.lib.type.overlay;
     default = { };
     description = lib.literalMD ''
-      Create a `overlays` flake output.
+      `overlays` flake output.
     '';
   };
+  config.eval.privateConfig = [ [ "overlays" ] ];
 
-  options.seal.defaults.overlay = lib.mkOption {
-    type = lib.types.nullOr lib.types.str;
-    default = null;
-    description = lib.literalMD ''
-      The default `overlays` flake output.
-    '';
-  };
-
-  options.seal.overlays = lib.mkOption {
+  options.flake.overlays = lib.mkOption {
     type = lib.types.attrsOf self.lib.type.overlay;
     default = { };
     description = lib.literalMD ''
-      Create a `overlays` flake output with default.
+      `overlays` flake output.
     '';
   };
-
-  config.propagate.overlays =
-    if !(config.flake ? overlays)
-    then { }
-    else
-      let
-        default = config.seal.defaults.overlay;
-
-        defaultOverlay =
-          if default != null
-          then config.seal.overlays.${default}
-          else if config.seal.overlays ? default
-          then config.seal.overlays.default
-          else
-            lib.composeManyExtensions
-              (builtins.attrValues
-                (builtins.removeAttrs
-                  config.seal.overlays
-                  [ "default" ]));
-      in
-      config.seal.overlays //
-      { default = defaultOverlay; };
+  config.flake.overlays = config.overlays;
+  config.eval.publicConfig = [ [ "flake" "overlays" ] ];
 }

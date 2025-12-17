@@ -1,9 +1,8 @@
-{ lib, pkgs, nixt, ... }:
+{ lib, pkgs, ... }:
 
 {
-  seal.defaults.devShell = "dev/dev";
-
-  integrate.devShell.devShell = pkgs.mkShell {
+  defaultDevShell = true;
+  devShell = pkgs.mkShell {
     packages = with pkgs; [
       # version control
       git
@@ -16,7 +15,6 @@
       nil
       nixpkgs-fmt
       nixVersions.stable
-      nixt.packages.${pkgs.system}.default
 
       # markdown
       markdownlint-cli

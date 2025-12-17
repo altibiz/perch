@@ -1,8 +1,6 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
-    nixt.url = "github:nix-community/nixt";
-    nixt.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { nixpkgs, ... } @inputs:
@@ -36,7 +34,7 @@
           builtins.attrValues
             (nixpkgs.lib.filterAttrs
               (name: _: nixpkgs.lib.hasPrefix "lib" name)
-              (importLib.import.dirToFlatPathAttrs ./src));
+              (importLib.import.dirToFlatPathAttrs "-" ./src));
       };
 
       lib = eval.config.flake.lib;
@@ -45,5 +43,6 @@
       inputs = specialArgs;
       root = ./.;
       prefix = "src";
+      separator = "-";
     };
 }

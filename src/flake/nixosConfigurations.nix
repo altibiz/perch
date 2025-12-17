@@ -1,32 +1,29 @@
 { self
 , lib
+, nixpkgs
+, flakeModules
 , specialArgs
-, perchModules
-, options
-, config
 , ...
 }:
 
-{
-  options.integrate.nixosConfiguration =
-    self.lib.option.mkIntegrationOption
-      config
-      "nixosConfiguration";
-
-  options.propagate.nixosConfigurations = lib.mkOption {
-    type = lib.types.attrsOf lib.types.raw;
-    default = { };
-    description = lib.literalMD ''
-      Propagated `nixosConfigurations` flake output.
-    '';
-  };
-
-  config.propagate.nixosConfigurations =
-    self.lib.module.systems
-      specialArgs
-      perchModules
-      options
-      config
-      "nixosConfiguration"
-      perchModules.current;
+self.lib.factory.artifactModule {
+  inherit specialArgs flakeModules nixpkgs;
+  nixpkgsConfig = "nixosConfigurationNixpkgs";
+  config = "nixosConfiguration";
+  artifactType = lib.types.attrsOf lib.types.raw;
+  mapArtifacts = artifacts: builtins.listToAttrs
+    (lib.flatten
+      (builtins.map
+        ({ name, value }:
+          let
+            system = name;
+            configs = value;
+          in
+          builtins.map
+            ({ name, value }: {
+              inherit value;
+              name = "${name}-${system}";
+            })
+            (lib.attrsToList configs))
+        (lib.attrsToList artifacts)));
 }

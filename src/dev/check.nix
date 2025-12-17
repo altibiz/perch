@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  integrate.devShell.devShell = pkgs.mkShell {
+  devShell = pkgs.mkShell {
     packages = with pkgs; [
       # version control
       git

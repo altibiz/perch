@@ -14,15 +14,15 @@
           nixpkgs = nixpkgs;
         };
 
-        importLib = ((import "${root}/src/perch3/src/lib/import.nix" specialArgs).flake.lib);
+        importLib = ((import "${root}/src/lib/import.nix" specialArgs).flake.lib);
 
         eval = lib.evalModules {
           specialArgs = specialArgs;
-          class = "perch";
+          class = "flake";
           modules = builtins.attrValues
             (lib.filterAttrs
               (name: _: lib.hasPrefix "lib" name)
-              (importLib.import.dirToFlatPathAttrs "-" "${root}/src/perch3/src"));
+              (importLib.import.dirToFlatPathAttrs "-" "${root}/src"));
         };
 
         flake = eval.config.flake;

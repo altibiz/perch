@@ -31,3 +31,5 @@ words:
   - elif
   - langservers
   - nixroot
+  - foldl
+  - subattrset

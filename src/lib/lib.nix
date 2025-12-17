@@ -1,5 +1,8 @@
 { lib, ... }:
 
+# TODO: with mkOptionType
+# NOTE: anything results in infinite recursion?
+
 let
   nest = lib.fix (nest: times:
     if times == 0

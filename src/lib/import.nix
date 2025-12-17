@@ -1,12 +1,13 @@
+# NOTE: do not reference self.lib here because it is used in initial import of perch
+# NOTE: be very careful with this one because its needed to create the unit test harness
+
 { lib, ... }:
 
 let
-  nameSeparator = "/";
-
   importDirToAttrsWithMap =
     let
       initial =
-        (importDirToAttrsWithMap: prefix: map: dir:
+        (importDirToAttrsWithMap: prefix: map: separator: dir:
           lib.attrsets.mapAttrs'
             (name: type:
               let
@@ -15,7 +16,7 @@ let
                 prefixedName =
                   if prefix == ""
                   then nameWithoutExtension
-                  else "${prefix}${nameSeparator}${nameWithoutExtension}";
+                  else "${prefix}${separator}${nameWithoutExtension}";
               in
               {
                 name =
@@ -61,13 +62,15 @@ let
                       importDirToAttrsWithMap
                         importDirToAttrsWithMap
                         prefixedName
-                        map "${dir}/${name}";
+                        map
+                        separator
+                        "${dir}/${name}";
               })
             (builtins.readDir dir));
     in
     initial initial "";
 
-  importDirToListWithMap = map: dir:
+  importDirToListWithMap = map: separator: dir:
     builtins.map
       map
       (builtins.filter
@@ -75,16 +78,16 @@ let
           || module.__import.type == "default")
         (lib.collect
           (builtins.hasAttr "__import")
-          (importDirToAttrsWithMap (module: module) dir)));
+          (importDirToAttrsWithMap (module: module) separator dir)));
 
-  importDirToFlatAttrsWithMap = map: dir:
+  importDirToFlatAttrsWithMap = map: separator: dir:
     builtins.listToAttrs
       (builtins.map
         (module: {
           name = module.__import.name;
           value = map module;
         })
-        (importDirToListWithMap (module: module) dir));
+        (importDirToListWithMap (module: module) separator dir));
 in
 {
   flake.lib.import = {

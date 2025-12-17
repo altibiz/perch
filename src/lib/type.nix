@@ -1,6 +1,7 @@
 { lib, ... }:
 
 # NOTE: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/nixpkgs.nix
+# TODO: somehow import from nixpkgs because this is super brittle
 
 let
   isConfig = x: builtins.isAttrs x || lib.isFunction x;

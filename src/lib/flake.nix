@@ -8,6 +8,7 @@
     , selfModules ? { }
     , inputModules ? [ ]
     , includeInputModulesFromInputs ? true
+    , separator ? "-"
     }:
     let
       prefixedRoot =
@@ -18,6 +19,7 @@
         if prefixedRoot == null then { }
         else
           self.lib.import.dirToFlatPathAttrs
+            separator
             prefixedRoot;
 
       inputModulesFromInputs =
