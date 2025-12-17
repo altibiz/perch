@@ -33,3 +33,4 @@ words:
   - nixroot
   - foldl
   - subattrset
+  - nixall
