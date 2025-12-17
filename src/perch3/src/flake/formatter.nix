@@ -16,7 +16,7 @@ self.lib.factory.artifactModule {
       ({ name, value }:
         {
           inherit name;
-          # NOTE: a bit scary O.O
+          # NOTE: there should always be at least one
           value =
             (builtins.head
               (lib.attrsToList value)).value;
