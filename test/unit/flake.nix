@@ -11,6 +11,7 @@
         specialArgs = {
           lib = lib;
           self.lib = flake.lib;
+          nixpkgs = nixpkgs;
         };
 
         importLib = ((import "${root}/src/perch3/src/lib/import.nix" specialArgs).flake.lib);

@@ -86,11 +86,11 @@
         (builtins.attrValues
           (builtins.mapAttrs
             (module: configs: builtins.map
-              (config:
+              (conf:
                 let
                   eval = lib.evalModules {
                     specialArgs = specialArgs // {
-                      pkgs = import nixpkgs config;
+                      pkgs = import nixpkgs conf;
                     };
                     modules = [
                       valueModules.${module}
@@ -105,7 +105,7 @@
                 in
                 {
                   inherit module;
-                  system = config.system;
+                  system = conf.system;
                   value = eval.config.value;
                 })
               configs)
