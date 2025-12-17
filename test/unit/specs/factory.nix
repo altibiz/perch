@@ -36,6 +36,7 @@ let
         nixosModule = { value = "hello all default systems :)"; };
         package = "hello all default systems :)";
       };
+      none = { };
     };
   };
 in
