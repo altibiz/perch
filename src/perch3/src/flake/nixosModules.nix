@@ -4,7 +4,7 @@
 , ...
 }:
 
-self.lib.module.mkSubmoduleModule {
+self.lib.factory.submoduleModule {
   inherit flakeModules specialArgs;
   config = "nixosModule";
 }
