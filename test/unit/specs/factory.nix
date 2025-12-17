@@ -1,17 +1,24 @@
 { self, nixpkgs, ... }:
 
 let
-  submoduleResult = { specialArgs, flakeModules, ... }:
+  nixosModule = { specialArgs, flakeModules, ... }:
     self.lib.factory.submoduleModule {
       inherit specialArgs flakeModules;
       config = "nixosModule";
     };
 
-  artifactResult = { specialArgs, nixpkgs, flakeModules, ... }:
+  packageModule = { specialArgs, nixpkgs, flakeModules, ... }:
     self.lib.factory.artifactModule {
       inherit specialArgs nixpkgs flakeModules;
       config = "package";
       nixpkgsConfig = "packageNixpkgs";
+    };
+
+  appModule = { specialArgs, nixpkgs, flakeModules, ... }:
+    self.lib.factory.artifactModule {
+      inherit specialArgs nixpkgs flakeModules;
+      config = "app";
+      nixpkgsConfig = "appNixpkgs";
     };
 
   flakeResult = self.lib.flake.make {
@@ -20,58 +27,75 @@ let
       input = {
         modules.default = {
           imports = [
-            submoduleResult
-            artifactResult
+            nixosModule
+            packageModule
+            appModule
           ];
         };
       };
     };
     selfModules = {
-      x86_64_Only = {
-        nixosModule = { value = "x86_64 hello :)"; };
+      someNixosModule = {
+        nixosModule = { value = "some hello :)"; };
         defaultNixosModule = true;
-        package = "x86_64 hello :)";
-        packageNixpkgs.system = "x86_64-linux";
       };
-      allDefaultSystems = {
-        nixosModule = { value = "hello all default systems :)"; };
-        package = "hello all default systems :)";
+      otherNixosModule = {
+        nixosModule = { value = "other hello :)"; };
+      };
+      x86_64_Only = { pkgs, ... }: {
+        package = "${pkgs.system} hello x86_64-linux :)";
+        packageNixpkgs.system = "x86_64-linux";
+        app = "${pkgs.system} hello x86_64-linux :)";
+        appNixpkgs.system = "x86_64-linux";
+      };
+      allDefaultSystems = { pkgs, ... }: {
+        package = "${pkgs.system} hello all default systems :)";
         defaultPackage = true;
+        app = "${pkgs.system} hello all default systems :)";
       };
       none = { };
     };
   };
 in
 rec {
-  factory_submodule_artifact_correct = (builtins.removeAttrs flakeResult [ "modules" ]) == {
+  factory_submodule_artifact_correct = (self.lib.debug.trace (builtins.removeAttrs flakeResult [ "modules" ])) == {
+    apps = {
+      aarch64-darwin = {
+        allDefaultSystems = "aarch64-darwin hello all default systems :)";
+      };
+      aarch64-linux = {
+        allDefaultSystems = "aarch64-linux hello all default systems :)";
+      };
+      x86_64-darwin = {
+        allDefaultSystems = "x86_64-darwin hello all default systems :)";
+      };
+      x86_64-linux = {
+        allDefaultSystems = "x86_64-linux hello all default systems :)";
+        x86_64_Only = "x86_64-linux hello x86_64-linux :)";
+      };
+    };
     nixosModules = {
-      allDefaultSystems = {
-        value = "hello all default systems :)";
-      };
-      default = {
-        value = "x86_64 hello :)";
-      };
-      x86_64_Only = {
-        value = "x86_64 hello :)";
-      };
+      default = { value = "some hello :)"; };
+      otherNixosModule = { value = "other hello :)"; };
+      someNixosModule = { value = "some hello :)"; };
     };
     packages = {
       aarch64-darwin = {
-        default = "hello all default systems :)";
-        allDefaultSystems = "hello all default systems :)";
+        allDefaultSystems = "aarch64-darwin hello all default systems :)";
+        default = "aarch64-darwin hello all default systems :)";
       };
       aarch64-linux = {
-        default = "hello all default systems :)";
-        allDefaultSystems = "hello all default systems :)";
+        allDefaultSystems = "aarch64-linux hello all default systems :)";
+        default = "aarch64-linux hello all default systems :)";
       };
       x86_64-darwin = {
-        default = "hello all default systems :)";
-        allDefaultSystems = "hello all default systems :)";
+        allDefaultSystems = "x86_64-darwin hello all default systems :)";
+        default = "x86_64-darwin hello all default systems :)";
       };
       x86_64-linux = {
-        default = "hello all default systems :)";
-        allDefaultSystems = "hello all default systems :)";
-        x86_64_Only = "x86_64 hello :)";
+        allDefaultSystems = "x86_64-linux hello all default systems :)";
+        default = "x86_64-linux hello all default systems :)";
+        x86_64_Only = "x86_64-linux hello x86_64-linux :)";
       };
     };
   };

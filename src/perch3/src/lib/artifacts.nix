@@ -19,13 +19,10 @@
           (_: args: args)
           (_: result:
             let
-              value =
-                if result ? ${config}
-                then result.${config}
-                else if result ? config
-                  && result.config ? ${config}
-                then result.config.${config}
-                else null;
+              exists =
+                result ? ${config}
+                || (result ? config
+                && result.config ? ${config});
 
               nixpkgs =
                 if result ? ${nixpkgsConfig}
@@ -36,7 +33,7 @@
                 else { };
 
               systems =
-                if value == null then [ ]
+                if !(exists) then [ ]
                 else if nixpkgs ? system
                 then [ nixpkgs.system ]
                 else self.lib.defaults.systems;
@@ -80,9 +77,9 @@
               default =
                 if result ? ${defaultConfig}
                 then result.${defaultConfig}
-                else if result ? defaultConfig
-                  && result.defaultConfig ? ${defaultConfig}
-                then result.defaultConfig.${defaultConfig}
+                else if result ? config
+                  && result.config ? ${defaultConfig}
+                then result.config.${defaultConfig}
                 else false;
             in
             {
