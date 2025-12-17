@@ -5,6 +5,7 @@ let
   specialArgs = { inherit self; };
   config = "package";
   nixpkgsConfig = "packageNixpkgs";
+  defaultConfig = "defaultPackage";
   flakeModules = {
     x68_64_Only = {
       packageNixpkgs = {
@@ -18,7 +19,7 @@ let
   };
 
   artifacts = makeArtifacts {
-    inherit specialArgs flakeModules nixpkgs nixpkgsConfig config;
+    inherit specialArgs flakeModules nixpkgs nixpkgsConfig config defaultConfig;
   };
 in
 {

@@ -44,6 +44,7 @@
     }:
     let
       configs = "${config}s";
+      defaultConfig = "default${self.lib.string.capitalize config}";
 
       artifacts = mapArtifacts (self.lib.artifacts.make {
         inherit
@@ -51,19 +52,24 @@
           flakeModules
           nixpkgs
           nixpkgsConfig
+          defaultConfig
           config;
       });
     in
     {
       config.eval.allowedArgs = [ "pkgs" ];
 
+      options.${defaultConfig} = lib.mkOption {
+        type = lib.types.boolean;
+        default = false;
+      };
       options.${config} = lib.mkOption {
         type = lib.types.raw;
       };
       options.${nixpkgsConfig} = lib.mkOption {
         type = self.lib.type.nixpkgs.config;
       };
-      config.eval.privateConfig = [ [ nixpkgsConfig ] [ config ] ];
+      config.eval.privateConfig = [ [ nixpkgsConfig ] [ config ] [ defaultConfig ] ];
 
       options.flake.${configs} = lib.mkOption {
         type = artifactType;

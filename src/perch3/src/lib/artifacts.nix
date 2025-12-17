@@ -10,6 +10,7 @@
     , nixpkgs
     , nixpkgsConfig
     , config
+    , defaultConfig
     }:
     let
       nixpkgsAttrModules = builtins.mapAttrs
@@ -76,9 +77,16 @@
                   && result.config ? ${config}
                 then result.config.${config}
                 else null;
+              default =
+                if result ? ${defaultConfig}
+                then result.${defaultConfig}
+                else if result ? defaultConfig
+                  && result.defaultConfig ? ${defaultConfig}
+                then result.defaultConfig.${defaultConfig}
+                else false;
             in
             {
-              inherit value;
+              inherit value default;
             }))
         flakeModules;
 
@@ -99,6 +107,10 @@
                           type = lib.types.raw;
                           default = { };
                         };
+                        options.default = lib.mkOption {
+                          type = lib.types.bool;
+                          default = false;
+                        };
                       })
                     ];
                   };
@@ -107,6 +119,7 @@
                   inherit module;
                   system = conf.system;
                   value = eval.config.value;
+                  default = eval.config.default;
                 })
               configs)
             nixpkgsAttrEval.config.nixpkgs));
@@ -121,14 +134,27 @@
           (system: {
             name = system;
             value = builtins.listToAttrs
-              (builtins.map
-                (value: {
-                  name = value.module;
-                  value = value.value;
-                })
-                (builtins.filter
-                  (value: value.system == system)
-                  valuesEval));
+              (lib.flatten
+                (builtins.map
+                  (value:
+                    if value.default then [
+                      {
+                        name = "default";
+                        value = value.value;
+                      }
+                      {
+                        name = value.module;
+                        value = value.value;
+                      }
+                    ] else [
+                      {
+                        name = value.module;
+                        value = value.value;
+                      }
+                    ])
+                  (builtins.filter
+                    (value: value.system == system)
+                    valuesEval)));
           })
           systems);
     in
