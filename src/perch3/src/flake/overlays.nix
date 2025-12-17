@@ -1,12 +1,22 @@
-{ self, lib, ... }:
+{ self, lib, config, ... }:
 
 {
+  options.overlays = lib.mkOption {
+    type = lib.types.attrsOf self.lib.type.overlay;
+    default = { };
+    description = lib.literalMD ''
+      `overlays` flake output.
+    '';
+  };
+  config.eval.privateConfig = [ [ "overlays" ] ];
+
   options.flake.overlays = lib.mkOption {
     type = lib.types.attrsOf self.lib.type.overlay;
     default = { };
     description = lib.literalMD ''
-      `lib` flake output.
+      `overlays` flake output.
     '';
   };
-  eval.publicConfig = [ [ "flake" "overlays" ] ];
+  config.flake.overlays = config.overlays;
+  config.eval.publicConfig = [ [ "flake" "overlays" ] ];
 }
