@@ -28,7 +28,7 @@ let
 in
 {
   options.flake.lib = lib.mkOption {
-    type = nest 8;
+    type = lib.types.attrsOf (nest 8);
     default = { };
     description = lib.literalMD ''
       `lib` flake output.
