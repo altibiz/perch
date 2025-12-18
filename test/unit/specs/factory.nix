@@ -1,15 +1,18 @@
 { self, nixpkgs, ... }:
 
 let
+  superConfig = { };
+  superOptions = { };
+
   nixosModule = { specialArgs, flakeModules, ... }:
     self.lib.factory.submoduleModule {
-      inherit specialArgs flakeModules;
+      inherit specialArgs flakeModules superConfig superOptions;
       config = "nixosModule";
     };
 
   nixosConfigurationModule = { specialArgs, nixpkgs, flakeModules, ... }:
     self.lib.factory.configurationModule {
-      inherit specialArgs nixpkgs flakeModules;
+      inherit specialArgs nixpkgs flakeModules superConfig superOptions;
       config = "nixosConfiguration";
       nixpkgsConfig = "nixosConfigurationNixpkgs";
     };
