@@ -4,6 +4,8 @@
   flake.lib.factory.submoduleModule =
     { flakeModules
     , specialArgs
+    , superConfig
+    , superOptions
     , config
     , submoduleType ? lib.types.attrsOf lib.types.raw
     , mapSubmodules ? (_: _)
@@ -13,10 +15,21 @@
       defaultConfig = "default${self.lib.string.capitalize config}";
 
       submodules = mapSubmodules (self.lib.submodules.make {
-        inherit flakeModules specialArgs config defaultConfig;
+        inherit
+          flakeModules
+          config
+          defaultConfig;
+
+        specialArgs =
+          (specialArgs // {
+            super.config = superConfig;
+            super.options = superOptions;
+          });
       });
     in
     {
+      config.eval.allowedArgs = [ "super" "pkgs" ];
+
       options.${defaultConfig} = lib.mkOption {
         type = lib.types.bool;
         default = false;
@@ -82,6 +95,8 @@
   flake.lib.factory.configurationModule =
     { flakeModules
     , specialArgs
+    , superConfig
+    , superOptions
     , nixpkgs
     , nixpkgsConfig
     , config
@@ -94,16 +109,21 @@
 
       configurations = mapConfigurations (self.lib.configurations.make {
         inherit
-          specialArgs
           flakeModules
           nixpkgs
           nixpkgsConfig
           defaultConfig
           config;
+
+        specialArgs =
+          (specialArgs // {
+            super.config = superConfig;
+            super.options = superOptions;
+          });
       });
     in
     {
-      config.eval.allowedArgs = [ "pkgs" ];
+      config.eval.allowedArgs = [ "super" "pkgs" ];
 
       options.${defaultConfig} = lib.mkOption {
         type = lib.types.bool;

@@ -107,7 +107,7 @@
                           default = false;
                         };
 
-                        config.nixpkgs.config = conf;
+                        config.nixpkgs = conf;
                       })
                       modules.${module}
                     ];

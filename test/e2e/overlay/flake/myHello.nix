@@ -1,53 +1,46 @@
-{ lib, super, pkgs, ... }:
+{ self, super, pkgs, ... }:
 
 {
-  flake.overlays = lib.mkForce {
-    default = (final: prev: {
-      myHello = final.writeShellApplication {
-        name = "hello";
-        runtimeInputs = [ prev.hello ];
-        text = ''
-          hello
-        '';
-      };
-    });
+  overlays.default = final: prev: {
+    myHello = final.writeShellApplication {
+      name = "hello";
+      runtimeInputs = [ prev.hello ];
+      text = ''
+        hello
+      '';
+    };
   };
 
-  integrate.systems = [ "x86_64-linux" "x86_64-darwin" ];
+  defaultPackage = true;
+  packageNixpkgs = {
+    system = [ "x86_64-linux" "x86_64-darwin" ];
+    overlays = [ self.overlays.default ];
+  };
+  package = pkgs.myHello;
 
-  seal.defaults.package = "myHello";
-  integrate.package.package = pkgs.myHello;
-
-  seal.defaults.nixosModule = "myHello";
-  branch.nixosModule.nixosModule = {
+  defaultNixosModule = true;
+  nixosModule = {
     environment.systemPackages = [
       pkgs.myHello
     ];
   };
 
-  seal.defaults.homeManagerModule = "myHello";
-  branch.homeManagerModule.homeManagerModule = {
-    home.packages = [
-      pkgs.myHello
-    ];
+  nixosConfigurationNixpkgs = {
+    system = "x86_64-linux";
+    overlays = [ self.overlays.default ];
   };
+  nixosConfiguration = {
+    imports = [
+      super.config.flake.nixosModules.default
+    ];
 
-  integrate.nixosConfiguration = {
-    systems = [ "x86_64-linux" ];
-
-    nixosConfiguration = {
-      imports = [
-        super.config.flake.nixosModules.default
-      ];
-
-      fileSystems."/" = {
-        device = "/dev/disk/by-label/NIXROOT";
-        fsType = "ext4";
-      };
-
-      boot.loader.grub.device = "nodev";
-
-      system.stateVersion = "24.11";
+    fileSystems."/" = {
+      device = "/dev/disk/by-label/NIXROOT";
+      fsType = "ext4";
     };
+
+    boot.loader.grub.device = "nodev";
+
+    system.stateVersion = "24.11";
   };
 }
