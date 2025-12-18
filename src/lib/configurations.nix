@@ -87,7 +87,7 @@
                 else false;
             in
             if value == null then null else value // {
-              __default = default;
+              __perch_default = default;
             }))
         flakeModules;
 
@@ -102,7 +102,7 @@
                     system = conf.system;
                     modules = [
                       ({ lib, ... }: {
-                        options.__default = lib.mkOption {
+                        options.__perch_default = lib.mkOption {
                           type = lib.types.bool;
                           default = false;
                         };
@@ -117,7 +117,7 @@
                   inherit module;
                   system = conf.system;
                   value = eval;
-                  default = eval.config.__default;
+                  default = eval.config.__perch_default;
                 })
               configs)
             nixpkgsEval.config.nixpkgs));
