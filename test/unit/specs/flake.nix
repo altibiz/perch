@@ -55,10 +55,25 @@ let
   };
 
   result = makeFlake { inherit inputs selfModules; };
+  resultList = makeFlake { inherit inputs; selfModules = builtins.attrValues selfModules; };
 in
 {
   flake_make_nixos_modules_result_correct = result.nixosModules == {
     module = {
+      environment.systemPackages = [ "my package" ];
+    };
+    default = {
+      imports = [
+        {
+          environment.systemPackages = [ "my package" ];
+        }
+      ];
+    };
+  };
+
+  flake_make_list_nixos_modules_result_correct = resultList.nixosModules == {
+    # NOTE: -1 from being a list index
+    module-1 = {
       environment.systemPackages = [ "my package" ];
     };
     default = {

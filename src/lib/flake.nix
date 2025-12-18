@@ -11,6 +11,18 @@
     , separator ? "-"
     }:
     let
+      selfModule =
+        if builtins.isList selfModules
+        then
+          builtins.listToAttrs
+            (lib.imap
+              (i: module: {
+                name = "module-${builtins.toString i}";
+                value = module;
+              })
+              selfModules)
+        else selfModules;
+
       prefixedRoot =
         if root == null || prefix == null then null
         else lib.path.append root prefix;
@@ -44,7 +56,7 @@
       eval = self.lib.eval.flake
         (inputs // { inherit root; })
         (inputModulesFromInputs ++ inputModules)
-        (prefixedRootModules // selfModules);
+        (prefixedRootModules // selfModule);
     in
     if eval.config ? flake
     then eval.config.flake
