@@ -13,7 +13,7 @@
 
       # nix
       nil
-      nixpkgs-fmt
+      nixfmt-rfc-style
       nixVersions.stable
 
       # markdown

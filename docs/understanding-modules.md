@@ -91,8 +91,8 @@ uses the `integrate` prefix outputs, it is advised that you also read about
 
 For reusable Perch module authors (those of you who want to provide flake
 outputs for consuming flakes), however, it is advised you read about the
-[API](./api/index.md). For examples, please refer to the [Perch
-`src/flake` directory].
+[API](./api/index.md). For examples, please refer to the [Perch `src/flake`
+directory].
 
 [Perch `src/flake` directory]:
   https://github.com/altibiz/perch/blob/main/src/flake

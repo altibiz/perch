@@ -54,7 +54,7 @@ let
             fsType = "ext4";
           };
           boot.loader.grub.device = "nodev";
-          system.stateVersion = "24.11";
+          system.stateVersion = "25.11";
         };
       };
       someNixosModule = {

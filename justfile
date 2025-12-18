@@ -11,11 +11,12 @@ default:
 format:
     cd '{{ root }}'; just --unstable --fmt
     prettier --write '{{ root }}'
-    nixpkgs-fmt '{{ root }}'
+    nixfmt ...(fd '.*.nix$' '{{ root }}' | lines)
 
 lint:
     cd '{{ root }}'; just --unstable --fmt --check
     prettier --check '{{ root }}'
+    nixfmt --check ...(fd '.*.nix$' '{{ root }}' | lines)
     cspell lint '{{ root }}' --no-progress
     nixpkgs-fmt --check '{{ root }}'
     markdownlint '{{ root }}'

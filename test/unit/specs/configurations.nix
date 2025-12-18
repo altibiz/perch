@@ -7,7 +7,7 @@ let
       fsType = "ext4";
     };
     boot.loader.grub.device = "nodev";
-    system.stateVersion = "24.11";
+    system.stateVersion = "25.11";
   };
   linuxConf = {
     fileSystems."/" = {
@@ -15,7 +15,7 @@ let
       fsType = "ext4";
     };
     boot.loader.grub.device = "nodev";
-    system.stateVersion = "24.11";
+    system.stateVersion = "25.11";
   };
   makeConfigurations = self.lib.configurations.make;
   specialArgs = { inherit self; };
