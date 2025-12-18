@@ -52,11 +52,11 @@
     , nixpkgs
     , nixpkgsConfig
     , config
+    , configs ? "${config}s"
     , artifactType ? lib.types.attrsOf (lib.types.attrsOf lib.types.raw)
     , mapArtifacts ? (_: _)
     }:
     let
-      configs = "${config}s";
       defaultConfig = "default${self.lib.string.capitalize config}";
 
       artifacts = mapArtifacts (self.lib.artifacts.make {

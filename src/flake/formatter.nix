@@ -10,6 +10,7 @@ self.lib.factory.artifactModule {
   inherit specialArgs flakeModules nixpkgs;
   nixpkgsConfig = "formatterNixpkgs";
   config = "formatter";
+  configs = "formatter";
   artifactType = lib.types.attrsOf lib.types.raw;
   mapArtifacts = artifacts: builtins.listToAttrs
     (builtins.map
