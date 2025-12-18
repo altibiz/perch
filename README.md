@@ -5,15 +5,13 @@ organize, extend, and refine your configurations.
 
 ## Get started
 
-Add the following to `flake.nix`:
+Add the following to `flake.nix` to build flake modules from the `flake`
+directory into a flake:
 
 ```nix
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/<nixpkgs-version>";
-
     perch.url = "github:altibiz/perch/refs/tags/<perch-version>";
-    perch.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { perch, ... } @inputs:
