@@ -43,7 +43,13 @@ let
       ...
     }:
     self.lib.factory.artifactModule {
-      inherit specialArgs nixpkgs flakeModules;
+      inherit
+        specialArgs
+        nixpkgs
+        flakeModules
+        superConfig
+        superOptions
+        ;
       config = "package";
       nixpkgsConfig = "packageNixpkgs";
     };
@@ -56,7 +62,13 @@ let
       ...
     }:
     self.lib.factory.artifactModule {
-      inherit specialArgs nixpkgs flakeModules;
+      inherit
+        specialArgs
+        nixpkgs
+        flakeModules
+        superConfig
+        superOptions
+        ;
       config = "app";
       nixpkgsConfig = "appNixpkgs";
     };

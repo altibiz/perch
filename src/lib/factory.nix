@@ -64,6 +64,8 @@
     {
       flakeModules,
       specialArgs,
+      superConfig,
+      superOptions,
       nixpkgs,
       nixpkgsConfig,
       config,
@@ -77,13 +79,20 @@
       artifacts = mapArtifacts (
         self.lib.artifacts.make {
           inherit
-            specialArgs
             flakeModules
             nixpkgs
             nixpkgsConfig
             defaultConfig
             config
             ;
+
+          specialArgs = (
+            specialArgs
+            // {
+              super.config = superConfig;
+              super.options = superOptions;
+            }
+          );
         }
       );
     in
