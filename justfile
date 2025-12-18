@@ -2,8 +2,6 @@ set windows-shell := ["nu.exe", "-c"]
 set shell := ["nu", "-c"]
 
 root := absolute_path('')
-artifacts := absolute_path('artifacts')
-docs := absolute_path('docs')
 
 default:
     @just --choose
@@ -84,7 +82,10 @@ repl test *args:
           testFlake = builtins.getFlake test; \
         }'
 
+dev-docs:
+    mdbook serve '{{ root }}/docs'
+
 docs:
-    rm -rf '{{ artifacts }}'
-    cd '{{ docs }}'; mdbook build
-    mv '{{ docs }}/book' '{{ artifacts }}'
+    rm -rf '{{ root }}/artifacts'
+    cd '{{ root }}/docs'; mdbook build
+    mv '{{ root }}/docs/book' '{{ root }}/artifacts'
