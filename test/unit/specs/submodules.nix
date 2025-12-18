@@ -19,12 +19,13 @@ let
   };
 in
 {
-  submodules_make_correct = submodules == {
-    default = {
-      value = 1;
+  submodules_make_correct =
+    submodules == {
+      default = {
+        value = 1;
+      };
+      withConfig = {
+        value = 1;
+      };
     };
-    withConfig = {
-      value = 1;
-    };
-  };
 }

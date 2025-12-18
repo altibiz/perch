@@ -19,23 +19,31 @@ let
   };
 
   artifacts = makeArtifacts {
-    inherit specialArgs flakeModules nixpkgs nixpkgsConfig config defaultConfig;
+    inherit
+      specialArgs
+      flakeModules
+      nixpkgs
+      nixpkgsConfig
+      config
+      defaultConfig
+      ;
   };
 in
 {
-  artifacts_make_correct = artifacts == {
-    "aarch64-darwin" = {
-      allDefaultSystems = "hello all default systems :)";
+  artifacts_make_correct =
+    artifacts == {
+      "aarch64-darwin" = {
+        allDefaultSystems = "hello all default systems :)";
+      };
+      "aarch64-linux" = {
+        allDefaultSystems = "hello all default systems :)";
+      };
+      "x86_64-darwin" = {
+        allDefaultSystems = "hello all default systems :)";
+      };
+      "x86_64-linux" = {
+        x68_64_Only = "hello x86_64 :)";
+        allDefaultSystems = "hello all default systems :)";
+      };
     };
-    "aarch64-linux" = {
-      allDefaultSystems = "hello all default systems :)";
-    };
-    "x86_64-darwin" = {
-      allDefaultSystems = "hello all default systems :)";
-    };
-    "x86_64-linux" = {
-      x68_64_Only = "hello x86_64 :)";
-      allDefaultSystems = "hello all default systems :)";
-    };
-  };
 }

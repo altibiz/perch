@@ -31,22 +31,31 @@ let
     };
     linux-only = {
       nixosConfigurationNixpkgs = {
-        system = [ "x86_64-linux" "aarch64-linux" ];
+        system = [
+          "x86_64-linux"
+          "aarch64-linux"
+        ];
       };
       nixosConfiguration = linuxConf;
     };
   };
 
   configurations = makeConfigurations {
-    inherit specialArgs flakeModules nixpkgs nixpkgsConfig config defaultConfig;
+    inherit
+      specialArgs
+      flakeModules
+      nixpkgs
+      nixpkgsConfig
+      config
+      defaultConfig
+      ;
   };
 in
 {
   configurations_make_correct =
-    (self.lib.debug.trace
-      (builtins.mapAttrs
-        (_: value: value.config.fileSystems."/".device)
-        configurations)) == {
+    (self.lib.debug.trace (
+      builtins.mapAttrs (_: value: value.config.fileSystems."/".device) configurations
+    )) == {
       "linux-only-aarch64-linux" = linuxConf.fileSystems."/".device;
       "x86_64-linux-only-x86_64-linux" = x86conf.fileSystems."/".device;
       "linux-only-x86_64-linux" = linuxConf.fileSystems."/".device;

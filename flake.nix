@@ -3,14 +3,18 @@
     nixpkgs.url = "github:nixos/nixpkgs/release-25.11";
   };
 
-  outputs = { nixpkgs, ... } @inputs:
+  outputs =
+    { nixpkgs, ... }@inputs:
     let
       selflessInputs = builtins.removeAttrs inputs [ "self" ];
 
-      specialArgs = (selflessInputs // {
-        lib = nixpkgs.lib;
-        self.lib = lib;
-      });
+      specialArgs = (
+        selflessInputs
+        // {
+          lib = nixpkgs.lib;
+          self.lib = lib;
+        }
+      );
 
       importLib = ((import ./src/lib/import.nix) specialArgs).flake.lib;
 
@@ -30,11 +34,11 @@
       eval = nixpkgs.lib.evalModules {
         specialArgs = specialArgs;
         class = "perch";
-        modules =
-          builtins.attrValues
-            (nixpkgs.lib.filterAttrs
-              (name: _: nixpkgs.lib.hasPrefix "lib" name)
-              (importLib.import.dirToFlatPathAttrs "-" ./src));
+        modules = builtins.attrValues (
+          nixpkgs.lib.filterAttrs (name: _: nixpkgs.lib.hasPrefix "lib" name) (
+            importLib.import.dirToFlatPathAttrs "-" ./src
+          )
+        );
       };
 
       lib = eval.config.flake.lib;

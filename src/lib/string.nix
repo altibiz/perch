@@ -1,8 +1,10 @@
 { lib, ... }:
 
 {
-  flake.lib.string.capitalize = s:
-    if s == "" then ""
+  flake.lib.string.capitalize =
+    s:
+    if s == "" then
+      ""
     else
       let
         first = lib.toUpper (builtins.substring 0 1 s);

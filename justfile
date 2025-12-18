@@ -18,7 +18,6 @@ lint:
     prettier --check '{{ root }}'
     nixfmt --check ...(fd '.*.nix$' '{{ root }}' | lines)
     cspell lint '{{ root }}' --no-progress
-    nixpkgs-fmt --check '{{ root }}'
     markdownlint '{{ root }}'
     markdown-link-check \
       --config .markdown-link-check.json \

@@ -1,8 +1,9 @@
-{ self
-, nixpkgs
-, flakeModules
-, specialArgs
-, ...
+{
+  self,
+  nixpkgs,
+  flakeModules,
+  specialArgs,
+  ...
 }:
 
 self.lib.factory.artifactModule {

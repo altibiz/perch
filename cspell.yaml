@@ -34,3 +34,4 @@ words:
   - foldl
   - subattrset
   - nixall
+  - nixfmt

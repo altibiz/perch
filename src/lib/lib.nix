@@ -4,9 +4,9 @@
 # NOTE: anything results in infinite recursion?
 
 let
-  nest = lib.fix (nest: times:
-    if times == 0
-    then
+  nest = lib.fix (
+    nest: times:
+    if times == 0 then
       lib.types.oneOf [
         lib.types.bool
         lib.types.number
@@ -23,7 +23,8 @@ let
         (lib.types.functionTo lib.types.raw)
         (lib.types.listOf (nest (times - 1)))
         (lib.types.attrsOf (nest (times - 1)))
-      ]);
+      ]
+  );
 in
 {
   options.flake.lib = lib.mkOption {

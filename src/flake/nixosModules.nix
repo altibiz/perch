@@ -1,9 +1,10 @@
-{ self
-, flakeModules
-, specialArgs
-, config
-, options
-, ...
+{
+  self,
+  flakeModules,
+  specialArgs,
+  config,
+  options,
+  ...
 }:
 
 self.lib.factory.submoduleModule {

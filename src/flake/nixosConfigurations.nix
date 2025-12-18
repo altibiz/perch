@@ -1,10 +1,11 @@
-{ self
-, nixpkgs
-, flakeModules
-, specialArgs
-, config
-, options
-, ...
+{
+  self,
+  nixpkgs,
+  flakeModules,
+  specialArgs,
+  config,
+  options,
+  ...
 }:
 
 self.lib.factory.configurationModule {

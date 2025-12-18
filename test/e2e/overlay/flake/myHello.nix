@@ -1,4 +1,9 @@
-{ self, super, pkgs, ... }:
+{
+  self,
+  super,
+  pkgs,
+  ...
+}:
 
 {
   overlays.default = final: prev: {
@@ -13,7 +18,10 @@
 
   defaultPackage = true;
   packageNixpkgs = {
-    system = [ "x86_64-linux" "x86_64-darwin" ];
+    system = [
+      "x86_64-linux"
+      "x86_64-darwin"
+    ];
     overlays = [ self.overlays.default ];
   };
   package = pkgs.myHello;

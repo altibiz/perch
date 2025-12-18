@@ -1,9 +1,10 @@
-{ self
-, perch
-, perchModules
-, lib
-, pkgs
-, ...
+{
+  self,
+  perch,
+  perchModules,
+  lib,
+  pkgs,
+  ...
 }:
 
 {
@@ -18,7 +19,8 @@
       inherit
         self
         perch
-        perchModules;
+        perchModules
+        ;
     };
 
     nixosModule = {
@@ -43,24 +45,36 @@
       ];
     };
 
-    packageNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
+    packageNixpkgs.system = [
+      "x86_64-linux"
+      "x86_64-darwin"
+    ];
     package = pkgs.writeShellApplication {
       name = "hello";
       runtimeInputs = [ pkgs.hello ];
       text = "hello";
     };
 
-    checkNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
+    checkNixpkgs.system = [
+      "x86_64-linux"
+      "x86_64-darwin"
+    ];
     check = pkgs.runCommand "check" { } "touch $out";
 
-    formatterNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
+    formatterNixpkgs.system = [
+      "x86_64-linux"
+      "x86_64-darwin"
+    ];
     formatter = pkgs.writeShellApplication {
       name = "formatter";
       runtimeInputs = [ ];
       text = "exit 0";
     };
 
-    devShellNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
+    devShellNixpkgs.system = [
+      "x86_64-linux"
+      "x86_64-darwin"
+    ];
     devShell = pkgs.mkShell {
       packages = [
         pkgs.hello

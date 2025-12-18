@@ -1,4 +1,9 @@
-{ self, lib, config, ... }:
+{
+  self,
+  lib,
+  config,
+  ...
+}:
 
 {
   options.overlays = lib.mkOption {
@@ -18,5 +23,10 @@
     '';
   };
   config.flake.overlays = config.overlays;
-  config.eval.publicConfig = [ [ "flake" "overlays" ] ];
+  config.eval.publicConfig = [
+    [
+      "flake"
+      "overlays"
+    ]
+  ];
 }

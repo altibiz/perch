@@ -9,44 +9,64 @@ let
 
   declNoop = (_: decl: decl);
 
-  declRequireX =
-    (_: decl:
-      let
-        xReq = if decl ? x then { x = false; } else { };
-      in
-      decl // xReq);
+  declRequireX = (
+    _: decl:
+    let
+      xReq = if decl ? x then { x = false; } else { };
+    in
+    decl // xReq
+  );
 
   argsNoop = (_: args: args);
   argsBumpX = (_: args: args // (if args ? x then { x = args.x + 1; } else { }));
 
-  plainAttr = { alpha = 1; };
-  fnModule = { lib, ... }: { beta = lib.add 39 3; };
-  fnWithArgs = { x, y ? 10, ... }: { got = x + y; };
+  plainAttr = {
+    alpha = 1;
+  };
+  fnModule =
+    { lib, ... }:
+    {
+      beta = lib.add 39 3;
+    };
+  fnWithArgs =
+    {
+      x,
+      y ? 10,
+      ...
+    }:
+    {
+      got = x + y;
+    };
 
-  withImportsFile =
-    mkModuleFile ''
-      { lib, ... }: {
-        imports = [
-          ({ ... }: { inner = 7; })
-          (${builtins.toString (mkModuleFile '' { ... }: { deep = 9; } '')})
-        ];
-        root = true;
-      }
-    '';
+  withImportsFile = mkModuleFile ''
+    { lib, ... }: {
+      imports = [
+        ({ ... }: { inner = 7; })
+        (${builtins.toString (mkModuleFile ''{ ... }: { deep = 9; } '')})
+      ];
+      root = true;
+    }
+  '';
 in
 {
   module_patch_plain_attrset =
     let
       out = patch declNoop argsNoop baseResultPatch plainAttr;
     in
-    out == { alpha = 1; tag = "patched"; };
+    out == {
+      alpha = 1;
+      tag = "patched";
+    };
 
   module_patch_function_module =
     let
       outF = patch declNoop argsNoop baseResultPatch fnModule;
       out = outF { inherit lib; };
     in
-    out == { beta = 42; tag = "patched"; };
+    out == {
+      beta = 42;
+      tag = "patched";
+    };
 
   module_patch_preserves_args_and_maps =
     let
@@ -54,7 +74,14 @@ in
       argsMeta = lib.functionArgs outF;
       out = outF { x = 5; };
     in
-    (argsMeta ? x) && (argsMeta ? y) && (out == { got = (5 + 1) + 10; tag = "patched"; });
+    (argsMeta ? x)
+    && (argsMeta ? y)
+    && (
+      out == {
+        got = (5 + 1) + 10;
+        tag = "patched";
+      }
+    );
 
   module_patch_declaration_flags_apply =
     let
@@ -62,19 +89,26 @@ in
       argsMeta = lib.functionArgs outF;
       out = outF { x = 3; };
     in
-    (argsMeta ? x) && (argsMeta.x == false) && (argsMeta ? y)
-    && out == { got = 3 + 10; tag = "patched"; };
+    (argsMeta ? x)
+    && (argsMeta.x == false)
+    && (argsMeta ? y)
+    &&
+      out == {
+        got = 3 + 10;
+        tag = "patched";
+      };
 
   module_patch_recurses_imports_path =
     let
       outF = patch declNoop argsNoop baseResultPatch withImportsFile;
       out = outF { inherit lib; };
-      subOK =
-        builtins.all
-          (f:
-            let v = f { inherit lib; };
-            in v ? tag && v.tag == "patched")
-          out.imports;
+      subOK = builtins.all (
+        f:
+        let
+          v = f { inherit lib; };
+        in
+        v ? tag && v.tag == "patched"
+      ) out.imports;
     in
     out.root == true && subOK && out.tag == "patched";
 
@@ -88,7 +122,17 @@ in
 
   module_patch_plain_value_nested =
     let
-      nested = { imports = [ ({ ... }: { z = 3; }) ]; top = 1; };
+      nested = {
+        imports = [
+          (
+            { ... }:
+            {
+              z = 3;
+            }
+          )
+        ];
+        top = 1;
+      };
       out = patch declNoop argsNoop baseResultPatch nested;
       subs = builtins.map (f: f { }) out.imports;
       allPatched = builtins.all (m: m ? tag && m.tag == "patched") subs;
@@ -98,9 +142,15 @@ in
   module_patch_args_transform_applies_nested =
     let
       modF =
-        { x, ... }: {
+        { x, ... }:
+        {
           imports = [
-            ({ x, ... }: { child = x; })
+            (
+              { x, ... }:
+              {
+                child = x;
+              }
+            )
           ];
           here = x;
         };
