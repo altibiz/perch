@@ -186,7 +186,7 @@
         (builtins.map
           (path: [ ([ "config" ] ++ path) path ])
           stageOneEval.config.eval.publicConfig))
-      ++ [ [ "_file" ] [ "key" ] [ "disabledModules" ] [ "imports" ] ];
+      ++ [ [ "_file" ] [ "key" ] [ "disabledModules" ] [ "imports" ] [ "options" ] ];
       allowedArgs = stageOneEval.config.eval.allowedArgs;
 
       stageTwoModules = builtins.map
@@ -221,8 +221,11 @@
 
       flakeModules = (builtins.mapAttrs
         (_: self.lib.module.patch
-          (_: args: args)
-          (_: args: args)
+          (_: args: builtins.removeAttrs
+            args
+            (builtins.attrNames specialArgs))
+          (_: args:
+            args // specialArgs)
           (_: result:
             self.lib.attrset.keepAttrsByPath
               publicAttrs

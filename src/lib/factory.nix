@@ -18,7 +18,7 @@
     in
     {
       options.${defaultConfig} = lib.mkOption {
-        type = lib.types.boolean;
+        type = lib.types.bool;
         default = false;
       };
       options.${config} = lib.mkOption {
@@ -60,7 +60,7 @@
       config.eval.allowedArgs = [ "pkgs" ];
 
       options.${defaultConfig} = lib.mkOption {
-        type = lib.types.boolean;
+        type = lib.types.bool;
         default = false;
       };
       options.${config} = lib.mkOption {
@@ -106,7 +106,7 @@
       config.eval.allowedArgs = [ "pkgs" ];
 
       options.${defaultConfig} = lib.mkOption {
-        type = lib.types.boolean;
+        type = lib.types.bool;
         default = false;
       };
       options.${config} = lib.mkOption {
