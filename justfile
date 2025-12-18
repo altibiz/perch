@@ -73,14 +73,14 @@ test-unit filter="":
     }
 
 repl test *args:
-    cd '{{ root }}/test/{{ test }}'; \
+    cd '{{ root }}/test/e2e/{{ test }}'; \
       nix repl \
         {{ args }} \
         --override-flake perch '{{ root }}' \
         --expr 'rec { \
           perch = "{{ root }}"; \
           perchFlake = builtins.getFlake perch; \
-          test = "{{ root }}/test/{{ test }}"; \
+          test = "{{ root }}/test/e2e/{{ test }}"; \
           testFlake = builtins.getFlake test; \
         }'
 
