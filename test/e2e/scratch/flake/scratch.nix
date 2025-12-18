@@ -7,32 +7,27 @@
 }:
 
 {
-  options.flake.scratch = lib.mkOption {
-    type = lib.types.raw;
+  options = {
+    flake.scratch = lib.mkOption {
+      type = lib.types.raw;
+    };
   };
 
-  config.flake.scratch = {
-    inherit
-      self
-      perch
-      perchModules;
-  };
+  config = {
+    flake.scratch = {
+      inherit
+        self
+        perch
+        perchModules;
+    };
 
-  config.branch.nixosModule.nixosModule = {
-    environment.systemPackages = [
-      pkgs.hello
-    ];
-  };
+    nixosModule = {
+      environment.systemPackages = [
+        pkgs.hello
+      ];
+    };
 
-  config.branch.homeManagerModule.homeManagerModule = {
-    home.packages = [
-      pkgs.hello
-    ];
-  };
-
-  config.integrate.systems = [ "x86_64-linux" ];
-
-  config.integrate.nixosConfiguration = {
+    nixosConfigurationNixpkgs.system = [ "x86_64-linux" ];
     nixosConfiguration = {
       fileSystems."/" = {
         device = "/dev/disk/by-label/NIXOS_SD";
@@ -47,35 +42,30 @@
         pkgs.hello
       ];
     };
-  };
 
-  config.integrate.package = {
-    systems = [ "x86_64-linux" "x86_64-darwin" ];
-
+    packageNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
     package = pkgs.writeShellApplication {
       name = "hello";
       runtimeInputs = [ pkgs.hello ];
       text = "hello";
     };
-  };
 
-  config.integrate.check = {
+    checkNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
     check = pkgs.runCommand "check" { } "touch $out";
-  };
 
-  config.integrate.formatter = {
+    formatterNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
     formatter = pkgs.writeShellApplication {
       name = "formatter";
       runtimeInputs = [ ];
       text = "exit 0";
     };
-  };
 
-  config.integrate.devShell = {
+    devShellNixpkgs.system = [ "x86_64-linux" "x86_64-darwin" ];
     devShell = pkgs.mkShell {
       packages = [
         pkgs.hello
       ];
     };
   };
+
 }
